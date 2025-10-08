@@ -1,0 +1,1 @@
+Online reservation and ordering system is is a web-based platform that automates the process of requesting and distributing school supplies. It allows students to order items online and enables custodial staff to manage inventory, approve requests, and track supplies efficiently, promoting faster service and better resource management.
