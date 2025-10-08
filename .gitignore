@@ -29,3 +29,6 @@ config/settings.py  # if you have sensitive keys
 # OS
 .DS_Store
 Thumbs.db
+
+.env
+*.env

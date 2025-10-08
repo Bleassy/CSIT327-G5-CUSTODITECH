@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import student_dashboard, admin_dashboard, dashboard_redirect
+from . import views
 
 urlpatterns = [
-    path('', dashboard_redirect, name='dashboard_redirect'),
-    path('student/', student_dashboard, name='student_dashboard'),
-    path('admin/', admin_dashboard, name='admin_dashboard'),
+    path('student/', views.student_dashboard, name='student_dashboard'),
+    path('admin/', views.admin_dashboard, name='admin_dashboard'),
+    path('redirect/', views.dashboard_redirect, name='dashboard_redirect'),
 ]

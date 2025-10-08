@@ -1,21 +1,46 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
-@login_required
+
 def dashboard_redirect(request):
-    if hasattr(request.user, 'user_type'):
-        if request.user.user_type == 'admin':
-            return redirect('admin_dashboard')
+    """Redirect to appropriate dashboard based on user type"""
+    # Check if user is authenticated via Supabase
+    if not hasattr(request.user, 'is_authenticated') or not request.user.is_authenticated:
+        messages.error(request, 'Please login to access the dashboard.')
+        return redirect('login')
+    
+    # Redirect based on user type
+    user_type = getattr(request.user, 'user_type', 'student')
+    if user_type == 'admin':
+        return redirect('admin_dashboard')
     return redirect('student_dashboard')
 
-@login_required
+
 def student_dashboard(request):
-    if hasattr(request.user, 'user_type') and request.user.user_type != 'student':
+    """Student dashboard view"""
+    # Check if user is authenticated via Supabase
+    if not hasattr(request.user, 'is_authenticated') or not request.user.is_authenticated:
+        messages.error(request, 'Please login to access the dashboard.')
+        return redirect('login')
+    
+    # Check if user is admin trying to access student dashboard
+    user_type = getattr(request.user, 'user_type', 'student')
+    if user_type == 'admin':
         return redirect('admin_dashboard')
+    
     return render(request, 'dashboards/student_dashboard.html')
 
-@login_required
+
 def admin_dashboard(request):
-    if hasattr(request.user, 'user_type') and request.user.user_type != 'admin':
+    """Admin dashboard view"""
+    # Check if user is authenticated via Supabase
+    if not hasattr(request.user, 'is_authenticated') or not request.user.is_authenticated:
+        messages.error(request, 'Please login to access the dashboard.')
+        return redirect('login')
+    
+    # Check if user is student trying to access admin dashboard
+    user_type = getattr(request.user, 'user_type', 'student')
+    if user_type != 'admin':
         return redirect('student_dashboard')
+    
     return render(request, 'dashboards/admin_dashboard.html')

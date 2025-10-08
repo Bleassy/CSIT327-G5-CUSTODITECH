@@ -14,23 +14,36 @@
                 <h1>WildShoppers Portal</h1>
                 <p class="welcome-text">Welcome back, Wildcat! 🐱</p>
                 
-                {% if form.errors %}
-                    <div class="error-message">
-                        <p>Invalid email or password. Please try again.</p>
-                    </div>
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
                 {% endif %}
 
                 <form method="post">
                     {% csrf_token %}
                     
                     <div class="form-group">
-                        <label for="id_username">CIT Institutional Email</label>
-                        {{ form.username }}
+                        <label for="username">CIT Institutional Email</label>
+                        <input type="email" 
+                               id="username" 
+                               name="username" 
+                               placeholder="your.email@cit.edu"
+                               class="form-control"
+                               required
+                               autofocus>
                     </div>
                     
                     <div class="form-group">
-                        <label for="id_password">Password</label>
-                        {{ form.password }}
+                        <label for="password">Password</label>
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               placeholder="Enter your password"
+                               class="form-control"
+                               required>
                     </div>
 
                     <button type="submit" class="btn-login">LOGIN</button>

@@ -1,163 +1,250 @@
-import random
+"""
+Supabase-based authentication views for CIT Shop
+"""
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate
-from django.contrib.auth.views import LoginView
 from django.contrib import messages
-from django.core.mail import send_mail
-from django.utils import timezone
-from .forms import StudentRegistrationForm, AdminRegistrationForm
-from .models import CustomUser
+from django.views.decorators.http import require_http_methods
+from supabase_client import supabase
 
 
 def register(request):
+    """Register a new user with Supabase Auth and create profile"""
     user_type = request.GET.get('type', 'student')
     
     if request.method == 'POST':
         user_type = request.POST.get('user_type', 'student')
+        email = request.POST.get('email')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+        full_name = request.POST.get('full_name')
+        student_id = request.POST.get('student_id')
+        staff_id = request.POST.get('staff_id')
+        phone_number = request.POST.get('phone_number')
+        address = request.POST.get('address')
         
-        if user_type == 'student':
-            form = StudentRegistrationForm(request.POST)
-        else:
-            form = AdminRegistrationForm(request.POST)
+        # Validation
+        if not email or not email.endswith('@cit.edu'):
+            messages.error(request, 'Only CIT institutional email addresses (@cit.edu) are allowed.')
+            return render(request, 'registration/register.html', {'user_type': user_type})
         
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            messages.success(request, 'Registration successful!')
+        if password1 != password2:
+            messages.error(request, 'Passwords do not match.')
+            return render(request, 'registration/register.html', {'user_type': user_type})
+        
+        if len(password1) < 6:
+            messages.error(request, 'Password must be at least 6 characters long.')
+            return render(request, 'registration/register.html', {'user_type': user_type})
+        
+        try:
+            # Sign up user with Supabase
+            response = supabase.auth.sign_up({
+                'email': email,
+                'password': password1,
+                'options': {
+                    'data': {
+                        'full_name': full_name,
+                        'user_type': user_type,
+                        'student_id': student_id if user_type == 'student' else None,
+                        'staff_id': staff_id if user_type == 'admin' else None,
+                        'phone_number': phone_number,
+                        'address': address,
+                    }
+                }
+            })
             
-            if user.user_type == 'admin':
-                return redirect('admin_dashboard')
+            if response.user:
+                # Create profile in user_profiles table
+                try:
+                    supabase.table('user_profiles').insert({
+                        'user_id': response.user.id,
+                        'email': email,
+                        'full_name': full_name,
+                        'user_type': user_type,
+                        'student_id': student_id if user_type == 'student' else None,
+                        'staff_id': staff_id if user_type == 'admin' else None,
+                        'phone_number': phone_number,
+                        'address': address,
+                    }).execute()
+                    print(f"✅ Profile created for user: {email}")
+                except Exception as e:
+                    print(f"⚠️ Profile creation failed: {e}")
+                    # Don't block registration if profile creation fails
+                
+                messages.success(request, 'Registration successful! You can now login.')
+                return redirect('login')
             else:
-                return redirect('student_dashboard')
-    else:
-        if user_type == 'student':
-            form = StudentRegistrationForm()
-        else:
-            form = AdminRegistrationForm()
+                messages.error(request, 'Registration failed. Please try again.')
+                
+        except Exception as e:
+            error_message = str(e)
+            if 'already registered' in error_message.lower():
+                messages.error(request, 'This email is already registered.')
+            else:
+                messages.error(request, f'Registration error: {error_message}')
     
-    return render(request, 'registration/register.html', {
-        'form': form,
-        'user_type': user_type
-    })
+    return render(request, 'registration/register.html', {'user_type': user_type})
 
 
-from .forms import StudentRegistrationForm, AdminRegistrationForm, EmailAuthenticationForm
-
-class CustomLoginView(LoginView):
-    template_name = 'registration/login.html'
-    authentication_form = EmailAuthenticationForm  # Use our custom form
-    
-    def get_success_url(self):
-        user = self.request.user
-        if user.is_authenticated:
-            if hasattr(user, 'user_type'):
-                if user.user_type == 'admin':
-                    return '/dashboard/admin/'
+def login_view(request):
+    """Login user with Supabase Auth and sync profile"""
+    if request.method == 'POST':
+        email = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        if not email or not password:
+            messages.error(request, 'Email and password are required.')
+            return render(request, 'registration/login.html')
+        
+        try:
+            response = supabase.auth.sign_in_with_password({
+                'email': email,
+                'password': password
+            })
+            
+            if response.session:
+                # Store access token in Django session
+                request.session['supa_access_token'] = response.session.access_token
+                
+                # Get user metadata
+                user_id = response.user.id
+                user_metadata = response.user.user_metadata
+                user_type = user_metadata.get('user_type', 'student')
+                
+                # Save session immediately (IMPORTANT!)
+                request.session.save()
+                
+                # DEBUG: Print token and user info
+                print(f"🔑 Token stored: {request.session.get('supa_access_token')[:20]}...")
+                print(f"👤 User type: {user_type}")
+                print(f"📧 Email: {response.user.email}")
+                
+                # Sync profile to user_profiles table
+                try:
+                    supabase.table('user_profiles').upsert({
+                        'user_id': user_id,
+                        'email': response.user.email,
+                        'full_name': user_metadata.get('full_name'),
+                        'user_type': user_type,
+                        'student_id': user_metadata.get('student_id'),
+                        'staff_id': user_metadata.get('staff_id'),
+                        'phone_number': user_metadata.get('phone_number'),
+                        'address': user_metadata.get('address'),
+                        'updated_at': 'now()'
+                    }, on_conflict='user_id').execute()
+                    
+                    print(f"✅ Profile synced for user: {response.user.email}")
+                except Exception as e:
+                    print(f"⚠️ Profile sync failed: {e}")
+                
+  #              messages.success(request, f'Welcome back, {response.user.email}!')
+                
+                # Redirect based on user type
+                print(f"🔀 Redirecting to: {'admin_dashboard' if user_type == 'admin' else 'student_dashboard'}")
+                if user_type == 'admin':
+                    return redirect('admin_dashboard')
                 else:
-                    return '/dashboard/student/'
-        return '/dashboard/student/'
+                    return redirect('student_dashboard')
+            else:
+                messages.error(request, 'Invalid email or password.')
+                
+        except Exception as e:
+            error_message = str(e)
+            if 'Invalid login credentials' in error_message:
+                messages.error(request, 'Invalid email or password.')
+            elif 'Email not confirmed' in error_message:
+                messages.error(request, 'Please verify your email first.')
+            else:
+                messages.error(request, f'Login error: {error_message}')
+    
+    return render(request, 'registration/login.html')
 
-# OTP Helper Function
-def generate_otp():
-    """Generate a random 6-digit OTP"""
-    return str(random.randint(100000, 999999))
+
+def logout_view(request):
+    """Logout user from Supabase"""
+    try:
+        # Sign out from Supabase
+        supabase.auth.sign_out()
+    except:
+        pass
+    
+    # Clear Django session
+    if 'supa_access_token' in request.session:
+        del request.session['supa_access_token']
+    
+    #messages.success(request, 'You have been logged out successfully.')
+    return redirect('login')
 
 
-# Forgot Password Views
 def forgot_password(request):
-    """Request OTP for password reset"""
+    """Send password reset OTP via Supabase"""
     if request.method == 'POST':
         email = request.POST.get('email')
         
-        # Check if email ends with @cit.edu
-        if not email.endswith('@cit.edu'):
+        if not email or not email.endswith('@cit.edu'):
             messages.error(request, 'Only CIT institutional email addresses (@cit.edu) are allowed.')
             return render(request, 'registration/forgot_password.html')
         
         try:
-            user = CustomUser.objects.get(email=email)
+            # Send OTP via Supabase (Supabase will send the email)
+            response = supabase.auth.sign_in_with_otp({
+                'email': email,
+                'options': {
+                    'should_create_user': False  # Don't create new user if email doesn't exist
+                }
+            })
             
-            # Generate and save OTP
-            otp = generate_otp()
-            user.otp = otp
-            user.otp_created_at = timezone.now()
-            user.save()
+            messages.success(request, f'An OTP has been sent to {email}. Please check your inbox.')
+            return redirect('verify_otp', email=email)
             
-            print(f"DEBUG: Generated OTP {otp} for user {user.email}")  # Debug output
-            
-            # Send OTP via email
-            subject = 'Password Reset OTP - CIT Shop'
-            message = f'''Hello {user.get_full_name() or user.username},
-
-Your OTP for password reset is: {otp}
-
-This OTP is valid for 5 minutes only.
-
-If you didn't request this password reset, please ignore this email and your password will remain unchanged.
-
-Best regards,
-CIT Shop Team - Wildcats'''
-            
-            try:
-                result = send_mail(
-                    subject,
-                    message,
-                    'lanticsev@gmail.com',  # Explicitly use your verified SendGrid sender
-                    [email],
-                    fail_silently=False,
-                )
-                print(f"DEBUG: Email send result: {result}")  # 1 = success, 0 = failed
-                
-                if result == 1:
-                    messages.success(request, f'OTP has been sent to {email}. Please check your inbox.')
-                    return redirect('verify_otp', email=email)
-                else:
-                    messages.error(request, 'Failed to send email. Email service returned 0.')
-                    print(f"DEBUG: Email failed - check terminal for errors")
-                    
-            except Exception as e:
-                messages.error(request, f'Failed to send email. Error: {str(e)}')
-                print(f"DEBUG: Email exception: {type(e).__name__}: {str(e)}")  # Print full error to console
-                import traceback
-                traceback.print_exc()  # Print full traceback
-                
-        except CustomUser.DoesNotExist:
-            # For security, don't reveal if email exists or not
-            messages.error(request, 'If an account exists with this email, an OTP has been sent.')
+        except Exception as e:
+            # For security, don't reveal if email exists
+            messages.success(request, f'If an account exists with {email}, an OTP has been sent.')
+            return redirect('verify_otp', email=email)
     
     return render(request, 'registration/forgot_password.html')
 
 
 def verify_otp(request, email):
-    """Verify OTP and allow password reset"""
-    try:
-        user = CustomUser.objects.get(email=email)
-    except CustomUser.DoesNotExist:
-        messages.error(request, 'Invalid request.')
-        return redirect('forgot_password')
-    
+    """Verify OTP sent by Supabase"""
     if request.method == 'POST':
-        otp_input = request.POST.get('otp')
+        otp = request.POST.get('otp')
         
-        # Check if OTP matches and is still valid
-        if user.otp == otp_input:
-            if user.is_otp_valid():
-                # OTP is correct and valid
-                request.session['reset_user_id'] = user.id
+        if not otp or len(otp) != 6:
+            messages.error(request, 'Please enter a valid 6-digit OTP.')
+            return render(request, 'registration/verify_otp.html', {'email': email})
+        
+        try:
+            # Verify OTP with Supabase
+            response = supabase.auth.verify_otp({
+                'email': email,
+                'token': otp,
+                'type': 'email'
+            })
+            
+            if response.session:
+                # Store token in session
+                request.session['supa_access_token'] = response.session.access_token
+                request.session['reset_email'] = email
+                
                 messages.success(request, 'OTP verified! Please enter your new password.')
                 return redirect('reset_password')
             else:
+                messages.error(request, 'Invalid or expired OTP.')
+                
+        except Exception as e:
+            error_message = str(e)
+            if 'expired' in error_message.lower():
                 messages.error(request, 'OTP has expired. Please request a new one.')
-        else:
-            messages.error(request, 'Invalid OTP. Please try again.')
+            else:
+                messages.error(request, 'Invalid OTP. Please try again.')
     
     return render(request, 'registration/verify_otp.html', {'email': email})
 
 
 def reset_password(request):
     """Reset password after OTP verification"""
-    # Check if user has verified OTP
-    if 'reset_user_id' not in request.session:
+    # Check if user verified OTP
+    if 'supa_access_token' not in request.session:
         messages.error(request, 'Please verify your OTP first.')
         return redirect('forgot_password')
     
@@ -165,89 +252,33 @@ def reset_password(request):
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
         
-        # Validate passwords match
         if password1 != password2:
-            messages.error(request, 'Passwords do not match. Please try again.')
+            messages.error(request, 'Passwords do not match.')
             return render(request, 'registration/reset_password.html')
         
-        # Validate password length
         if len(password1) < 6:
             messages.error(request, 'Password must be at least 6 characters long.')
             return render(request, 'registration/reset_password.html')
         
         try:
-            user = CustomUser.objects.get(id=request.session['reset_user_id'])
+            # Update password in Supabase
+            response = supabase.auth.update_user({
+                'password': password1
+            })
             
-            # Set new password
-            user.set_password(password1)
-            
-            # Clear OTP fields
-            user.otp = None
-            user.otp_created_at = None
-            user.save()
-            
-            # Clear session
-            del request.session['reset_user_id']
-            
-            messages.success(request, 'Password reset successful! You can now login with your new password.')
-            return redirect('login')
-            
-        except CustomUser.DoesNotExist:
-            messages.error(request, 'User not found. Please try again.')
-            del request.session['reset_user_id']
-            return redirect('forgot_password')
-    
-    return render(request, 'registration/reset_password.html')
-
-
-def resend_otp(request, email):
-    """Resend OTP to user's email"""
-    try:
-        user = CustomUser.objects.get(email=email)
-        
-        # Generate new OTP
-        otp = generate_otp()
-        user.otp = otp
-        user.otp_created_at = timezone.now()
-        user.save()
-        
-        print(f"DEBUG: Resending OTP {otp} for user {user.email}")  # Debug output
-        
-        # Send OTP via email
-        subject = 'Password Reset OTP (Resent) - CIT Shop'
-        message = f'''Hello {user.get_full_name() or user.username},
-
-Your new OTP for password reset is: {otp}
-
-This OTP is valid for 5 minutes only.
-
-If you didn't request this password reset, please ignore this email.
-
-Best regards,
-CIT Shop Team - Wildcats'''
-        
-        try:
-            result = send_mail(
-                subject,
-                message,
-                'lanticsev@gmail.com',  # Explicitly use your verified SendGrid sender
-                [email],
-                fail_silently=False,
-            )
-            print(f"DEBUG: Resend email result: {result}")
-            
-            if result == 1:
-                messages.success(request, 'A new OTP has been sent to your email.')
+            if response.user:
+                # Clear session
+                if 'reset_email' in request.session:
+                    del request.session['reset_email']
+                if 'supa_access_token' in request.session:
+                    del request.session['supa_access_token']
+                
+                #messages.success(request, 'Password reset successful! You can now login with your new password.')
+                return redirect('login')
             else:
-                messages.error(request, 'Failed to resend OTP.')
+                messages.error(request, 'Failed to reset password. Please try again.')
                 
         except Exception as e:
-            messages.error(request, f'Failed to resend OTP. Error: {str(e)}')
-            print(f"DEBUG: Resend exception: {type(e).__name__}: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            
-    except CustomUser.DoesNotExist:
-        messages.error(request, 'User not found.')
+            messages.error(request, f'Error: {str(e)}')
     
-    return redirect('verify_otp', email=email)
+    return render(request, 'registration/reset_password.html')

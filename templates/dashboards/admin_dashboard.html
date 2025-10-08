@@ -13,9 +13,9 @@
             <div class="header-content">
                 <div>
                     <h1>🔧 Admin Dashboard</h1>
-                    <p>Welcome, Administrator {{ user.get_full_name|default:user.username }}!</p>
+                    <p>Welcome, Administrator {{ user.get_full_name }}!</p>
                 </div>
-                <a href="{% url 'login' %}" class="logout-btn">Logout</a>
+                <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
             </div>
         </div>
         
@@ -24,20 +24,20 @@
             
             <div class="info-grid">
                 <div class="info-card">
+                    <strong>Staff ID</strong>
+                    <span>{{ user.user_metadata.staff_id|default:"Not provided" }}</span>
+                </div>
+                <div class="info-card">
                     <strong>Email</strong>
                     <span>{{ user.email }}</span>
                 </div>
                 <div class="info-card">
-                    <strong>Username</strong>
-                    <span>{{ user.username }}</span>
+                    <strong>Phone Number</strong>
+                    <span>{{ user.user_metadata.phone_number|default:"Not provided" }}</span>
                 </div>
                 <div class="info-card">
                     <strong>Account Type</strong>
-                    <span>Administrator</span>
-                </div>
-                <div class="info-card">
-                    <strong>Privileges</strong>
-                    <span>Full Access</span>
+                    <span>{{ user.user_metadata.user_type|default:"Admin" }}</span>
                 </div>
             </div>
             

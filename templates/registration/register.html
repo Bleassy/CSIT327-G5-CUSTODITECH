@@ -31,35 +31,133 @@
                             onclick="window.location.href='?type=admin'">Admin</button>
                 </div>
 
-                {% if form.non_field_errors %}
-                    <div class="error-message">
-                        {{ form.non_field_errors }}
-                    </div>
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
                 {% endif %}
 
-                <form method="post" novalidate>
+                <form method="post">
                     {% csrf_token %}
                     <input type="hidden" name="user_type" value="{{ user_type }}">
                     
-                    {% for field in form %}
-                        <div class="form-group">
-                            <label for="{{ field.id_for_label }}">
-                                {{ field.label }}
-                                {% if field.field.required %}<span class="required">*</span>{% endif %}
-                            </label>
-                            {{ field }}
-                            {% if field.help_text %}
-                                <small class="help-text">{{ field.help_text }}</small>
-                            {% endif %}
-                            {% if field.errors %}
-                                <ul class="errorlist">
-                                    {% for error in field.errors %}
-                                        <li>{{ error }}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
+                    <!-- Full Name -->
+                    <div class="form-group">
+                        <label for="full_name">
+                            Full Name <span class="required">*</span>
+                        </label>
+                        <input type="text" 
+                               id="full_name" 
+                               name="full_name" 
+                               placeholder="Juan Dela Cruz" 
+                               class="form-control"
+                               required>
+                    </div>
+
+                    {% if user_type == 'student' %}
+                    <!-- Student ID -->
+                    <div class="form-group">
+                        <label for="student_id">
+                            Student ID <span class="required">*</span>
+                        </label>
+                        <input type="text" 
+                               id="student_id" 
+                               name="student_id" 
+                               placeholder="12-3456-789" 
+                               pattern="\d{2}-\d{4}-\d{3}"
+                               class="form-control"
+                               required>
+                        <small class="help-text">Format: 12-3456-789</small>
+                    </div>
+                    {% else %}
+                    <!-- Staff ID -->
+                    <div class="form-group">
+                        <label for="staff_id">
+                            Staff ID <span class="required">*</span>
+                        </label>
+                        <input type="text" 
+                               id="staff_id" 
+                               name="staff_id" 
+                               placeholder="12-3456-789" 
+                               pattern="\d{2}-\d{4}-\d{3}"
+                               class="form-control"
+                               required>
+                        <small class="help-text">Format: 12-3456-789</small>
+                    </div>
+                    {% endif %}
+
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label for="email">
+                            CIT Institutional Email <span class="required">*</span>
+                        </label>
+                        <input type="email" 
+                               id="email" 
+                               name="email" 
+                               placeholder="juan.delacruz@cit.edu" 
+                               pattern="[a-zA-Z0-9._%+-]+@cit\.edu$"
+                               class="form-control"
+                               required>
+                        <small class="help-text">Must end with @cit.edu</small>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="form-group">
+                        <label for="phone_number">
+                            Phone Number <span class="required">*</span>
+                        </label>
+                        <input type="text" 
+                               id="phone_number" 
+                               name="phone_number" 
+                               placeholder="+63 912 345 6789" 
+                               pattern="\+63 \d{3} \d{3} \d{4}"
+                               class="form-control"
+                               required>
+                        <small class="help-text">Format: +63 912 345 6789</small>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="form-group">
+                        <label for="address">
+                            Address <span class="required">*</span>
+                        </label>
+                        <input type="text" 
+                               id="address" 
+                               name="address" 
+                               placeholder="Cebu City, Philippines" 
+                               class="form-control"
+                               required>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-group">
+                        <label for="password1">
+                            Password <span class="required">*</span>
+                        </label>
+                        <input type="password" 
+                               id="password1" 
+                               name="password1" 
+                               placeholder="Minimum 6 characters" 
+                               class="form-control"
+                               minlength="6"
+                               required>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="form-group">
+                        <label for="password2">
+                            Confirm Password <span class="required">*</span>
+                        </label>
+                        <input type="password" 
+                               id="password2" 
+                               name="password2" 
+                               placeholder="Re-enter your password" 
+                               class="form-control"
+                               minlength="6"
+                               required>
+                    </div>
 
                     <button type="submit" class="btn-register">REGISTER</button>
                 </form>
