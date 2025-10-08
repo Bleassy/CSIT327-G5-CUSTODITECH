@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - CIT Shop</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div>
+                    <h1>🐱 Student Dashboard</h1>
+                    <p>Welcome, {{ user.get_full_name|default:user.username }}!</p>
+                </div>
+                <a href="{% url 'login' %}" class="logout-btn">Logout</a>
+            </div>
+        </div>
+        
+        <div class="content">
+            <h2>Welcome to CIT Shop - Student Portal</h2>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <strong>Student ID</strong>
+                    <span>{{ user.student_id|default:"Not provided" }}</span>
+                </div>
+                <div class="info-card">
+                    <strong>Email</strong>
+                    <span>{{ user.email }}</span>
+                </div>
+                <div class="info-card">
+                    <strong>Username</strong>
+                    <span>{{ user.username }}</span>
+                </div>
+                <div class="info-card">
+                    <strong>Account Type</strong>
+                    <span>Student</span>
+                </div>
+            </div>
+            
+            <p class="placeholder-text">
+                This is a placeholder dashboard. More features coming soon! 
+                You'll be able to browse products, place orders, and track your purchases here.
+            </p>
+            
+            <div class="quick-actions">
+                <a href="#" class="action-btn">Browse Products</a>
+                <a href="#" class="action-btn">My Orders</a>
+                <a href="#" class="action-btn">Profile Settings</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

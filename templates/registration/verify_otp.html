@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - CIT Shop</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <style>
+        .otp-input {
+            font-size: 1.5rem;
+            letter-spacing: 0.5rem;
+            text-align: center;
+            font-weight: bold;
+        }
+        .success-message {
+            color: #155724;
+            background-color: #d4edda;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-side">
+            <div class="form-container">
+                <h1>Verify OTP</h1>
+                <p class="welcome-text">Enter the 6-digit code sent to {{ email }}</p>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="otp">Enter OTP</label>
+                        <input type="text" 
+                               name="otp" 
+                               id="otp" 
+                               class="otp-input"
+                               placeholder="123456"
+                               pattern="\d{6}"
+                               maxlength="6"
+                               required
+                               autofocus>
+                        <small class="help-text">OTP is valid for 5 minutes</small>
+                    </div>
+
+                    <button type="submit" class="btn-login">VERIFY OTP</button>
+                </form>
+                
+                <div class="links">
+                    <p><a href="{% url 'forgot_password' %}">Request New OTP</a></p>
+                    <p><a href="{% url 'login' %}">Back to Login</a></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="right-side">
+            <div class="logo-box">
+                <h1>CIT</h1>
+                <h2>WILDCATS</h2>
+                <div class="logo-icon">🐱</div>
+            </div>
+            <p class="tagline">Check Your Email</p>
+            <p class="tagline">OTP Expires in 5 Minutes</p>
+            <p class="tagline">Pride of Cebu</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - CIT Shop</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div>
+                    <h1>🔧 Admin Dashboard</h1>
+                    <p>Welcome, Administrator {{ user.get_full_name|default:user.username }}!</p>
+                </div>
+                <a href="{% url 'login' %}" class="logout-btn">Logout</a>
+            </div>
+        </div>
+        
+        <div class="content">
+            <h2>Welcome to CIT Shop - Admin Portal</h2>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <strong>Email</strong>
+                    <span>{{ user.email }}</span>
+                </div>
+                <div class="info-card">
+                    <strong>Username</strong>
+                    <span>{{ user.username }}</span>
+                </div>
+                <div class="info-card">
+                    <strong>Account Type</strong>
+                    <span>Administrator</span>
+                </div>
+                <div class="info-card">
+                    <strong>Privileges</strong>
+                    <span>Full Access</span>
+                </div>
+            </div>
+            
+            <p class="placeholder-text">
+                This is a placeholder admin dashboard. More features coming soon! 
+                You'll be able to manage products, view orders, handle users, and generate reports here.
+            </p>
+            
+            <div class="quick-actions">
+                <a href="#" class="action-btn">Manage Products</a>
+                <a href="#" class="action-btn">View Orders</a>
+                <a href="#" class="action-btn">User Management</a>
+                <a href="#" class="action-btn">Reports</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,74 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIT Shop - Register</title>
+    <link rel="stylesheet" href="{% static 'css/register.css' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="left-side">
+            <div class="logo-box">
+                <h1>CIT</h1>
+                <h2>WILDCATS</h2>
+                <div class="logo-icon">🐱</div>
+            </div>
+            <p class="tagline">Join the Pride</p>
+            <p class="tagline">Shop Smart</p>
+            <p class="tagline">Go Wildcats!</p>
+        </div>
+        
+        <div class="right-side">
+            <div class="form-container">
+                <h1>Use CIT Shop Now!</h1>
+                
+                <div class="tabs">
+                    <button class="tab {% if user_type == 'student' %}active{% else %}inactive{% endif %}" 
+                            onclick="window.location.href='?type=student'">Student</button>
+                    <button class="tab {% if user_type == 'admin' %}active{% else %}inactive{% endif %}" 
+                            onclick="window.location.href='?type=admin'">Admin</button>
+                </div>
+
+                {% if form.non_field_errors %}
+                    <div class="error-message">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="user_type" value="{{ user_type }}">
+                    
+                    {% for field in form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                                {% if field.field.required %}<span class="required">*</span>{% endif %}
+                            </label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <small class="help-text">{{ field.help_text }}</small>
+                            {% endif %}
+                            {% if field.errors %}
+                                <ul class="errorlist">
+                                    {% for error in field.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <button type="submit" class="btn-register">REGISTER</button>
+                </form>
+                
+                <div class="links">
+                    <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
