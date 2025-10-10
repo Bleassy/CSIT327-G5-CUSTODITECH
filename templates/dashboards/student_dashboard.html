@@ -2,56 +2,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard - CIT Shop</title>
-    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CIT Wildcats Store - Student Dashboard</title>
+  <link rel="stylesheet" href="{% static 'css/studentdashboard.css' %}">
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="header-content">
-                <div>
-                    <h1>🐱 Student Dashboard</h1>
-                    <p>Welcome, {{ user.get_full_name }}!</p>
-                </div>
-                <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
-            </div>
-        </div>
-        
-        <div class="content">
-            <h2>Welcome to CIT Shop - Student Portal</h2>
-            
-            <div class="info-grid">
-                <div class="info-card">
-                    <strong>Student ID</strong>
-                    <span>{{ user.user_metadata.student_id|default:"Not provided" }}</span>
-                </div>
-                <div class="info-card">
-                    <strong>Email</strong>
-                    <span>{{ user.email }}</span>
-                </div>
-                <div class="info-card">
-                    <strong>Phone Number</strong>
-                    <span>{{ user.user_metadata.phone_number|default:"Not provided" }}</span>
-                </div>
-                <div class="info-card">
-                    <strong>Account Type</strong>
-                    <span>{{ user.user_metadata.user_type|default:"Student" }}</span>
-                </div>
-            </div>
-            
-            <p class="placeholder-text">
-                This is a placeholder dashboard. More features coming soon! 
-                You'll be able to browse products, place orders, and track your purchases here.
-            </p>
-            
-            <div class="quick-actions">
-                <a href="#" class="action-btn">Browse Products</a>
-                <a href="#" class="action-btn">My Orders</a>
-                <a href="#" class="action-btn">Profile Settings</a>
-            </div>
-        </div>
+
+<body class="buyer-dashboard">
+
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-left">
+      <div class="logo">
+        <span class="logo-icon">🐱</span>
+        <span class="logo-text">CIT Wildcats Store</span>
+      </div>
     </div>
+
+    <nav class="main-nav">
+      <button class="nav-btn active" data-tab="dashboard">🏠 Dashboard</button>
+      <button class="nav-btn" data-tab="browse">🛒 Browse Products</button>
+      <button class="nav-btn" data-tab="reservations">📅 My Reservations</button>
+      <button class="nav-btn" data-tab="orders">📦 My Orders</button>
+    </nav>
+
+    <div class="header-right">
+      <button id="profile-btn" class="profile-btn">Profile</button>
+      <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+    </div>
+  </header>
+
+  <!-- Dashboard Content -->
+  <main id="main-content" class="dashboard-main">
+    <div class="container">
+      <h1 class="welcome-title">
+  {{ greeting }}, {{ display_name }}! 👋
+</h1>
+
+
+      <div class="dashboard-grid">
+        <div class="dashboard-card">
+          <div class="card-icon">🛍️</div>
+          <h2>Browse Products</h2>
+          <p>Explore our wide selection of school supplies and items</p>
+          <button class="card-btn" data-tab="browse">View Products</button>
+        </div>
+
+        <div class="dashboard-card">
+          <div class="card-icon">📋</div>
+          <h2>My Reservations</h2>
+          <p>Check your current and past reservations</p>
+          <button class="card-btn" data-tab="reservations">View Reservations</button>
+        </div>
+      </div>
+
+      <!-- Activity Section -->
+      <div class="activity-section">
+        <div class="activity-left">
+          <h3>Reservations <span class="count" id="reservation-count">...</span></h3>
+          <div id="reservations-list" class="activity-list">
+            <div class="loading-item">🐱 Loading reservations...</div>
+          </div>
+          <button class="view-all-btn" data-tab="reservations">View All Reservations</button>
+        </div>
+
+        <div class="activity-right">
+          <h3>Orders <span class="count" id="order-count">...</span></h3>
+          <div id="orders-list" class="activity-list">
+            <div class="loading-item">🐱 Loading orders...</div>
+          </div>
+          <button class="view-all-btn" data-tab="orders">View All Orders</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API_BASE_URL = "{{ request.scheme }}://{{ request.get_host }}/api";
+    const reservationList = document.getElementById("reservations-list");
+    const ordersList = document.getElementById("orders-list");
+    const resCount = document.getElementById("reservation-count");
+    const ordCount = document.getElementById("order-count");
+
+    async function fetchOrders() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/orders/`);
+        if (!res.ok) throw new Error("Failed to fetch orders");
+        const data = await res.json();
+
+        const reservations = data.filter(o => o.order_type === "reservation");
+        const orders = data.filter(o => o.order_type === "order");
+
+        resCount.textContent = `${reservations.length} total`;
+        ordCount.textContent = `${orders.length} total`;
+
+        reservationList.innerHTML = reservations.length
+          ? reservations.slice(0, 3).map(r => `
+              <div class="activity-item">
+                <div class="item-details">
+                  <span class="item-name">${r.items?.[0]?.product_name || 'Product'}</span>
+                  <span class="item-order-number">#${r.order_number}</span>
+                </div>
+                <span class="item-date">${new Date(r.created_at).toLocaleDateString()}</span>
+                <span class="item-status ${r.status}">
+                  ${r.status.charAt(0).toUpperCase() + r.status.slice(1)}
+                </span>
+              </div>
+            `).join('')
+          : `<div class="empty-state"><span>📋 No reservations yet</span><p>Reserve some items to see them here!</p></div>`;
+
+        ordersList.innerHTML = orders.length
+          ? orders.slice(0, 3).map(o => `
+              <div class="activity-item">
+                <div class="item-details">
+                  <span class="item-name">${o.items?.[0]?.product_name || 'Product'}</span>
+                  <span class="item-order-number">#${o.order_number}</span>
+                </div>
+                <span class="item-date">${new Date(o.created_at).toLocaleDateString()}</span>
+                <span class="item-amount">₱${parseFloat(o.total_amount).toFixed(2)}</span>
+              </div>
+            `).join('')
+          : `<div class="empty-state"><span>📦 No orders yet</span><p>Order some items to see them here!</p></div>`;
+      } catch (err) {
+        reservationList.innerHTML = `<div class="empty-state">❌ Error loading data.</div>`;
+        ordersList.innerHTML = `<div class="empty-state">❌ Error loading data.</div>`;
+        console.error(err);
+      }
+    }
+
+    // Simulate tab click handling
+    document.querySelectorAll("[data-tab]").forEach(btn => {
+      btn.addEventListener("click", e => {
+        const tab = btn.getAttribute("data-tab");
+        if (tab === "dashboard") location.reload();
+        else alert(`In Django version, this should navigate to ${tab} view.`);
+      });
+    });
+
+    // Fetch initial data
+    fetchOrders();
+  </script>
 </body>
 </html>

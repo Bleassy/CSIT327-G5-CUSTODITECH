@@ -13,7 +13,7 @@
             <div class="form-container">
                 <h1>WildShoppers Portal</h1>
                 <p class="welcome-text">Welcome back, Wildcat! 🐱</p>
-                
+
                 {% if messages %}
                     {% for message in messages %}
                         <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">
@@ -22,9 +22,18 @@
                     {% endfor %}
                 {% endif %}
 
+                <!-- Role Selection Buttons -->
+                <div class="role-selector">
+                    <button type="button" class="role-btn active" data-role="student">Student</button>
+                    <button type="button" class="role-btn" data-role="admin">Admin</button>
+                </div>
+
                 <form method="post">
                     {% csrf_token %}
                     
+                    <!-- Hidden input to store the selected role -->
+                    <input type="hidden" name="role" id="role" value="student">
+
                     <div class="form-group">
                         <label for="username">CIT Institutional Email</label>
                         <input type="email" 
@@ -67,5 +76,24 @@
             <p class="tagline">Pride of Cebu</p>
         </div>
     </div>
+
+    <script>
+        // JavaScript to handle role button clicks
+        const roleButtons = document.querySelectorAll('.role-btn');
+        const roleInput = document.getElementById('role');
+
+        roleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove 'active' class from any currently active button
+                document.querySelector('.role-btn.active').classList.remove('active');
+                
+                // Add 'active' class to the button that was just clicked
+                button.classList.add('active');
+                
+                // Update the value of the hidden input field to the selected role
+                roleInput.value = button.dataset.role;
+            });
+        });
+    </script>
 </body>
 </html>

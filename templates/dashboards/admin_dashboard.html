@@ -1,58 +1,102 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - CIT Shop</title>
-    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/admindashboard.css' %}">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="header-content">
-                <div>
-                    <h1>🔧 Admin Dashboard</h1>
-                    <p>Welcome, Administrator {{ user.get_full_name }}!</p>
+    <div class="admin-dashboard">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-left">
+                <div class="logo">
+                    <span class="logo-icon">🐱</span>
+                    <span class="logo-text">CIT Wildcats Admin</span>
                 </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="admin-nav">
+                <a href="#" class="nav-btn active">🏠 Admin Dashboard</a>
+                <a href="#" class="nav-btn">📦 Manage Products</a>
+                <a href="#" class="nav-btn">📅 Manage Reservations</a>
+                <a href="#" class="nav-btn">🛍️ Manage Orders</a>
+                <a href="#" class="nav-btn">📋 Reports</a>
+            </nav>
+
+            <!-- Profile Section -->
+            <div class="header-right">
+                <span class="admin-name">{{ user_name|first|upper }}</span>
                 <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
             </div>
-        </div>
-        
-        <div class="content">
-            <h2>Welcome to CIT Shop - Admin Portal</h2>
-            
-            <div class="info-grid">
-                <div class="info-card">
-                    <strong>Staff ID</strong>
-                    <span>{{ user.user_metadata.staff_id|default:"Not provided" }}</span>
+        </header>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <div class="container">
+                <!-- Welcome Section -->
+                <div class="welcome-section">
+                     <h1 class="welcome-title">{{ greeting }}, {{ display_name }}! 👑</h1>
+
+                    <p class="welcome-subtitle">
+                        Manage your Reserve & Order platform with ease. Keep an eye on key metrics and dive into specific management tasks.
+                    </p>
                 </div>
-                <div class="info-card">
-                    <strong>Email</strong>
-                    <span>{{ user.email }}</span>
+
+                <!-- Overview Section -->
+                <div class="overview-section">
+                    <h2 class="section-title">Overview</h2>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon products">📦</div>
+                            <div class="stat-content">
+                                <h3>Total Products</h3>
+                                <div class="stat-number">{{ stats.total_products }}</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon buyers">👥</div>
+                            <div class="stat-content">
+                                <h3>Total Buyers</h3>
+                                <div class="stat-number">{{ stats.total_buyers }}</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon reservations">📅</div>
+                            <div class="stat-content">
+                                <h3>Total Reservations</h3>
+                                <div class="stat-number">{{ stats.total_reservations }}</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon orders">🛍️</div>
+                            <div class="stat-content">
+                                <h3>Total Orders</h3>
+                                <div class="stat-number">{{ stats.total_orders }}</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="info-card">
-                    <strong>Phone Number</strong>
-                    <span>{{ user.user_metadata.phone_number|default:"Not provided" }}</span>
-                </div>
-                <div class="info-card">
-                    <strong>Account Type</strong>
-                    <span>{{ user.user_metadata.user_type|default:"Admin" }}</span>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h2 class="section-title">Quick Actions</h2>
+                    <div class="actions-grid">
+                        <a href="#" class="action-btn products-btn">📦 Add New Product</a>
+                        <a href="#" class="action-btn orders-btn">📋 View New Orders</a>
+                        <a href="#" class="action-btn reports-btn">📊 Generate Report</a>
+                        <a href="#" class="action-btn users-btn">👥 Manage Users</a>
+                    </div>
                 </div>
             </div>
-            
-            <p class="placeholder-text">
-                This is a placeholder admin dashboard. More features coming soon! 
-                You'll be able to manage products, view orders, handle users, and generate reports here.
-            </p>
-            
-            <div class="quick-actions">
-                <a href="#" class="action-btn">Manage Products</a>
-                <a href="#" class="action-btn">View Orders</a>
-                <a href="#" class="action-btn">User Management</a>
-                <a href="#" class="action-btn">Reports</a>
-            </div>
-        </div>
+        </main>
     </div>
 </body>
 </html>
