@@ -60,7 +60,7 @@ Create a new file named .env in the root directory of the project. Copy the cont
 SECRET_KEY=django-insecure-your-secret-key-here
 
 # Supabase Configuration
-SUPABASE_URL=[https://your-project-url.supabase.co](https://your-project-url.supabase.co)
+SUPABASE_URL=https://lsumstfswtxqrieuibky.supabase.co
 SUPABASE_ANON_KEY=your-supabase-anon-key
 SUPABASE_SERVICE_ROLE=your-supabase-service-role-key
 
