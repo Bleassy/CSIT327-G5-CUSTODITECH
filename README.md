@@ -80,7 +80,8 @@ python manage.py runserver
 
 The application will now be running at https://www.google.com/search?q=http://127.0.0.1:8000/. You can open this URL in your web browser to see the live application.
 
-👥 Team Members
+#👥 Team Members
+
 This project is developed and maintained by the following team members:
 
 Name: Theo Cedric Chan
