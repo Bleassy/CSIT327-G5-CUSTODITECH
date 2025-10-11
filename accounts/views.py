@@ -14,7 +14,6 @@ def register(request):
     if request.method == 'POST':
         user_type = request.POST.get('user_type', 'student')
         email = request.POST.get('email')
-        password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
         full_name = request.POST.get('full_name')
         student_id = request.POST.get('student_id')
@@ -86,67 +85,45 @@ def register(request):
 
 
 def login_view(request):
-    """Login user with Supabase Auth and sync profile"""
+    """Login user with Supabase Auth, verify role, and sync profile"""
     if request.method == 'POST':
-        email = request.POST.get('username')
+        email = request.POST.get('email')
         password = request.POST.get('password')
-        
+        selected_role = request.POST.get('user_type') # Get role from the form
+
         if not email or not password:
             messages.error(request, 'Email and password are required.')
             return render(request, 'registration/login.html')
         
         try:
+            # 1. Sign in user with Supabase
             response = supabase.auth.sign_in_with_password({
                 'email': email,
                 'password': password
             })
             
             if response.session:
-                # Store access token in Django session
-                request.session['supa_access_token'] = response.session.access_token
-                
-                # Get user metadata
-                user_id = response.user.id
+                # 2. Get the user's actual role from Supabase metadata
                 user_metadata = response.user.user_metadata
-                user_type = user_metadata.get('user_type', 'student')
-                
-                # Save session immediately (IMPORTANT!)
-                request.session.save()
-                
-                # DEBUG: Print token and user info
-                print(f"🔑 Token stored: {request.session.get('supa_access_token')[:20]}...")
-                print(f"👤 User type: {user_type}")
-                print(f"📧 Email: {response.user.email}")
-                
-                # Sync profile to user_profiles table
-                try:
-                    supabase.table('user_profiles').upsert({
-                        'user_id': user_id,
-                        'email': response.user.email,
-                        'full_name': user_metadata.get('full_name'),
-                        'user_type': user_type,
-                        'student_id': user_metadata.get('student_id'),
-                        'staff_id': user_metadata.get('staff_id'),
-                        'phone_number': user_metadata.get('phone_number'),
-                        'address': user_metadata.get('address'),
-                        'updated_at': 'now()'
-                    }, on_conflict='user_id').execute()
+                actual_user_type = user_metadata.get('user_type', 'student') # Default to 'student' if not set
+
+                # 3. CRITICAL: Check if the actual role matches the selected role
+                if actual_user_type == selected_role:
+                    # SUCCESS: Roles match. Proceed with login.
+                    request.session['supa_access_token'] = response.session.access_token
+                    request.session.save()
                     
-                    print(f"✅ Profile synced for user: {response.user.email}")
-                except Exception as e:
-                    print(f"⚠️ Profile sync failed: {e}")
-                
-  #              messages.success(request, f'Welcome back, {response.user.email}!')
-                
-                # Redirect based on user type
-                print(f"🔀 Redirecting to: {'admin_dashboard' if user_type == 'admin' else 'student_dashboard'}")
-                if user_type == 'admin':
-                    return redirect('admin_dashboard')
+                    # Redirect based on the verified user type
+                    if actual_user_type == 'admin':
+                        return redirect('admin_dashboard')
+                    else:
+                        return redirect('student_dashboard')
                 else:
-                    return redirect('student_dashboard')
-            else:
-                messages.error(request, 'Invalid email or password.')
-                
+                    # ERROR: Role mismatch.
+                    supabase.auth.sign_out() # Immediately invalidate the session
+                    messages.error(request, f"Access restricted. Please use the '{actual_user_type.capitalize()}' login option.")
+                    return redirect('login')
+
         except Exception as e:
             error_message = str(e)
             if 'Invalid login credentials' in error_message:
@@ -154,7 +131,8 @@ def login_view(request):
             elif 'Email not confirmed' in error_message:
                 messages.error(request, 'Please verify your email first.')
             else:
-                messages.error(request, f'Login error: {error_message}')
+                messages.error(request, 'An unexpected error occurred during login.')
+            return render(request, 'registration/login.html')
     
     return render(request, 'registration/login.html')
 
@@ -171,7 +149,6 @@ def logout_view(request):
     if 'supa_access_token' in request.session:
         del request.session['supa_access_token']
     
-    #messages.success(request, 'You have been logged out successfully.')
     return redirect('login')
 
 
@@ -186,13 +163,12 @@ def forgot_password(request):
         
         try:
             # Send OTP via Supabase (Supabase will send the email)
-            response = supabase.auth.sign_in_with_otp({
+            supabase.auth.sign_in_with_otp({
                 'email': email,
                 'options': {
                     'should_create_user': False  # Don't create new user if email doesn't exist
                 }
             })
-            
             messages.success(request, f'An OTP has been sent to {email}. Please check your inbox.')
             return redirect('verify_otp', email=email)
             
@@ -222,7 +198,6 @@ def verify_otp(request, email):
             })
             
             if response.session:
-                # Store token in session
                 request.session['supa_access_token'] = response.session.access_token
                 request.session['reset_email'] = email
                 
@@ -243,7 +218,6 @@ def verify_otp(request, email):
 
 def reset_password(request):
     """Reset password after OTP verification"""
-    # Check if user verified OTP
     if 'supa_access_token' not in request.session:
         messages.error(request, 'Please verify your OTP first.')
         return redirect('forgot_password')
@@ -262,23 +236,19 @@ def reset_password(request):
         
         try:
             # Update password in Supabase
-            response = supabase.auth.update_user({
+            supabase.auth.update_user({
                 'password': password1
             })
             
-            if response.user:
-                # Clear session
-                if 'reset_email' in request.session:
-                    del request.session['reset_email']
-                if 'supa_access_token' in request.session:
-                    del request.session['supa_access_token']
-                
-                #messages.success(request, 'Password reset successful! You can now login with your new password.')
-                return redirect('login')
-            else:
-                messages.error(request, 'Failed to reset password. Please try again.')
-                
+            # Clear session
+            if 'reset_email' in request.session:
+                del request.session['reset_email']
+            if 'supa_access_token' in request.session:
+                del request.session['supa_access_token']
+            
+            return redirect('login')
         except Exception as e:
             messages.error(request, f'Error: {str(e)}')
     
     return render(request, 'registration/reset_password.html')
+

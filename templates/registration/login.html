@@ -28,17 +28,17 @@
                     <button type="button" class="role-btn" data-role="admin">Admin</button>
                 </div>
 
-                <form method="post">
+                <form method="post" id="login-form">
                     {% csrf_token %}
                     
                     <!-- Hidden input to store the selected role -->
-                    <input type="hidden" name="role" id="role" value="student">
+                    <input type="hidden" name="user_type" id="user_type_input" value="student">
 
                     <div class="form-group">
-                        <label for="username">CIT Institutional Email</label>
+                        <label for="email">CIT Institutional Email</label>
                         <input type="email" 
-                               id="username" 
-                               name="username" 
+                               id="email" 
+                               name="email" 
                                placeholder="your.email@cit.edu"
                                class="form-control"
                                required
@@ -55,7 +55,7 @@
                                required>
                     </div>
 
-                    <button type="submit" class="btn-login">LOGIN</button>
+                    <button type="submit" class="btn-login" id="login-button">LOGIN</button>
                 </form>
                 
                 <div class="links">
@@ -78,22 +78,42 @@
     </div>
 
     <script>
-        // JavaScript to handle role button clicks
-        const roleButtons = document.querySelectorAll('.role-btn');
-        const roleInput = document.getElementById('role');
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Script for handling role button clicks ---
+            const roleButtons = document.querySelectorAll('.role-btn');
+            const roleInput = document.getElementById('user_type_input');
 
-        roleButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                // Remove 'active' class from any currently active button
-                document.querySelector('.role-btn.active').classList.remove('active');
-                
-                // Add 'active' class to the button that was just clicked
-                button.classList.add('active');
-                
-                // Update the value of the hidden input field to the selected role
-                roleInput.value = button.dataset.role;
+            roleButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove 'active' class from any currently active button
+                    const currentActive = document.querySelector('.role-btn.active');
+                    if(currentActive) {
+                        currentActive.classList.remove('active');
+                    }
+                    
+                    // Add 'active' class to the button that was just clicked
+                    button.classList.add('active');
+                    
+                    // Update the value of the hidden input field
+                    roleInput.value = button.dataset.role;
+                });
+            });
+
+            // --- Script for loading state on form submission ---
+            const loginForm = document.getElementById('login-form');
+            const loginButton = document.getElementById('login-button');
+
+            loginForm.addEventListener('submit', function() {
+                // Disable the button to prevent multiple submissions
+                loginButton.disabled = true;
+                // Change button text to indicate processing
+                loginButton.textContent = 'LOGGING IN...';
+                // Optionally, add a class for styling the disabled state
+                loginButton.style.opacity = '0.7';
+                loginButton.style.cursor = 'wait';
             });
         });
     </script>
 </body>
 </html>
+
