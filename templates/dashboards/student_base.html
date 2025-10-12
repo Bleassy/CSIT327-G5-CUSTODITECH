@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ page_title|default:'Dashboard' }} - CIT Wildcats Store</title>
+    <!-- Base styles for all student pages -->
+    <link rel="stylesheet" href="{% static 'css/student_base.css' %}?v=1.0">
+    <!-- Placeholder for page-specific styles -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="buyer-dashboard">
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="header-left">
+            <div class="logo">
+                <span class="logo-icon">🐱</span>
+                <span class="logo-text">CIT Wildcats Store</span>
+            </div>
+        </div>
+
+        <nav class="main-nav">
+            <!-- ✅ UPDATED: These are now real links -->
+            <a href="{% url 'student_dashboard' %}" class="nav-btn {% if active_page == 'dashboard' %}active{% endif %}">🏠 Dashboard</a>
+            <a href="{% url 'browse_products' %}" class="nav-btn {% if active_page == 'browse' %}active{% endif %}">🛒 Browse Products</a>
+            <a href="{% url 'my_reservations' %}" class="nav-btn {% if active_page == 'reservations' %}active{% endif %}">📅 My Reservations</a>
+            <a href="{% url 'my_orders' %}" class="nav-btn {% if active_page == 'orders' %}active{% endif %}">📦 My Orders</a>
+        </nav>
+
+        <div class="header-right">
+            <span class="student-name">{{ request.user.get_full_name|first|upper }}</span>
+            <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <div class="container">
+        <!-- Unique page content will be inserted here -->
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Placeholder for page-specific JavaScript -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

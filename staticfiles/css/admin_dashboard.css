@@ -1,0 +1,119 @@
+/* static/css/admin_dashboard.css */
+
+.welcome-section {
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    border-radius: 16px;
+    text-align: center;
+}
+
+.welcome-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+}
+
+.welcome-subtitle {
+    font-size: 16px;
+    opacity: 0.9;
+    margin: 0;
+    max-width: 600px;
+    line-height: 1.6;
+    margin: 0 auto;
+}
+
+/* Stat Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 24px;
+}
+
+.stat-icon.products { background: #eff6ff; color: #2563eb; }
+.stat-icon.orders { background: #fdf2f8; color: #ec4899; }
+.stat-icon.active-products { background: #f0fdf4; color: #16a34a; }
+.stat-icon.pending-orders { background: #fefce8; color: #ca8a04; }
+
+.stat-content h3 {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0 0 8px 0;
+    font-weight: 500;
+}
+.stat-number {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+/* Quick Actions */
+.quick-actions .section-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 2rem 0;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.action-btn {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+    text-decoration: none;
+}
+
+.action-btn:hover {
+    background: white;
+    border-color: #1e40af;
+    color: #1e40af;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}

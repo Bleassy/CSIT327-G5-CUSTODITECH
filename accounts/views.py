@@ -14,7 +14,11 @@ def register(request):
     if request.method == 'POST':
         user_type = request.POST.get('user_type', 'student')
         email = request.POST.get('email')
+<<<<<<< HEAD
         password1 = request.POST.get('password2')
+=======
+        password1 = request.POST.get('password1')
+>>>>>>> a551dc3571b434ec276757d804216668ed4ea2b3
         password2 = request.POST.get('password2')
         full_name = request.POST.get('full_name')
         student_id = request.POST.get('student_id')

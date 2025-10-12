@@ -1,0 +1,38 @@
+{% extends 'dashboards/student_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/student_tables.css' %}?v=1.0">
+{% endblock %}
+
+{% block content %}
+<h1 class="welcome-title">My Orders 📦</h1>
+
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Date Ordered</th>
+                <th>Total Price</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in orders %}
+            <tr>
+                <!-- ✅ FIXED: Access the flat product_name from the RPC result -->
+                <td>{{ item.product_name|default:'N/A' }}</td>
+                <td>{{ item.created_at|date:"M d, Y" }}</td>
+                <td>₱{{ item.total_price|floatformat:2 }}</td>
+                <td><span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="no-data-cell">You have not placed any orders.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

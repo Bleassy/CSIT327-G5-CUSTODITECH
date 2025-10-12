@@ -1,0 +1,93 @@
+{% extends 'dashboards/admin_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/reports.css' %}?v=1.0">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Reports</h1>
+</div>
+
+<div class="reports-grid">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon products">📦</div>
+            <div class="stat-content">
+                <h3>Total Products</h3>
+                <div class="stat-number">{{ total_products }}</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orders">🛍️</div>
+            <div class="stat-content">
+                <h3>Total Orders & Reservations</h3>
+                <div class="stat-number">{{ total_orders }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <h2>Order Status Overview</h2>
+        <canvas id="orderStatusChart"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- ✅ FIXED: Use Django's json_script filter for safe JSON serialization -->
+{{ status_counts|json_script:"chart-data" }}
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const dataElement = document.getElementById('chart-data');
+    if (dataElement) {
+        try {
+            const statusData = JSON.parse(dataElement.textContent);
+            const ctx = document.getElementById('orderStatusChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pending', 'Approved', 'Completed', 'Rejected', 'Cancelled'],
+                    datasets: [{
+                        label: 'Order Statuses',
+                        data: [
+                            statusData.pending || 0,
+                            statusData.approved || 0,
+                            statusData.completed || 0,
+                            statusData.rejected || 0,
+                            statusData.cancelled || 0
+                        ],
+                        backgroundColor: [
+                            '#f59e0b', // Amber
+                            '#22c55e', // Green
+                            '#3b82f6', // Blue
+                            '#ef4444', // Red
+                            '#6b7280'  // Gray
+                        ],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            console.error("Failed to parse chart data:", e);
+        }
+    }
+});
+</script>
+{% endblock %}
+
