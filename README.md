@@ -1,4 +1,4 @@
-CIT Shop: Online Reservation and Ordering System
+Online Reservation and Ordering System
 Welcome to the official repository for the CIT Shop (also known as the "WildShoppers Portal"), a web-based platform designed to automate the process of requesting and distributing school supplies for students and staff at the Cebu Institute of Technology - University.
 
 This system allows students to browse and order available items online, and it provides an administrative dashboard for custodial staff to manage inventory, approve requests, and track supplies efficiently. The goal is to provide faster service, improve resource management, and modernize the school supply distribution process.
@@ -60,9 +60,11 @@ Create a new file named .env in the root directory of the project. Copy the cont
 SECRET_KEY=django-insecure-your-secret-key-here
 
 # Supabase Configuration
-SUPABASE_URL=[https://your-project-url.supabase.co](https://your-project-url.supabase.co)
-SUPABASE_ANON_KEY=your-supabase-anon-key
-SUPABASE_SERVICE_ROLE=your-supabase-service-role-key
+SUPABASE_URL=https://lsumstfswtxqrieuibky.supabase.co
+
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzdW1zdGZzd3R4cXJpZXVpYmt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjQ3ODYsImV4cCI6MjA3NTUwMDc4Nn0.Ec1zIGJtibTLOaMLuRoecqhxVTWnYjAgzKnGVvq-xxY
+
+SUPABASE_SERVICE_ROLE=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzdW1zdGZzd3R4cXJpZXVpYmt5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTkyNDc4NiwiZXhwIjoyMDc1NTAwNzg2fQ.iI0-luBMxXxUB1d3Xaq1MaVZqmJj5wv14X_ARR01Tfs
 
 You can find your Supabase URL and keys in your Supabase project dashboard under Project Settings > API.
 
@@ -78,29 +80,25 @@ python manage.py runserver
 
 The application will now be running at https://www.google.com/search?q=http://127.0.0.1:8000/. You can open this URL in your web browser to see the live application.
 
-👥 Team Members
+# 👥 Team Members
+
 This project is developed and maintained by the following team members:
 
-Name
+Name: Theo Cedric Chan
 
-Role
+Role: Lead Developer
 
-Email Address
+Email Address: theocedric.chan@cit.edu
 
-Theo Cedric Chan
+Name: Bliss B. Chavez
 
-Lead Developer
+Role: 2nd Developer
 
-theocedric.chan@cit.edu
+Email Address: bliss.chavez@cit.edu
 
-Bliss B. Chavez
+Name: Rusty Summer Daclan
 
-2nd Developer
-
-bliss.chavez@cit.edu
-
-Rusty Summer Daclan
-
-3rd Developer
+Role: 3rd Developer
 
 rustysummer.daclan@cit.edu
+
