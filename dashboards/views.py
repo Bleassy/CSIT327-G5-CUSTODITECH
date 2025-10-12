@@ -1,156 +1,333 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from supabase_client import supabase
-import logging
+import pytz
 from datetime import datetime
-from zoneinfo import ZoneInfo
 import uuid
-import os
 
-logger = logging.getLogger(__name__)
+# --- Decorators for Access Control ---
 
+def student_required(function):
+    def wrap(request, *args, **kwargs):
+        if not hasattr(request.user, 'is_authenticated') or not request.user.is_authenticated:
+            messages.error(request, 'Please login to access this page.')
+            return redirect('login')
+        
+        user_type = getattr(request.user, 'user_type', 'student')
+        if user_type != 'student':
+            messages.warning(request, 'This page is for students only.')
+            return redirect('admin_dashboard')
+        
+        return function(request, *args, **kwargs)
+    return wrap
+
+def admin_required(function):
+    def wrap(request, *args, **kwargs):
+        if not hasattr(request.user, 'is_authenticated') or not request.user.is_authenticated:
+            messages.error(request, 'Please login to access this page.')
+            return redirect('login')
+        
+        user_type = getattr(request.user, 'user_type', 'student')
+        if user_type != 'admin':
+            messages.warning(request, 'You do not have permission to access this page.')
+            return redirect('student_dashboard')
+        
+        return function(request, *args, **kwargs)
+    return wrap
+
+# --- Helper Function for Greeting ---
+def get_greeting():
+    ph_tz = pytz.timezone('Asia/Manila')
+    current_hour = datetime.now(ph_tz).hour
+    if 5 <= current_hour < 12: return "Good morning"
+    if 12 <= current_hour < 18: return "Good afternoon"
+    return "Good evening"
+
+# --- Main Redirect View ---
 def dashboard_redirect(request):
-    """Redirect to appropriate dashboard based on user type"""
-    if not request.user.is_authenticated:
+    if not hasattr(request.user, 'is_authenticated') or not request.user.is_authenticated:
         messages.error(request, 'Please login to access the dashboard.')
         return redirect('login')
     
-    # Redirect based on user type from SupabaseUser object
-    if request.user.user_type == 'admin':
+    user_type = getattr(request.user, 'user_type', 'student')
+    if user_type == 'admin':
         return redirect('admin_dashboard')
     return redirect('student_dashboard')
 
-def get_greeting():
-    """Returns a time-appropriate greeting for the Philippines timezone."""
+# --- Student Views ---
+
+@student_required
+def student_dashboard(request):
+    raw_name = getattr(request.user, 'get_full_name', lambda: 'Wildcat')()
+    display_name = raw_name.split()[0] if isinstance(raw_name, str) else "Wildcat"
+    context = {
+        'display_name': display_name,
+        'greeting': get_greeting(),
+        'active_page': 'dashboard',
+        'page_title': 'Dashboard',
+    }
+    return render(request, 'dashboards/student_dashboard.html', context)
+
+@student_required
+def browse_products_view(request):
     try:
-        ph_tz = ZoneInfo("Asia/Manila")
-        now = datetime.now(ph_tz)
-        hour = now.hour
-
-        if 5 <= hour < 12:
-            return "Good Morning"
-        elif 12 <= hour < 18:
-            return "Good Afternoon"
-        else:
-            return "Good Evening"
-    except Exception:
-        return "Welcome" # Fallback greeting
-
-def admin_dashboard(request):
-    """
-    Displays the admin dashboard with an overview and a list of all products.
-    """
-    # Ensure user is authenticated and is an admin
-    if not request.user.is_authenticated or request.user.user_type != 'admin':
-        messages.error(request, "Access denied. You must be an admin to view this page.")
-        return redirect('login')
-
-    # Fetch all products from the 'products' table in Supabase
-    try:
-        products_response = supabase.table('products').select("*").order('created_at', desc=True).execute()
-        products = products_response.data
-        
-        stats = {
-            'total_products': len(products),
-            'total_buyers': 120, # Placeholder
-            'total_reservations': 85, # Placeholder
-            'total_orders': 150, # Placeholder
-        }
-
+        response = supabase.table('products').select('*').eq('is_available', True).order('created_at', desc=True).execute()
+        products = response.data
     except Exception as e:
-        logger.error(f"Error fetching products from Supabase: {e}")
-        messages.error(request, "Could not fetch product data. Please try again later.")
+        messages.error(request, f"Could not fetch products: {e}")
         products = []
-        stats = {'total_products': 0, 'total_buyers': 0, 'total_reservations': 0, 'total_orders': 0}
+    context = {
+        'products': products,
+        'active_page': 'browse',
+        'page_title': 'Browse Products',
+    }
+    return render(request, 'dashboards/browse_products.html', context)
 
-    # Get user's display name for the greeting
-    display_name = request.user.get_full_name().split()[0]
+@student_required
+def my_reservations_view(request):
+    try:
+        user_id = request.user.id
+        response = supabase.rpc('get_my_reservations', {'p_user_id': user_id}).execute()
+        reservations = response.data
+    except Exception as e:
+        messages.error(request, f"Could not fetch your reservations: {e}")
+        reservations = []
+        
+    context = {
+        'reservations': reservations,
+        'active_page': 'reservations',
+        'page_title': 'My Reservations',
+    }
+    return render(request, 'dashboards/my_reservations.html', context)
+
+@student_required
+def my_orders_view(request):
+    try:
+        user_id = request.user.id
+        response = supabase.rpc('get_my_orders', {'p_user_id': user_id}).execute()
+        orders = response.data
+    except Exception as e:
+        messages.error(request, f"Could not fetch your orders: {e}")
+        orders = []
 
     context = {
-        'greeting': get_greeting(),
+        'orders': orders,
+        'active_page': 'orders',
+        'page_title': 'My Orders',
+    }
+    return render(request, 'dashboards/my_orders.html', context)
+
+@student_required
+def create_reservation_view(request):
+    """
+    Handles the form submission for reserving a product.
+    """
+    if request.method == 'POST':
+        try:
+            product_id = int(request.POST.get('product_id'))
+            quantity = int(request.POST.get('quantity'))
+            deal_method = request.POST.get('deal_method')
+            user_id = request.user.id
+
+            params = {
+                'p_product_id': product_id,
+                'p_user_id': user_id,
+                'p_quantity': quantity,
+                'p_deal_method': deal_method
+            }
+            supabase.rpc('create_reservation', params).execute()
+            
+            messages.success(request, "Your item has been reserved successfully!")
+            
+
+        except Exception as e:
+            error_str = str(e)
+            if "'success': True" in error_str:
+                messages.success(request, "Your item has been reserved successfully!")
+                
+            else:
+                messages.error(request, f"Could not reserve item: {e}")
+                return redirect('browse_products')
+    
+    return redirect('browse_products')
+
+@student_required
+def create_order_view(request):
+    """
+    Handles the form submission for buying a product with cash or GCash.
+    """
+    if request.method == 'POST':
+        try:
+            product_id = int(request.POST.get('product_id'))
+            quantity = int(request.POST.get('quantity'))
+            deal_method = request.POST.get('deal_method')
+            payment_method = request.POST.get('payment_method')
+            transaction_id = request.POST.get('payment_transaction_id', None)
+            user_id = request.user.id
+
+            params = {
+                'p_product_id': product_id,
+                'p_user_id': user_id,
+                'p_quantity': quantity,
+                'p_deal_method': deal_method,
+                'p_payment_method': payment_method,
+                'p_payment_transaction_id': transaction_id
+            }
+            supabase.rpc('buy_product', params).execute()
+            
+            messages.success(request, "Your order has been placed successfully!")
+            
+
+        except Exception as e:
+            error_str = str(e)
+            if "'success': True" in error_str:
+                messages.success(request, "Your order has been placed successfully!")
+                
+            else:
+                messages.error(request, f"Could not place order: {e}")
+                return redirect('browse_products')
+    
+    return redirect('browse_products')
+
+
+# --- Admin Views ---
+@admin_required
+def admin_dashboard(request):
+    raw_name = getattr(request.user, 'get_full_name', lambda: 'Admin')()
+    display_name = raw_name.split()[0] if isinstance(raw_name, str) else "Admin"
+    
+    stats = {}
+    try:
+        stats = supabase.rpc('get_dashboard_stats').execute().data
+    except Exception as e:
+        messages.error(request, f"Could not load dashboard stats: {e}")
+        stats = {
+            'total_products': 0, 'total_orders': 0,
+            'active_products': 0, 'pending_orders': 0
+        }
+
+    context = {
         'display_name': display_name,
-        'user_name': display_name,
-        'products': products,
+        'greeting': get_greeting(),
         'stats': stats,
+        'active_page': 'dashboard',
     }
     return render(request, 'dashboards/admin_dashboard.html', context)
 
+@admin_required
+def manage_products_view(request):
+    try:
+        response = supabase.table('products').select('*').order('created_at', desc=True).execute()
+        products = response.data if response.data else []
+    except Exception as e:
+        messages.error(request, f"Error fetching products: {e}")
+        products = []
 
+    context = {
+        'products': products,
+        'active_page': 'manage_products',
+    }
+    return render(request, 'dashboards/manage_products.html', context)
+
+@admin_required
 def add_product(request):
-    """
-    Handles form submission for adding a new product, including image upload.
-    """
-    if not request.user.is_authenticated or request.user.user_type != 'admin':
-        messages.error(request, "You do not have permission to perform this action.")
-        return redirect('admin_dashboard')
-
     if request.method == 'POST':
         try:
             image_url = None
-            uploaded_file = request.FILES.get('product-image')
-
-            if uploaded_file:
-                # Generate a unique file name to prevent overwrites
-                file_ext = os.path.splitext(uploaded_file.name)[1]
-                file_name = f"{uuid.uuid4()}{file_ext}"
-                
-                # Upload the file to the 'product_images' bucket in Supabase Storage
-                supabase.storage.from_('product_images').upload(
-                    file=uploaded_file.read(),
-                    path=file_name,
-                    file_options={"content-type": uploaded_file.content_type}
-                )
-                
-                # Get the public URL of the uploaded file
+            image_file = request.FILES.get('product-image')
+            if image_file:
+                file_ext = image_file.name.split('.')[-1]
+                file_name = f'product_{uuid.uuid4()}.{file_ext}'
+                supabase.storage.from_('product_images').upload(file=image_file.read(), path=file_name, file_options={"content-type": image_file.content_type})
                 image_url = supabase.storage.from_('product_images').get_public_url(file_name)
 
-            # Extract other form data
             product_data = {
                 'name': request.POST.get('product-name'),
                 'description': request.POST.get('product-description'),
                 'price': float(request.POST.get('product-price')),
-                'stock_quantity': int(request.POST.get('product-stock')),
-                'image_url': image_url, # Use the public URL from storage
-                'is_available': 'is-available' in request.POST
+                'stock_quantity': int(request.POST.get('stock-quantity')),
+                'image_url': image_url,
+                'is_available': 'is_available' in request.POST
             }
-
-            # Insert product metadata into the 'products' table
-            response = supabase.table('products').insert(product_data).execute()
-
-            if response.data:
-                messages.success(request, f"Successfully added '{product_data['name']}'.")
-            else:
-                messages.error(request, "Failed to add product. Please check data and permissions.")
-
+            supabase.table('products').insert(product_data).execute()
+            messages.success(request, f"Product '{product_data['name']}' added successfully!")
         except Exception as e:
-            logger.error(f"Error adding product: {e}")
-            messages.error(request, f"An error occurred: {e}")
+            messages.error(request, f"Failed to add product: {e}")
+    return redirect('manage_products')
 
-    return redirect('admin_dashboard')
+@admin_required
+def edit_product(request, product_id):
+    if request.method == 'POST':
+        try:
+            update_data = {
+                'name': request.POST.get('product-name'),
+                'description': request.POST.get('product-description'),
+                'price': float(request.POST.get('product-price')),
+                'stock_quantity': int(request.POST.get('stock-quantity')),
+                'is_available': 'is_available' in request.POST
+            }
+            supabase.table('products').update(update_data).eq('id', product_id).execute()
+            messages.success(request, "Product updated successfully!")
+        except Exception as e:
+            messages.error(request, f"Failed to update product: {e}")
+    return redirect('manage_products')
 
-def student_dashboard(request):
-    """
-    Displays the student dashboard with a list of available products.
-    """
-    if not request.user.is_authenticated or request.user.user_type != 'student':
-        messages.error(request, "Access denied.")
-        return redirect('login')
-        
+@admin_required
+def delete_product(request, product_id):
+    if request.method == 'POST':
+        try:
+            supabase.table('products').delete().eq('id', product_id).execute()
+            messages.success(request, "Product deleted successfully!")
+        except Exception as e:
+            messages.error(request, f"Failed to delete product: {e}")
+    return redirect('manage_products')
+
+@admin_required
+def order_management_view(request):
     try:
-        # The RLS policy we created ensures this query only returns available products
-        products_response = supabase.table('products').select("*").order('name').execute()
-        products = products_response.data
+        response = supabase.rpc('get_all_orders_with_details').execute()
+        orders = response.data if response.data else []
     except Exception as e:
-        logger.error(f"Error fetching products for student: {e}")
-        products = []
+        messages.error(request, f"An error occurred while fetching orders: {e}")
+        orders = []
 
     context = {
-        'display_name': request.user.get_full_name().split()[0],
-        'greeting': get_greeting(),
-        'products': products
+        'orders': orders,
+        'active_page': 'order_management'
     }
-    # NOTE: You will need to create/update a 'student_dashboard.html' template
-    # to display the products fetched here.
-    return render(request, 'dashboards/student_dashboard.html', context)
+    return render(request, 'dashboards/order_management.html', context)
 
+@admin_required
+def update_order_status(request, order_id):
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status:
+            try:
+                supabase.table('orders').update({'status': new_status}).eq('id', order_id).execute()
+                messages.success(request, f"Order status updated to '{new_status}'.")
+            except Exception as e:
+                messages.error(request, f"Failed to update order status: {e}")
+    return redirect('order_management')
 
+@admin_required
+def reports_view(request):
+    report_data = {}
+    try:
+        report_data = supabase.rpc('get_report_stats').execute().data
+    except Exception as e:
+        messages.error(request, f"Error fetching report data: {e}")
+        report_data = {
+            'total_products': 0, 'total_orders': 0,
+            'active_products': 0, 'sold_out_products': 0,
+            'status_counts': {}
+        }
+
+    context = {
+        'total_products': report_data.get('total_products', 0),
+        'total_orders': report_data.get('total_orders', 0),
+        'active_products': report_data.get('active_products', 0),
+        'sold_out_products': report_data.get('sold_out_products', 0),
+        'status_counts': report_data.get('status_counts', {}),
+        'active_page': 'reports'
+    }
+    return render(request, 'dashboards/reports.html', context)

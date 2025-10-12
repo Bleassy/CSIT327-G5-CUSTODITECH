@@ -1,0 +1,243 @@
+{% extends 'dashboards/admin_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/manage_products.css' %}?v=1.0">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Manage Products</h1>
+    <button class="btn btn-add" id="add-product-btn">📦 Add New Product</button>
+</div>
+
+<div class="table-container">
+    <table class="data-table product-table">
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Product Name</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>
+                    <img src="{{ product.image_url|default:'https://placehold.co/100x100/e0e7ff/3730a3?text=Item' }}" alt="{{ product.name }}" class="product-thumbnail">
+                </td>
+                <td>
+                    <div class="product-details">
+                        <strong class="product-table-name">{{ product.name }}</strong>
+                        <span class="product-table-desc">{{ product.description|truncatewords:10 }}</span>
+                    </div>
+                </td>
+                <td>₱{{ product.price|floatformat:2 }}</td>
+                <td>{{ product.stock_quantity }} pcs</td>
+                <td>
+                    {% if product.is_available %}
+                        <span class="badge badge-available">Available</span>
+                    {% else %}
+                        <span class="badge badge-unavailable">Unavailable</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-edit" 
+                                data-id="{{ product.id }}"
+                                data-name="{{ product.name }}"
+                                data-description="{{ product.description }}"
+                                data-price="{{ product.price|floatformat:2 }}"
+                                data-stock="{{ product.stock_quantity }}"
+                                data-is-available="{{ product.is_available|yesno:'true,false' }}">
+                            Edit
+                        </button>
+                        <button class="btn btn-delete" data-id="{{ product.id }}" data-name="{{ product.name }}">
+                            Delete
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="no-data-cell">
+                    You haven't added any products yet. Click "Add New Product" to get started!
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Product Modal -->
+<div id="add-product-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add New Product</h2>
+            <span class="close-btn">&times;</span>
+        </div>
+        <form action="{% url 'add_product' %}" method="post" enctype="multipart/form-data" class="modal-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="product-name">Product Name</label>
+                <input type="text" name="product-name" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="product-price">Price (₱)</label>
+                    <input type="number" name="product-price" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="stock-quantity">Stock Quantity</label>
+                    <input type="number" name="stock-quantity" min="0" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="product-description">Description</label>
+                <textarea name="product-description" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="product-image">Product Image</label>
+                <input type="file" name="product-image" accept="image/*" class="image-upload-input">
+                <img src="https://placehold.co/400x200/f1f5f9/64748b?text=Image+Preview" alt="Image Preview" class="image-preview">
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" name="is_available" id="add-is-available" checked>
+                <label for="add-is-available">Available for Students</label>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add Product</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div id="edit-product-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Edit Product</h2>
+            <span class="close-btn">&times;</span>
+        </div>
+        <form id="edit-product-form" method="post" class="modal-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="edit-product-name">Product Name</label>
+                <input type="text" id="edit-product-name" name="product-name" required>
+            </div>
+             <div class="form-row">
+                 <div class="form-group">
+                    <label for="edit-product-price">Price (₱)</label>
+                    <input type="number" id="edit-product-price" name="product-price" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-stock-quantity">Stock Quantity</label>
+                    <input type="number" id="edit-stock-quantity" name="stock-quantity" min="0" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="edit-product-description">Description</label>
+                <textarea id="edit-product-description" name="product-description" rows="3" required></textarea>
+            </div>
+             <div class="form-group checkbox-group">
+                <input type="checkbox" id="edit-is-available" name="is_available">
+                <label for="edit-is-available">Available for Students</label>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update Product</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-confirm-modal" class="modal">
+    <div class="modal-content modal-sm">
+        <div class="modal-header">
+            <h2>Confirm Deletion</h2>
+            <span class="close-btn">&times;</span>
+        </div>
+        <p>Are you sure you want to delete "<strong id="delete-product-name"></strong>"? This action cannot be undone.</p>
+        <form id="delete-product-form" method="post">
+            {% csrf_token %}
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+                <button type="submit" class="btn btn-delete">Yes, Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const addModal = document.getElementById('add-product-modal');
+    const editModal = document.getElementById('edit-product-modal');
+    const deleteModal = document.getElementById('delete-confirm-modal');
+
+    const openModal = (modal) => modal.style.display = 'block';
+    const closeModal = (modal) => modal.style.display = 'none';
+
+    document.getElementById('add-product-btn').addEventListener('click', () => openModal(addModal));
+
+    document.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const data = btn.dataset;
+            const form = document.getElementById('edit-product-form');
+            form.action = `/dashboard/admin/edit-product/${data.id}/`;
+            document.getElementById('edit-product-name').value = data.name;
+            document.getElementById('edit-product-description').value = data.description;
+            document.getElementById('edit-product-price').value = data.price;
+            document.getElementById('edit-stock-quantity').value = data.stock;
+            document.getElementById('edit-is-available').checked = data.isAvailable === 'true';
+            openModal(editModal);
+        });
+    });
+
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const productId = btn.dataset.id;
+            const productName = btn.dataset.name;
+            
+            // ✅ THE FIX IS HERE
+            // We ensure that productId is valid before setting the form action.
+            if (productId) {
+                document.getElementById('delete-product-name').textContent = productName;
+                const form = document.getElementById('delete-product-form');
+                form.action = `/dashboard/admin/delete-product/${productId}/`;
+                openModal(deleteModal);
+            } else {
+                console.error("Delete button is missing a product ID.");
+            }
+        });
+    });
+
+    document.querySelectorAll('.close-btn, .cancel-btn').forEach(btn => {
+        btn.addEventListener('click', () => closeModal(btn.closest('.modal')));
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target.classList.contains('modal')) {
+            closeModal(event.target);
+        }
+    });
+
+    document.querySelectorAll('.image-upload-input').forEach(input => {
+        const preview = input.nextElementSibling;
+        input.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                preview.src = URL.createObjectURL(file);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+

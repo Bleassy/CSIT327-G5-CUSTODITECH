@@ -1,195 +1,56 @@
+{% extends 'dashboards/student_base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CIT Wildcats Store - Student Dashboard</title>
-    <!-- ✅ FIX: Added a version query to force the browser to load the new CSS -->
-    <link rel="stylesheet" href="{% static 'css/studentdashboard.css' %}?v=1.1">
-</head>
 
-<body class="buyer-dashboard">
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/student_dashboard.css' %}?v=1.0">
+{% endblock %}
 
-    <!-- Header -->
-    <header class="dashboard-header">
-        <div class="header-left">
-            <div class="logo">
-                <span class="logo-icon">🐱</span>
-                <span class="logo-text">CIT Wildcats Store</span>
-            </div>
-        </div>
+{% block content %}
+<h1 class="welcome-title">{{ greeting }}, {{ display_name }}! 👋</h1>
 
-        <nav class="main-nav">
-            <button class="nav-btn active" data-tab="dashboard">🏠 Dashboard</button>
-            <button class="nav-btn" data-tab="browse">🛒 Browse Products</button>
-            <button class="nav-btn" data-tab="reservations">📅 My Reservations</button>
-            <button class="nav-btn" data-tab="orders">📦 My Orders</button>
-        </nav>
-
-        <div class="header-right">
-             <span class="student-name">{{ display_name|first|upper }}</span>
-             <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
-        </div>
-    </header>
-
-    <!-- Main Content Area -->
-    <div class="container">
-        <!-- Tab 1: Dashboard View -->
-        <main id="dashboard-content" class="tab-content active">
-            <h1 class="welcome-title">{{ greeting }}, {{ display_name }}! 👋</h1>
-
-            <div class="dashboard-grid">
-                <div class="dashboard-card">
-                    <div class="card-icon">🛍️</div>
-                    <h2>Browse Products</h2>
-                    <p>Explore our wide selection of school supplies and items</p>
-                    <button class="card-btn" data-tab-target="browse">View Products</button>
-                </div>
-
-                <div class="dashboard-card">
-                    <div class="card-icon">📋</div>
-                    <h2>My Reservations</h2>
-                    <p>Check your current and past reservations</p>
-                    <button class="card-btn" data-tab-target="reservations">View Reservations</button>
-                </div>
-            </div>
-
-            <!-- Activity Section -->
-            <div class="activity-section">
-                <div class="activity-left">
-                    <h3>Reservations <span class="count" id="reservation-count">...</span></h3>
-                    <div id="reservations-list" class="activity-list">
-                        <div class="loading-item">🐱 Loading reservations...</div>
-                    </div>
-                    <button class="view-all-btn" data-tab-target="reservations">View All Reservations</button>
-                </div>
-
-                <div class="activity-right">
-                    <h3>Orders <span class="count" id="order-count">...</span></h3>
-                    <div id="orders-list" class="activity-list">
-                        <div class="loading-item">🐱 Loading orders...</div>
-                    </div>
-                    <button class="view-all-btn" data-tab-target="orders">View All Orders</button>
-                </div>
-            </div>
-        </main>
-
-        <!-- Tab 2: Browse Products View -->
-        <main id="browse-content" class="tab-content" style="display: none;">
-             <h1 class="welcome-title">Available Products 🛒</h1>
-             
-             {% if products %}
-             <div class="product-grid">
-                 {% for product in products %}
-                 <div class="product-card">
-                     <div class="product-image-container">
-                         <img src="{{ product.image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ product.name }}" class="product-image">
-                         {% if product.stock_quantity == 0 %}
-                             <div class="stock-overlay out-of-stock">Out of Stock</div>
-                         {% elif product.stock_quantity < 10 %}
-                              <div class="stock-overlay low-stock">Low Stock</div>
-                         {% endif %}
-                     </div>
-                     <div class="product-info">
-                         <h3 class="product-name">{{ product.name }}</h3>
-                         <p class="product-description">{{ product.description|truncatewords:15 }}</p>
-                         <div class="product-meta">
-                             <span class="product-price">₱{{ product.price|floatformat:2 }}</span>
-                             <span class="product-stock">{{ product.stock_quantity }} pcs available</span>
-                         </div>
-                     </div>
-                     <div class="product-actions">
-                         <button class="btn btn-primary" {% if product.stock_quantity == 0 %}disabled{% endif %}>Add to Cart</button>
-                     </div>
-                 </div>
-                 {% endfor %}
-             </div>
-             {% else %}
-             <div class="no-products-message">
-                 <p>No products are available at the moment. Please check back later!</p>
-             </div>
-             {% endif %}
-        </main>
-        
-        <!-- Other tab content for Reservations and Orders can be added here -->
+<div class="dashboard-grid">
+    <div class="dashboard-card">
+        <div class="card-icon">🛍️</div>
+        <h2>Browse Products</h2>
+        <p>Explore our wide selection of school supplies and items</p>
+        <a href="{% url 'browse_products' %}" class="card-btn">View Products</a>
     </div>
 
+    <div class="dashboard-card">
+        <div class="card-icon">📋</div>
+        <h2>My Reservations</h2>
+        <p>Check your current and past reservations</p>
+        <a href="{% url 'my_reservations' %}" class="card-btn">View Reservations</a>
+    </div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const tabs = document.querySelectorAll('.nav-btn');
-            const cardButtons = document.querySelectorAll('.card-btn, .view-all-btn');
-            const tabContents = document.querySelectorAll('.tab-content');
+<!-- Activity Section -->
+<div class="activity-section">
+    <div class="activity-left">
+        <h3>Recent Reservations <span class="count" id="reservation-count">...</span></h3>
+        <div id="reservations-list" class="activity-list">
+            <div class="loading-item">🐱 Loading...</div>
+        </div>
+        <a href="{% url 'my_reservations' %}" class="view-all-btn">View All Reservations</a>
+    </div>
 
-            function switchTab(tabName) {
-                // Update nav buttons
-                tabs.forEach(t => {
-                    if (t.dataset.tab === tabName) {
-                        t.classList.add('active');
-                    } else {
-                        t.classList.remove('active');
-                    }
-                });
+    <div class="activity-right">
+        <h3>Recent Orders <span class="count" id="order-count">...</span></h3>
+        <div id="orders-list" class="activity-list">
+            <div class="loading-item">🐱 Loading...</div>
+        </div>
+        <a href="{% url 'my_orders' %}" class="view-all-btn">View All Orders</a>
+    </div>
+</div>
+{% endblock %}
 
-                // Update content visibility
-                tabContents.forEach(content => {
-                    if (content.id === `${tabName}-content`) {
-                        content.style.display = 'block';
-                    } else {
-                        content.style.display = 'none';
-                    }
-                });
-            }
-
-            // Event listener for top navigation tabs
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const tabName = tab.dataset.tab;
-                    // For now, only dashboard and browse are handled in this template
-                    if (tabName === 'dashboard' || tabName === 'browse') {
-                        switchTab(tabName);
-                    } else {
-                        alert(`In a full Django app, this would navigate to the '${tabName}' page.`);
-                    }
-                });
-            });
-
-            // Event listener for dashboard card buttons
-            cardButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const tabName = button.dataset.tabTarget;
-                    if (tabName) {
-                       switchTab(tabName);
-                    }
-                });
-            });
-
-
-            // --- Your existing script for fetching orders/reservations ---
-            const API_BASE_URL = "{{ request.scheme }}://{{ request.get_host }}/api";
-            const reservationList = document.getElementById("reservations-list");
-            const ordersList = document.getElementById("orders-list");
-            const resCount = document.getElementById("reservation-count");
-            const ordCount = document.getElementById("order-count");
-
-            async function fetchOrders() {
-              try {
-                // This part is a placeholder - in a real app you might need a proper API endpoint
-                // For now, we'll just show the empty state.
-                reservationList.innerHTML = `<div class="empty-state"><span>📋 No reservations yet</span><p>Reserve some items to see them here!</p></div>`;
-                ordersList.innerHTML = `<div class="empty-state"><span>📦 No orders yet</span><p>Order some items to see them here!</p></div>`;
-                resCount.textContent = `0 total`;
-                ordCount.textContent = `0 total`;
-              } catch (err) {
-                reservationList.innerHTML = `<div class="empty-state">❌ Error loading data.</div>`;
-                ordersList.innerHTML = `<div class="empty-state">❌ Error loading data.</div>`;
-                console.error(err);
-              }
-            }
-            fetchOrders();
-        });
-    </script>
-</body>
-</html>
-
+{% block extra_js %}
+<script>
+    // Placeholder script to show empty state.
+    // In a real app, you would fetch data via an API.
+    document.getElementById("reservations-list").innerHTML = `<div class="empty-state"><span>📋 No recent reservations</span></div>`;
+    document.getElementById("orders-list").innerHTML = `<div class="empty-state"><span>📦 No recent orders</span></div>`;
+    document.getElementById("reservation-count").textContent = `0 total`;
+    document.getElementById("order-count").textContent = `0 total`;
+</script>
+{% endblock %}

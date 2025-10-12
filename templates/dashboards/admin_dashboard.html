@@ -1,418 +1,55 @@
+{% extends 'dashboards/admin_base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="{% static 'css/admindashboard.css' %}">
-    <style>
-        /* Styles for Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 550px;
-            transform: translateY(-20px);
-            transition: transform 0.3s ease;
-        }
-        .modal-overlay.active .modal-content {
-            transform: translateY(0);
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #1e293b;
-        }
-        .modal-close-btn {
-            background: none;
-            border: none;
-            font-size: 1.75rem;
-            cursor: pointer;
-            color: #64748b;
-            line-height: 1;
-        }
-        .form-row {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        .form-group {
-            margin-bottom: 1rem;
-            flex: 1;
-        }
-        .form-group.full-width {
-            flex-basis: 100%;
-        }
-        .form-group label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: #334155;
-        }
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-        .form-check {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .form-check input {
-            width: auto;
-        }
-        .form-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 1.5rem;
-        }
-        .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-        }
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: background-color 0.2s;
-        }
-        .btn-primary {
-            background-color: #1e40af;
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #1d4ed8;
-        }
-        .btn-secondary {
-            background-color: #e2e8f0;
-            color: #475569;
-        }
-        .btn-secondary:hover {
-            background-color: #cbd5e1;
-        }
-        
-        /* Product Table Styles */
-        .product-list-section { margin-top: 3rem; }
-        .product-table-wrapper {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            border: 1px solid #f1f5f9;
-            overflow-x: auto;
-        }
-        .product-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .product-table th, .product-table td {
-            padding: 1.25rem 1.5rem;
-            text-align: left;
-            border-bottom: 1px solid #f1f5f9;
-        }
-        .product-table th {
-            font-size: 12px;
-            text-transform: uppercase;
-            color: #64748b;
-            font-weight: 600;
-        }
-        .product-table td {
-            color: #334155;
-            font-size: 14px;
-            vertical-align: middle;
-        }
-        .product-table tr:last-child td {
-            border-bottom: none;
-        }
-        .product-image {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
-        .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .status-badge.available {
-            background-color: #dcfce7;
-            color: #166534;
-        }
-        .status-badge.unavailable {
-            background-color: #fee2e2;
-            color: #991b1b;
-        }
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}?v=1.1">
+{% endblock %}
 
-        /* Message Styles */
-        .messages {
-            list-style: none;
-            padding: 0;
-            margin: 0 0 2rem 0;
-        }
-        .message {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            font-weight: 500;
-        }
-        .message.success {
-            background-color: #dcfce7;
-            color: #166534;
-            border: 1px solid #86efac;
-        }
-        .message.error {
-            background-color: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fca5a5;
-        }
-    </style>
-</head>
-<body>
-    <div class="admin-dashboard">
-        <!-- Header -->
-        <header class="admin-header">
-             <div class="header-left">
-                <div class="logo">
-                    <span class="logo-icon">🐱</span>
-                    <span class="logo-text">CIT Wildcats Admin</span>
-                </div>
-            </div>
-            <nav class="admin-nav">
-                <a href="#" class="nav-btn active">🏠 Admin Dashboard</a>
-            </nav>
-            <div class="header-right">
-                <span class="admin-name">{{ display_name|first|upper }}</span>
-                <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
-            </div>
-        </header>
+{% block content %}
+<div class="welcome-section">
+    <h1 class="welcome-title">{{ greeting }}, {{ display_name }}! 👑</h1>
+    <p class="welcome-subtitle">
+        Here's a quick overview of your platform's activity.
+    </p>
+</div>
 
-        <!-- Main Content -->
-        <main class="admin-main">
-            <div class="container">
-                <!-- Welcome Section -->
-                <div class="welcome-section">
-                     <h1 class="welcome-title">{{ greeting }}, {{ display_name }}! 👑</h1>
-                     <p class="welcome-subtitle">
-                        Manage your Reserve & Order platform with ease. Keep an eye on key metrics and dive into specific management tasks.
-                    </p>
-                </div>
-                
-                <!-- Display Django Messages -->
-                {% if messages %}
-                <ul class="messages">
-                    {% for message in messages %}
-                    <li class="message {{ message.tags }}">{{ message }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-
-                <!-- Overview Section -->
-                <div class="overview-section">
-                    <h2 class="section-title">Overview</h2>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon products">📦</div>
-                            <div class="stat-content">
-                                <h3>Total Products</h3>
-                                <div class="stat-number">{{ stats.total_products }}</div>
-                            </div>
-                        </div>
-                        <!-- Other stat cards... -->
-                    </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="quick-actions">
-                    <h2 class="section-title">Quick Actions</h2>
-                    <div class="actions-grid">
-                        <a href="#" class="action-btn products-btn" id="add-product-btn">📦 Add New Product</a>
-                    </div>
-                </div>
-                
-                <!-- Product List Section -->
-                <div class="product-list-section">
-                    <h2 class="section-title">Manage Products</h2>
-                    <div class="product-table-wrapper">
-                        <table class="product-table">
-                            <thead>
-                                <tr>
-                                    <th>Image</th>
-                                    <th>Product Name</th>
-                                    <th>Price</th>
-                                    <th>Stock</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for product in products %}
-                                <tr>
-                                    <td>
-                                        <img src="{{ product.image_url|default:'https://placehold.co/100x100/e0e7ff/3730a3?text=Img' }}" alt="{{ product.name }}" class="product-image">
-                                    </td>
-                                    <td>{{ product.name }}</td>
-                                    <td>₱{{ product.price|floatformat:2 }}</td>
-                                    <td>{{ product.stock_quantity }}</td>
-                                    <td>
-                                        {% if product.is_available %}
-                                        <span class="status-badge available">Available</span>
-                                        {% else %}
-                                        <span class="status-badge unavailable">Hidden</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <!-- Add Edit/Delete buttons here later -->
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="6" style="text-align: center; padding: 2rem;">
-                                        No products found. Add one to get started!
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Add Product Modal -->
-    <div class="modal-overlay" id="add-product-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Add New Product</h3>
-                <button class="modal-close-btn" id="modal-close-btn">&times;</button>
-            </div>
-            
-            <form id="addProductForm" method="post" action="{% url 'add_product' %}" enctype="multipart/form-data">
-                {% csrf_token %}
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="product-name">Product Name</label>
-                        <input type="text" id="product-name" name="product-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="product-price">Price (₱)</label>
-                        <input type="number" id="product-price" name="product-price" step="0.01" min="0" required>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="product-stock">Stock Quantity</label>
-                        <input type="number" id="product-stock" name="product-stock" min="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="product-image">Product Image</label>
-                        <input type="file" id="product-image" name="product-image" accept="image/*" required>
-                    </div>
-                </div>
-                
-                <div class="form-group full-width">
-                    <label for="product-description">Description</label>
-                    <textarea id="product-description" name="product-description" rows="3"></textarea>
-                </div>
-                
-                <div class="form-footer">
-                     <div class="form-check">
-                        <input type="checkbox" id="is-available" name="is-available" checked>
-                        <label for="is-available">Available for Students</label>
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" id="modal-cancel-btn">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Add Product</button>
-                    </div>
-                </div>
-            </form>
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon products">📦</div>
+        <div class="stat-content">
+            <h3>Total Products</h3>
+            <div class="stat-number">{{ stats.total_products }}</div>
         </div>
     </div>
+    <div class="stat-card">
+        <div class="stat-icon orders">🛍️</div>
+        <div class="stat-content">
+            <h3>Total Orders</h3>
+            <div class="stat-number">{{ stats.total_orders }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon active-products">✔️</div>
+        <div class="stat-content">
+            <h3>Active Products</h3>
+            <div class="stat-number">{{ stats.active_products }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon pending-orders">⏳</div>
+        <div class="stat-content">
+            <h3>Pending Orders</h3>
+            <div class="stat-number">{{ stats.pending_orders }}</div>
+        </div>
+    </div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const addProductBtn = document.getElementById('add-product-btn');
-            const addProductModal = document.getElementById('add-product-modal');
-            const closeModalBtn = document.getElementById('modal-close-btn');
-            const cancelModalBtn = document.getElementById('modal-cancel-btn');
-
-            function showModal() {
-                if (addProductModal) {
-                    addProductModal.classList.add('active');
-                }
-            }
-
-            function hideModal() {
-                if (addProductModal) {
-                    addProductModal.classList.remove('active');
-                }
-            }
-            
-            if (addProductBtn) {
-                addProductBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    showModal();
-                });
-            }
-
-            if (closeModalBtn) {
-                closeModalBtn.addEventListener('click', hideModal);
-            }
-            
-            if (cancelModalBtn) {
-                cancelModalBtn.addEventListener('click', hideModal);
-            }
-
-            if (addProductModal) {
-                addProductModal.addEventListener('click', (e) => {
-                    if (e.target === addProductModal) {
-                        hideModal();
-                    }
-                });
-            }
-        });
-    </script>
-</body>
-</html>
-
+<div class="quick-actions">
+    <h2 class="section-title">Quick Actions</h2>
+    <div class="actions-grid">
+        <a href="{% url 'manage_products' %}" class="action-btn">📦 Add/View Products</a>
+        <a href="{% url 'order_management' %}" class="action-btn">📋 View New Orders</a>
+        <a href="{% url 'reports' %}" class="action-btn">📊 Generate Report</a>
+    </div>
+</div>
+{% endblock %}

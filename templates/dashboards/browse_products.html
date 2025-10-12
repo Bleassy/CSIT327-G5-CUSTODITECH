@@ -1,0 +1,227 @@
+{% extends 'dashboards/student_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/browse_products.css' %}?v=2.0">
+{% endblock %}
+
+{% block content %}
+<h1 class="welcome-title">Available Products 🛒</h1>
+
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<div class="product-grid">
+    {% for product in products %}
+    <div class="product-card">
+        <div class="product-image-container">
+            <img src="{{ product.image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" 
+                 alt="{{ product.name }}" class="product-image">
+            {% if product.stock_quantity == 0 %}
+            <div class="stock-overlay out-of-stock">Out of Stock</div>
+            {% elif product.stock_quantity < 10 %}
+            <div class="stock-overlay low-stock">Low Stock</div>
+            {% endif %}
+        </div>
+        <div class="product-info">
+            <h3 class="product-name">{{ product.name }}</h3>
+            <p class="product-description">{{ product.description|truncatewords:15 }}</p>
+            <div class="product-meta">
+                <span class="product-price" data-price="{{ product.price }}">₱{{ product.price|floatformat:2 }}</span>
+                <span class="product-stock">{{ product.stock_quantity }} pcs available</span>
+            </div>
+        </div>
+        <div class="product-actions">
+            <button class="btn btn-secondary add-to-cart-btn"
+                data-id="{{ product.id }}"
+                data-name="{{ product.name }}"
+                data-stock="{{ product.stock_quantity }}"
+                {% if product.stock_quantity == 0 %}disabled{% endif %}>
+                Add to Cart
+            </button>
+            <button class="btn btn-primary buy-now-btn"
+                data-id="{{ product.id }}"
+                data-name="{{ product.name }}"
+                data-stock="{{ product.stock_quantity }}"
+                data-price="{{ product.price }}"
+                {% if product.stock_quantity == 0 %}disabled{% endif %}>
+                Buy Now
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ✅ BUY NOW MODAL -->
+<div id="buy-product-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Confirm Purchase</h2>
+            <span class="close-btn">&times;</span>
+        </div>
+        <form id="buy-product-form" action="{% url 'create_order' %}" method="post" class="modal-form">
+            {% csrf_token %}
+            <div class="modal-body">
+                <input type="hidden" name="product_id" id="buy-product-id">
+                <input type="hidden" name="deal_method" value="meet-up">
+
+                <p class="item-name-modal">You are buying: <strong id="buy-product-name"></strong></p>
+
+                <div class="form-group">
+                    <label for="quantity">Quantity</label>
+                    <input type="number" id="buy-quantity" name="quantity" value="1" min="1" required>
+                </div>
+
+                <div class="price-summary">
+                    <span>Total Price:</span>
+                    <strong id="total-price">₱0.00</strong>
+                </div>
+
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <div class="payment-options">
+                        <label><input type="radio" name="payment_method" value="cash" checked> Cash</label>
+                        <label><input type="radio" name="payment_method" value="online"> GCash</label>
+                    </div>
+                </div>
+
+                <div id="gcash-payment-section" style="display: none;">
+                    <p class="instructions">1. Scan the QR code with your GCash app.</p>
+                    <img src="{% static 'images/gcash_qr.jpg' %}" alt="GCash QR Code" class="qr-code-img">
+                    <p class="instructions">2. Enter the GCash Reference No. below.</p>
+                    <div class="form-group">
+                        <label for="gcash_ref_num">GCash Reference No.</label>
+                        <input type="text" id="gcash_ref_num" name="payment_transaction_id"
+                            placeholder="e.g., 0012345678912">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+                <button type="submit" id="place-order-btn" class="btn btn-primary">Place Order</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ✅ RESERVATION MODAL -->
+<div id="reservation-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Reserve Item</h2>
+            <span class="close-btn">&times;</span>
+        </div>
+        <form id="reservation-form" action="{% url 'create_reservation' %}" method="post" class="modal-form">
+            {% csrf_token %}
+            <div class="modal-body">
+                <input type="hidden" name="product_id" id="reserve-product-id">
+
+                <p class="item-name-modal">You are reserving: <strong id="reserve-product-name"></strong></p>
+
+                <div class="form-group">
+                    <label for="reserve-quantity">Quantity</label>
+                    <input type="number" id="reserve-quantity" name="quantity" value="1" min="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="reserve-deal-method">Deal Method</label>
+                    <select id="reserve-deal-method" name="deal_method" required>
+                        <option value="meet-up">Meet-up at CIT-U</option>
+                        <option value="delivery">Delivery (Address on file)</option>
+                    </select>
+                </div>
+                <p class="instructions">This will reserve the item for you. Payment will be made upon meet-up or delivery.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+                <button type="submit" class="btn btn-primary">Confirm Reservation</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- BUY NOW MODAL ---
+    const buyModal = document.getElementById('buy-product-modal');
+    const quantityInput = document.getElementById('buy-quantity');
+    const totalPriceEl = document.getElementById('total-price');
+    const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
+    const gcashSection = document.getElementById('gcash-payment-section');
+    const gcashRefInput = document.getElementById('gcash_ref_num');
+    let currentPrice = 0;
+
+    const openBuyModal = () => buyModal.style.display = 'flex';
+    const closeBuyModal = () => buyModal.style.display = 'none';
+    const updateTotalPrice = () => {
+        const quantity = parseInt(quantityInput.value) || 0;
+        const total = quantity * currentPrice;
+        totalPriceEl.textContent = `₱${total.toFixed(2)}`;
+    };
+
+    document.querySelectorAll('.buy-now-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            document.getElementById('buy-product-id').value = button.dataset.id;
+            document.getElementById('buy-product-name').textContent = button.dataset.name;
+            quantityInput.max = button.dataset.stock;
+            currentPrice = parseFloat(button.dataset.price);
+            updateTotalPrice();
+            openBuyModal();
+        });
+    });
+
+    quantityInput.addEventListener('input', updateTotalPrice);
+
+    paymentRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'online') {
+                gcashSection.style.display = 'block';
+                gcashRefInput.required = true;
+            } else {
+                gcashSection.style.display = 'none';
+                gcashRefInput.required = false;
+            }
+        });
+    });
+
+    buyModal.querySelector('.close-btn').addEventListener('click', closeBuyModal);
+    buyModal.querySelector('.cancel-btn').addEventListener('click', closeBuyModal);
+    window.addEventListener('click', (e) => { if (e.target === buyModal) closeBuyModal(); });
+
+
+    // --- RESERVATION MODAL ---
+    const reserveModal = document.getElementById('reservation-modal');
+    const openReserveModal = () => reserveModal.style.display = 'flex';
+    const closeReserveModal = () => reserveModal.style.display = 'none';
+
+    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const productId = button.dataset.id;
+            const productName = button.dataset.name;
+            const maxStock = button.dataset.stock;
+
+            reserveModal.querySelector('#reserve-product-id').value = productId;
+            reserveModal.querySelector('#reserve-product-name').textContent = productName;
+            reserveModal.querySelector('#reserve-quantity').max = maxStock;
+
+            openReserveModal();
+        });
+    });
+
+    reserveModal.querySelector('.close-btn').addEventListener('click', closeReserveModal);
+    reserveModal.querySelector('.cancel-btn').addEventListener('click', closeReserveModal);
+    window.addEventListener('click', (event) => {
+        if (event.target === reserveModal) closeReserveModal();
+    });
+});
+</script>
+{% endblock %}

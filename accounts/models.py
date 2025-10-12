@@ -3,9 +3,12 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.utils import timezone
 from datetime import timedelta
-
+import uuid # <-- Make sure this import is present
 
 class CustomUser(AbstractUser):
+    # This is the most important line in the file.
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
     USER_TYPE_CHOICES = (
         ('student', 'Student'),
         ('admin', 'Admin'),
@@ -43,7 +46,7 @@ class CustomUser(AbstractUser):
     
     # Use email as the username field for authentication
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']  # username is now optional during createsuperuser
+    REQUIRED_FIELDS = ['username']
     
     def is_otp_valid(self):
         """Check if OTP is still valid (5 minutes expiration)"""
@@ -54,3 +57,5 @@ class CustomUser(AbstractUser):
     
     def __str__(self):
         return f"{self.get_full_name()} - {self.user_type}"
+
+

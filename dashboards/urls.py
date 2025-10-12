@@ -2,8 +2,23 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # --- Student URLs ---
     path('student/', views.student_dashboard, name='student_dashboard'),
+    path('student/browse/', views.browse_products_view, name='browse_products'),
+    path('student/my-reservations/', views.my_reservations_view, name='my_reservations'),
+    path('student/my-orders/', views.my_orders_view, name='my_orders'),
+    path('student/create-order/', views.create_order_view, name='create_order'),
+    path('student/create-reservation/', views.create_reservation_view, name='create_reservation'),
+
+    # --- Admin URLs ---
     path('admin/', views.admin_dashboard, name='admin_dashboard'),
     path('redirect/', views.dashboard_redirect, name='dashboard_redirect'),
-     path('admin/products/add/', views.add_product, name='add_product'),
+    path('admin/manage-products/', views.manage_products_view, name='manage_products'),
+    path('admin/add_product/', views.add_product, name='add_product'),
+    path('admin/edit-product/<int:product_id>/', views.edit_product, name='edit_product'),
+    path('admin/delete-product/<int:product_id>/', views.delete_product, name='delete_product'),
+    path('admin/order-management/', views.order_management_view, name='order_management'),
+    path('admin/update-order-status/<int:order_id>/', views.update_order_status, name='update_order_status'),
+    path('admin/reports/', views.reports_view, name='reports'),
 ]
+
