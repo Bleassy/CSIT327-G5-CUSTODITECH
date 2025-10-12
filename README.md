@@ -1,4 +1,5 @@
-Online Reservation and Ordering System
+# Online Reservation and Ordering System
+
 Welcome to the official repository for the CIT Shop (also known as the "WildShoppers Portal"), a web-based platform designed to automate the process of requesting and distributing school supplies for students and staff at the Cebu Institute of Technology - University.
 
 This system allows students to browse and order available items online, and it provides an administrative dashboard for custodial staff to manage inventory, approve requests, and track supplies efficiently. The goal is to provide faster service, improve resource management, and modernize the school supply distribution process.
