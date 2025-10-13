@@ -93,13 +93,13 @@ Email Address: theocedric.chan@cit.edu
 
 Name: Bliss B. Chavez
 
-Role: 2nd Developer
+Role: Frontend developer
 
 Email Address: bliss.chavez@cit.edu
 
 Name: Rusty Summer Daclan
 
-Role: 3rd Developer
+Role: Backend developer
 
 rustysummer.daclan@cit.edu
 
