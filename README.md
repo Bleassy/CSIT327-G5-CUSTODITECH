@@ -1,4 +1,4 @@
-# 📋 CustoDiTech
+# 📋 Online Reservation and Ordering System / CustodiTech
 
 <div align="center"\>
   <h3>An Online Reservation and Ordering System for School Supplies</h3>
