@@ -1,9 +1,9 @@
 # 📋 CustoDiTech
 
-\<div align="center"\>
-  \<h3\>An Online Reservation and Ordering System for School Supplies\</h3\>
-  \<p\>Automating the request and distribution process at CIT-University\</p\>
-\</div\>
+<div align="center"\>
+  <h3>An Online Reservation and Ordering System for School Supplies</h3>
+  <p>Automating the request and distribution process at CIT-University</p>
+</div>
 
 -----
 
@@ -277,9 +277,9 @@ The application is currently being developed for local use. Deployment instructi
 
   - *No current implementation - placeholder to match structure.*
 
-\<div align="center"\>
-  \<p\>Made with ❤️ by the CustoDiTech Team\</p\>
-  \<p\>© 2025 CustoDiTech. All rights reserved.\</p\>
+<div align="center">
+  <p>Made with ❤️ by the CustoDiTech Team</p>
+  <p>© 2025 CustoDiTech. All rights reserved.</p>
   <br>
-  \<a href="\#-custoditech"\>Back to Top ⬆️\</a\>
-\</div\>
+  <a href="\#-custoditech"\>Back to Top ⬆️</a>
+</div>
