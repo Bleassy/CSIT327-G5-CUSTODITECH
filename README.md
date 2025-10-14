@@ -1,105 +1,193 @@
-# Online Reservation and Ordering System
+📋 CustoDiTech
+<div align="center">
+<h3>An Online Reservation and Ordering System for School Supplies</h3>
+<p>Automating the request and distribution process at CIT-University</p>
+</div>
 
-Welcome to the official repository for the CIT Shop (also known as the "WildShoppers Portal"), a web-based platform designed to automate the process of requesting and distributing school supplies for students and staff at the Cebu Institute of Technology - University.
+📖 Table of Contents
+Overview
 
-This system allows students to browse and order available items online, and it provides an administrative dashboard for custodial staff to manage inventory, approve requests, and track supplies efficiently. The goal is to provide faster service, improve resource management, and modernize the school supply distribution process.
+Features
 
-🛠️ Tech Stack
-This project is built with a modern and robust technology stack:
-
-Backend: Django
-
-Frontend: HTML & CSS (with Django Template Engine)
-
-Database & Authentication: Supabase (PostgreSQL)
-
-Image/File Storage: Supabase Storage
-
-Crucially, this project does not use Django's built-in authentication system. All user sign-up, sign-in, and session management is handled via API calls to Supabase.
-
-🚀 Setup and Run Instructions
-Follow these steps to get a local copy of the project up and running on your machine.
+Tech Stack
 
 Prerequisites
-Python 3.8+ installed on your system.
 
-Git installed on your system.
+Setup & Installation
 
-A Supabase account and a project created.
+Team Members
 
-Step-by-Step Guide
-Clone the Repository
-Open your terminal or command prompt and clone the project to your local machine:
+Deployment
 
-git clone [https://github.com/theo2815/CSIT327-G5-CUSTODITECH.git](https://github.com/theo2815/CSIT327-G5-CUSTODITECH.git)
+🌟 Overview
+Welcome to the official repository for CustoDiTech (also known as the "WildShoppers Portal"), a web-based platform designed to automate the process of requesting and distributing school supplies for students and staff at the Cebu Institute of Technology - University.
+
+🎯 Purpose
+This system allows students to browse and order available items online, and it provides an administrative dashboard for custodial staff to manage inventory, approve requests, and track supplies efficiently. The goal is to provide:
+
+Faster service for students and staff
+
+Improved resource management and inventory tracking
+
+Modernization of the school supply distribution process
+
+✨ Features
+Core Features
+🔐 Supabase Authentication
+
+Secure user sign-up and sign-in handled via API calls to Supabase.
+
+Session management for authenticated users.
+
+Protected routes for student and admin dashboards.
+
+🛒 Student Portal
+
+Browse available school supplies from an item catalog.
+
+Place orders/requests for items online.
+
+View order history and status.
+
+📊 Administrative Dashboard
+
+A central hub for custodial staff to manage the system.
+
+View and process incoming student requests.
+
+Approve or decline orders.
+
+📦 Inventory Management
+
+Add, update, and remove items from the supply catalog.
+
+Track stock levels to prevent shortages.
+
+Efficiently manage school resources.
+
+🛠️ Tech Stack
+Backend Framework
+Django - High-level Python web framework
+
+Database & Authentication
+Supabase
+
+PostgreSQL database for data storage.
+
+Handles all user authentication (sign-up, sign-in, sessions).
+
+Supabase Storage for image and file hosting.
+
+Frontend Technologies
+HTML
+
+CSS
+
+Django Template Engine
+
+Version Control
+Git - Distributed version control system
+
+GitHub - Code hosting and collaboration platform
+
+📋 Prerequisites
+Before you begin, ensure you have the following installed on your system:
+
+Python 3.8 or higher
+
+Download from python.org
+
+Verify installation: python --version or python3 --version
+
+Git
+
+Download from git-scm.com
+
+Verify installation: git --version
+
+Supabase Account
+
+You will need a free Supabase account and a project created to get your API keys.
+
+⚙️ Setup & Installation
+Follow these steps to get a local copy of the project up and running.
+
+Step 1: Clone the Repository
+Bash
+
+# Clone the repository
+git clone https://github.com/theo2815/CSIT327-G5-CUSTODITECH.git
+
+# Navigate to the project directory
 cd CSIT327-G5-CUSTODITECH
+Step 2: Create and Activate a Virtual Environment
+It's highly recommended to use a virtual environment to manage project dependencies.
 
-Create and Activate a Virtual Environment
-It is highly recommended to use a virtual environment to manage project dependencies.
+Bash
 
-On macOS/Linux:
-
-python3 -m venv venv
-source venv/bin/activate
-
-On Windows:
-
+# Create a virtual environment
 python -m venv venv
-.\\venv\\Scripts\\activate
 
+# Activate it (Windows)
+venv\Scripts\activate
+
+# Or activate it (macOS/Linux)
+# source venv/bin/activate
 Your terminal prompt should now be prefixed with (venv).
+Step 3: Create Environment Variables File
+Create a .env file in the project root directory (at the same level as manage.py). Add your credentials to this file:
 
-Install Dependencies
-With the virtual environment activated, install all the required Python packages:
+Code snippet
 
-pip install -r requirements.txt
-
-Set Up Environment Variables
-Create a new file named .env in the root directory of the project. Copy the contents of the .env.example file (if one exists) or use the template below and fill in your actual Supabase project credentials.
-
-# Django Secret Key (you can generate one)
+# Django Secret Key (you can generate a new one)
 SECRET_KEY=django-insecure-your-secret-key-here
 
 # Supabase Configuration
-SUPABASE_URL=https://lsumstfswtxqrieuibky.supabase.co
-
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzdW1zdGZzd3R4cXJpZXVpYmt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjQ3ODYsImV4cCI6MjA3NTUwMDc4Nn0.Ec1zIGJtibTLOaMLuRoecqhxVTWnYjAgzKnGVvq-xxY
-
-SUPABASE_SERVICE_ROLE=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzdW1zdGZzd3R4cXJpZXVpYmt5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTkyNDc4NiwiZXhwIjoyMDc1NTAwNzg2fQ.iI0-luBMxXxUB1d3Xaq1MaVZqmJj5wv14X_ARR01Tfs
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE=your-supabase-service-role-key
+⚠️ Important Security Notes:
 
 You can find your Supabase URL and keys in your Supabase project dashboard under Project Settings > API.
 
-Run Database Migrations
-This command will set up the necessary tables for Django's internal apps (like the admin panel and sessions).
+Never commit the .env file to version control.
+
+Step 4: Install Project Dependencies
+Bash
+
+# Ensure your virtual environment is activated
+pip install -r requirements.txt
+Step 5: Run Database Migrations
+This command sets up the necessary tables for Django's internal apps (like admin and sessions).
+
+Bash
 
 python manage.py migrate
+Step 6: Run the Development Server
+Bash
 
-Run the Development Server
-You're all set! Start the Django development server with this command:
-
+# Start the Django development server
 python manage.py runserver
+Step 7: Access the Application
+Open your web browser and navigate to the application:
 
-The application will now be running at https://www.google.com/search?q=http://127.0.0.1:8000/. You can open this URL in your web browser to see the live application.
+http://127.0.0.1:8000/accounts/login
+👥 Team Members
+Name	Role	CIT-U Email
+Theo Cedric Chan	Lead Developer	theocedric.chan@cit.edu
+Bliss B. Chavez	Frontend Developer	bliss.chavez@cit.edu
+Rusty Summer Daclan	Backend Developer	rustysummer.daclan@cit.edu
 
-# 👥 Team Members
+Export to Sheets
+🌐 Deployment
+🚧 Status: In Development
+The application is currently being developed for local use. Deployment instructions will be added in the future.
 
-This project is developed and maintained by the following team members:
+<div align="center">
+<p>Made with ❤️ by the CustoDiTech Team</p>
+<p>© 2025 CustoDiTech. All rights reserved.</p>
 
-Name: Theo Cedric Chan
 
-Role: Lead Developer
 
-Email Address: theocedric.chan@cit.edu
-
-Name: Bliss B. Chavez
-
-Role: Frontend developer
-
-Email Address: bliss.chavez@cit.edu
-
-Name: Rusty Summer Daclan
-
-Role: Backend developer
-
-rustysummer.daclan@cit.edu
-
+<a href="#-custoditech">Back to Top ⬆️</a>
+</div>
