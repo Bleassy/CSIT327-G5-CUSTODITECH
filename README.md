@@ -228,7 +228,9 @@ http://127.0.0.1:8000/accounts/login
 | **Bliss B. Chavez** | Frontend Developer | bliss.chavez@cit.edu |
 | **Rusty Summer Daclan** | Backend Developer | rustysummer.daclan@cit.edu |
 
-## **Academic Instructors** | Name | Role | |------|------| | **Frederick Revilleza** | CSIT327 Instructor | | **Joemarie Amparo** | IT317 Instructor |
+## **Academic Instructors** | Name | Role | |------|------| 
+| **Frederick Revilleza** | CSIT327 Instructor | 
+| **Joemarie Amparo** | IT317 Instructor |
 
 ## 🌐 Deployment
 
