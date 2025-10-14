@@ -22,6 +22,7 @@ def register(request):
         phone_number = request.POST.get('phone_number')
         address = request.POST.get('address')
         
+        
         # Validation
         if not email or not email.endswith('@cit.edu'):
             messages.error(request, 'Only CIT institutional email addresses (@cit.edu) are allowed.')

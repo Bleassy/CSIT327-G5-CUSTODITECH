@@ -1,105 +1,246 @@
-# Online Reservation and Ordering System
+# 📋 Online Reservation and Ordering System / CustodiTech
 
-Welcome to the official repository for the CIT Shop (also known as the "WildShoppers Portal"), a web-based platform designed to automate the process of requesting and distributing school supplies for students and staff at the Cebu Institute of Technology - University.
+<div align="center"\>
+  <h3>An Online Reservation and Ordering System for School Supplies</h3>
+  <p>Automating the request and distribution process at CIT-University</p>
+</div>
 
-This system allows students to browse and order available items online, and it provides an administrative dashboard for custodial staff to manage inventory, approve requests, and track supplies efficiently. The goal is to provide faster service, improve resource management, and modernize the school supply distribution process.
+-----
 
-🛠️ Tech Stack
-This project is built with a modern and robust technology stack:
+## 📖 Table of Contents
 
-Backend: Django
+  - [Overview](https://www.google.com/search?q=%23-overview)
+  - [Features](https://www.google.com/search?q=%23-features)
+  - [Tech Stack](https://www.google.com/search?q=%23%EF%B8%8F-tech-stack)
+  - [Prerequisites](https://www.google.com/search?q=%23-prerequisites)
+  - [Setup & Installation](https://www.google.com/search?q=%23%EF%B8%8F-setup--installation)
+  - [Project Structure](https://www.google.com/search?q=%23-project-structure)
+  - [Usage Guide](https://www.google.com/search?q=%23-usage-guide)
+  - [Team Members](https://www.google.com/search?q=%23-team-members)
+  - [Deployment](https://www.google.com/search?q=%23-deployment)
 
-Frontend: HTML & CSS (with Django Template Engine)
+-----
 
-Database & Authentication: Supabase (PostgreSQL)
+## 🌟 Overview
 
-Image/File Storage: Supabase Storage
+Welcome to the official repository for **CustoDiTech** (also known as the "WildShoppers Portal"), a web-based platform designed to automate the process of requesting and distributing school supplies for students and staff at the Cebu Institute of Technology - University.
 
-Crucially, this project does not use Django's built-in authentication system. All user sign-up, sign-in, and session management is handled via API calls to Supabase.
+### 🎯 Purpose
 
-🚀 Setup and Run Instructions
-Follow these steps to get a local copy of the project up and running on your machine.
+This system allows students to browse and order available items online, and it provides an administrative dashboard for custodial staff to manage inventory, approve requests, and track supplies efficiently. The goal is to provide:
 
-Prerequisites
-Python 3.8+ installed on your system.
+  - **Faster** service for students and staff
+  - **Improved** resource management and inventory tracking
+  - **Modernization** of the school supply distribution process
 
-Git installed on your system.
+## ✨ Features
 
-A Supabase account and a project created.
+### Core Features
 
-Step-by-Step Guide
-Clone the Repository
-Open your terminal or command prompt and clone the project to your local machine:
+  - 🔐 **Supabase Authentication**
+      - Secure user sign-up and sign-in handled via API calls to Supabase.
+      - Session management for authenticated users.
+      - Protected routes for student and admin dashboards.
 
-git clone [https://github.com/theo2815/CSIT327-G5-CUSTODITECH.git](https://github.com/theo2815/CSIT327-G5-CUSTODITECH.git)
+  - 🛒 **Student Portal**
+      - Browse available school supplies from an item catalog.
+      - Place orders/requests for items online.
+      - View order history and status.
+
+  - 📊 **Administrative Dashboard**
+      - A central hub for custodial staff to manage the system.
+      - View and process incoming student requests.
+      - Approve or decline orders.
+
+  - 📦 **Inventory Management**
+      - Add, update, and remove items from the supply catalog.
+      - Track stock levels to prevent shortages.
+      - Efficiently manage school resources.
+
+-----
+
+## 🛠️ Tech Stack
+
+### **Backend Framework**
+
+  - **Django** - High-level Python web framework
+  - **Python** - Core programming language
+
+### **Database & Authentication**
+
+  - **Supabase**
+      - PostgreSQL database for data storage.
+      - Handles all user authentication (sign-up, sign-in, sessions).
+      - Supabase Storage for image and file hosting.
+
+### **Frontend Technologies**
+
+  - **HTML**
+  - **CSS**
+  - **Django Template Engine**
+
+### **Version Control**
+
+  - **Git** - Distributed version control system
+  - **GitHub** - Code hosting and collaboration platform
+
+-----
+
+## 📋 Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+  - **Python 3.8 or higher**
+      - Download from [python.org](https://www.python.org/downloads/)
+      - Verify installation: `python --version` or `python3 --version`
+
+  - **Git**
+      - Download from [git-scm.com](https://git-scm.com/downloads)
+      - Verify installation: `git --version`
+
+  - **IDE**
+      - VS Code (Recommended)
+
+-----
+
+## ⚙️ Setup & Installation
+
+### 📌 **Option 2: Just Using the Project (Direct Clone)**
+
+If you just want to use the application:
+
+```bash
+# Clone the repository directly
+git clone https://github.com/theo2815/CSIT327-G5-CUSTODITECH.git
+
+# Navigate to the project directory
 cd CSIT327-G5-CUSTODITECH
+```
 
-Create and Activate a Virtual Environment
-It is highly recommended to use a virtual environment to manage project dependencies.
+-----
 
-On macOS/Linux:
+### 🔧 **Common Setup Steps (After Cloning)**
 
-python3 -m venv venv
-source venv/bin/activate
+#### **Step 1: Create and Activate a Virtual Environment**
 
-On Windows:
+It's highly recommended to use a virtual environment to manage project dependencies.
 
+```bash
+# Create a virtual environment
 python -m venv venv
-.\\venv\\Scripts\\activate
 
-Your terminal prompt should now be prefixed with (venv).
+# Activate it (Windows)
+venv\Scripts\activate
 
-Install Dependencies
-With the virtual environment activated, install all the required Python packages:
+# Or activate it (macOS/Linux)
+# source venv/bin/activate
 
-pip install -r requirements.txt
+# You should see (venv) in your terminal prompt
+```
 
-Set Up Environment Variables
-Create a new file named .env in the root directory of the project. Copy the contents of the .env.example file (if one exists) or use the template below and fill in your actual Supabase project credentials.
+-----
 
-# Django Secret Key (you can generate one)
+#### **Step 2: Create Environment Variables File**
+
+Create a `.env` file in the project root directory
+
+Add the following configuration to `.env`:
+
+```env
+# Django Secret Key
 SECRET_KEY=django-insecure-your-secret-key-here
 
 # Supabase Configuration
 SUPABASE_URL=https://lsumstfswtxqrieuibky.supabase.co
-
 SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzdW1zdGZzd3R4cXJpZXVpYmt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjQ3ODYsImV4cCI6MjA3NTUwMDc4Nn0.Ec1zIGJtibTLOaMLuRoecqhxVTWnYjAgzKnGVvq-xxY
-
 SUPABASE_SERVICE_ROLE=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzdW1zdGZzd3R4cXJpZXVpYmt5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTkyNDc4NiwiZXhwIjoyMDc1NTAwNzg2fQ.iI0-luBMxXxUB1d3Xaq1MaVZqmJj5wv14X_ARR01Tfs
 
-You can find your Supabase URL and keys in your Supabase project dashboard under Project Settings > API.
+# Optional: If using Supabase as Django database
+SUPABASE_DB_URL=postgresql://postgres:[YOUR-PASSWORD]@db.your-project-id.supabase.co:5432/postgres
+```
 
-Run Database Migrations
-This command will set up the necessary tables for Django's internal apps (like the admin panel and sessions).
+**⚠️ Important Security Notes:**
 
+  - You can find your Supabase URL and keys in your Supabase project dashboard under **Project Settings \> API**.
+  - Never commit `.env` to version control.
+      
+
+-----
+
+#### **Step 3: Install Project Dependencies**
+
+```bash
+# Make sure your virtual environment is activated (you should see (venv) in the prompt)
+
+# Install all required packages from requirements.txt
+pip install -r requirements.txt
+
+# Wait for all packages to install
+```
+
+-----
+
+#### **Step 4: Run Database Migrations**
+
+This command sets up the necessary tables for Django's internal apps (like admin and sessions).
+
+```bash
 python manage.py migrate
+```
 
-Run the Development Server
-You're all set! Start the Django development server with this command:
+-----
 
+#### **Step 5: Run the Development Server**
+
+```bash
+# Start the Django development server
 python manage.py runserver
 
-The application will now be running at https://www.google.com/search?q=http://127.0.0.1:8000/. You can open this URL in your web browser to see the live application.
+# Server will start on http://127.0.0.1:8000/
+```
 
-# 👥 Team Members
+-----
 
-This project is developed and maintained by the following team members:
+#### **Step 6: Access the Application**
 
-Name: Theo Cedric Chan
+Open your web browser and navigate to the application:
 
-Role: Lead Developer
+**Main Application Login:**
 
-Email Address: theocedric.chan@cit.edu
+```
+http://127.0.0.1:8000/accounts/login
+```
 
-Name: Bliss B. Chavez
+**Available Pages:**
 
-Role: 2nd Developer
+  - Login: `http://127.0.0.1:8000/accounts/login`
+  - Register: `http://127.0.0.1:8000/accounts/register`
+  - Student/Admin Dashboard: (Requires login)
 
-Email Address: bliss.chavez@cit.edu
+-----
 
-Name: Rusty Summer Daclan
+## 👥 Team Members
 
-Role: 3rd Developer
+**Project Team**
+| Name | Role | CIT-U Email |
+|------|------|-------------|
+| **Theo Cedric Chan** | Lead Developer full stack | theocedric.chan@cit.edu |
+| **Bliss B. Chavez** | Frontend Developer | bliss.chavez@cit.edu |
+| **Rusty Summer Daclan** | Backend Developer | rustysummer.daclan@cit.edu |
 
-rustysummer.daclan@cit.edu
+## **Academic Instructors** | Name | Role | |------|------| | **Frederick Revilleza** | CSIT327 Instructor | | **Joemarie Amparo** | IT317 Instructor |
 
+## 🌐 Deployment
+
+### 🚧 **Status: In Development**
+
+The application is currently being developed for local use. Deployment instructions will be added in the future.
+
+---
+
+<div align="center">
+  <p>Made with ❤️ by the CustoDiTech Team</p>
+  <p>© 2025 CustoDiTech. All rights reserved.</p>
+  <br>
+  <a href="\#-custoditech"\>Back to Top ⬆️</a>
+</div>

@@ -48,43 +48,6 @@ body {
     font-weight: 500;
 }
 
-/* New Styles for Role Selector */
-.role-selector {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 25px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.role-btn {
-    flex: 1;
-    padding: 12px;
-    background-color: #f0f0f0;
-    color: #555;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 500;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.role-btn:not(:last-child) {
-    border-right: 1px solid #ddd;
-}
-
-.role-btn.active {
-    background-color: #8B0000;
-    color: white;
-}
-
-.role-btn:hover:not(.active) {
-    background-color: #e0e0e0;
-}
-/* End of New Styles */
-
-
 .form-group {
     margin-bottom: 20px;
 }
