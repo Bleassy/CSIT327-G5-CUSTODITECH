@@ -10,13 +10,12 @@ env/
 *.log
 db.sqlite3
 db.sqlite3-journal
-/static/
+/staticfiles/
 /media/
 
 # Sensitive files
 *.env
 .env
-config/settings.py  # if you have sensitive keys
 *.key
 *.pem
 
@@ -29,6 +28,3 @@ config/settings.py  # if you have sensitive keys
 # OS
 .DS_Store
 Thumbs.db
-
-.env
-*.env
