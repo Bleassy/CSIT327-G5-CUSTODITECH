@@ -8,8 +8,8 @@ urlpatterns = [
     path('student/my-reservations/', views.my_reservations_view, name='my_reservations'),
     path('student/my-orders/', views.my_orders_view, name='my_orders'),
     path('student/create-order/', views.create_order_view, name='create_order'),
-    path('student/create-reservation/', views.create_reservation_view, name='create_reservation'),
-
+    path('student/create-reservation/', views.create_reservation_view, name='create_reservation'),   
+   
     # --- Admin URLs ---
     path('admin/', views.admin_dashboard, name='admin_dashboard'),
     path('redirect/', views.dashboard_redirect, name='dashboard_redirect'),

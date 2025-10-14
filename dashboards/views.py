@@ -119,6 +119,33 @@ def my_orders_view(request):
 
 @student_required
 def create_reservation_view(request):
+    if request.method == 'POST':
+        try:
+            params = {
+                'p_product_id': int(request.POST.get('product_id')),
+                'p_user_id': request.user.id,
+                'p_quantity': int(request.POST.get('quantity')),
+                'p_deal_method': request.POST.get('deal_method', 'meet-up'),
+                'p_is_urgent': 'is_urgent' in request.POST
+            }
+            supabase.rpc('create_reservation', params).execute()
+            messages.success(request, "Your item has been reserved successfully!")
+            return redirect('my_reservations')
+
+        except Exception as e:
+            error_str = str(e)
+            if "'success': True" in error_str:
+                messages.success(request, "Your item has been reserved successfully!")
+                return redirect('my_reservations')
+            else:
+                messages.error(request, f"Could not reserve item: {e}")
+                return redirect('browse_products')
+    
+    return redirect('browse_products')
+
+
+@student_required
+def create_reservation_view(request):
     """
     Handles the form submission for reserving a product.
     """

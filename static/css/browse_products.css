@@ -25,7 +25,7 @@
 .btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
 .no-products-message p { font-size: 1.2rem; color: #64748b; margin: 0; }
 
-/* === Modal Styles === */
+/* === General Modal Styles === */
 .modal {
     position: fixed; z-index: 1000; left: 0; top: 0;
     width: 100%; height: 100%;
@@ -35,7 +35,8 @@
 }
 .modal-content {
     background-color: #ffffff; border-radius: 12px;
-    width: 100%; max-width: 450px;
+    width: 100%; 
+    max-width: 500px; 
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     animation: slideIn 0.3s;
     display: flex; flex-direction: column;
@@ -49,7 +50,22 @@
 .modal-header h2 { margin: 0; font-size: 20px; font-weight: 600; }
 .close-btn { font-size: 28px; font-weight: bold; color: #64748b; cursor: pointer; }
 
-.modal-body { padding: 24px; overflow-y: auto; min-height: 0; }
+/* ✅ NEW RULE: Makes the form a flex container */
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Allows the form to grow */
+    min-height: 0; /* Prevents flexbox overflow issues */
+}
+
+/* ✅ UPDATED RULE: Makes the body scroll inside the form */
+.modal-body {
+    padding: 24px;
+    overflow-y: auto; /* Adds a scrollbar ONLY when content is too tall */
+    flex-grow: 1;     /* Makes this area fill the available vertical space */
+    min-height: 0;
+}
+
 .modal-footer {
     padding: 24px; display: flex; justify-content: flex-end; gap: 1rem;
     border-top: 1px solid #e2e8f0; background-color: #f8fafc;
@@ -57,22 +73,72 @@
     flex-shrink: 0; 
 }
 
-/* --- Other styles --- */
+.modal-product-description {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.5;
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 1rem;
+}
+
+/* --- Styles for elements inside the modals --- */
+.modal-product-image {
+    width: 80%;
+    max-width: 200px;
+    height: auto;
+    display: block;
+    margin: 0 auto 1rem auto;
+    object-fit: contain;
+    border-radius: 8px;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
 .modal-form .form-group { margin-bottom: 1.2rem; }
 .modal-form label { display: block; font-weight: 500; margin-bottom: 8px; font-size: 14px; }
 .modal-form input, .modal-form select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
-.item-name-modal { margin-top: 0; font-size: 16px; }
+.item-name-modal { margin-top: 0; font-size: 16px; color: #475569;}
+.item-name-modal strong { font-weight: 600; color: #1e293b; }
 .price-summary { display: flex; justify-content: space-between; font-size: 18px; padding: 1rem; background-color: #f8fafc; border-radius: 8px; margin-bottom: 1rem; }
 .price-summary strong { color: #800000; }
 .payment-options { display: flex; gap: 1.5rem; margin-top: 0.5rem; }
 .payment-options label { display: flex; align-items: center; gap: 0.5rem; }
-#gcash-payment-section { border-top: 1px solid #e2e8f0; margin-top: 1.5rem; padding-top: 1.5rem; }
+
+.info-note {
+    background-color: #eff6ff;
+    color: #1e40af;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-top: 1rem;
+}
+.info-note p { margin: 0; }
+
+.date-info {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    font-size: 14px;
+}
+.date-info p { margin: 0; display: flex; justify-content: space-between; }
+.date-info p:first-child { margin-bottom: 0.5rem; }
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+.checkbox-group input { width: auto; }
 .instructions { font-size: 14px; color: #475569; margin: 0 0 1rem 0; text-align: center; }
-.qr-code-img { display: block; max-width: 200px; margin: 0 auto 1.5rem auto; border-radius: 8px; border: 1px solid #e2e8f0; }
+
+/* Messages for success/error */
 .messages { list-style: none; padding: 0; margin-bottom: 1.5rem; }
 .messages li { padding: 1rem; margin-bottom: 1rem; border-radius: 8px; font-weight: 500; }
 .messages li.success { background-color: #dcfce7; color: #166534; }
 .messages li.error { background-color: #fee2e2; color: #991b1b; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
