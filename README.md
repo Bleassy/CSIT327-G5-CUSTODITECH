@@ -18,11 +18,6 @@
   - [Usage Guide](https://www.google.com/search?q=%23-usage-guide)
   - [Team Members](https://www.google.com/search?q=%23-team-members)
   - [Deployment](https://www.google.com/search?q=%23-deployment)
-  - [Screenshots](https://www.google.com/search?q=%23-screenshots)
-  - [Future Enhancements](https://www.google.com/search?q=%23-future-enhancements)
-  - [Contributing](https://www.google.com/search?q=%23-contributing)
-  - [License](https://www.google.com/search?q=%23-license)
-  - [Contact](https://www.google.com/search?q=%23-contact)
 
 -----
 
