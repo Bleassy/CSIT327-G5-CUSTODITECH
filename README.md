@@ -62,12 +62,6 @@ This system allows students to browse and order available items online, and it p
       - Track stock levels to prevent shortages.
       - Efficiently manage school resources.
 
-  - ⏱️ **Activity Timeline**
-      - *No current implementation - placeholder to match structure.*
-
-  - 🔍 **Project Discovery**
-      - *No current implementation - placeholder to match structure.*
-
 -----
 
 ## 🛠️ Tech Stack
@@ -108,9 +102,6 @@ Before you begin, ensure you have the following installed on your system:
   - **Git**
       - Download from [git-scm.com](https://git-scm.com/downloads)
       - Verify installation: `git --version`
-
-  - **Supabase Account**
-      - You will need a free Supabase account and a project created to get your API keys.
 
   - **IDE**
       - VS Code (Recommended)
@@ -156,18 +147,21 @@ venv\Scripts\activate
 
 #### **Step 2: Create Environment Variables File**
 
-Create a `.env` file in the project root directory (same level as `manage.py`):
+Create a `.env` file in the project root directory
 
 Add the following configuration to `.env`:
 
 ```env
-# Django Secret Key (you can generate a new one)
+# Django Secret Key
 SECRET_KEY=django-insecure-your-secret-key-here
 
 # Supabase Configuration
-SUPABASE_URL=https://your-project-ref.supabase.co
-SUPABASE_ANON_KEY=your-supabase-anon-key
-SUPABASE_SERVICE_ROLE=your-supabase-service-role-key
+SUPABASE_URL=https://lsumstfswtxqrieuibky.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzdW1zdGZzd3R4cXJpZXVpYmt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjQ3ODYsImV4cCI6MjA3NTUwMDc4Nn0.Ec1zIGJtibTLOaMLuRoecqhxVTWnYjAgzKnGVvq-xxY
+SUPABASE_SERVICE_ROLE=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzdW1zdGZzd3R4cXJpZXVpYmt5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTkyNDc4NiwiZXhwIjoyMDc1NTAwNzg2fQ.iI0-luBMxXxUB1d3Xaq1MaVZqmJj5wv14X_ARR01Tfs
+
+# Optional: If using Supabase as Django database
+SUPABASE_DB_URL=postgresql://postgres:[YOUR-PASSWORD]@db.your-project-id.supabase.co:5432/postgres
 ```
 
 **⚠️ Important Security Notes:**
@@ -235,7 +229,7 @@ http://127.0.0.1:8000/accounts/login
 **Project Team**
 | Name | Role | CIT-U Email |
 |------|------|-------------|
-| **Theo Cedric Chan** | Lead Developer | theocedric.chan@cit.edu |
+| **Theo Cedric Chan** | Lead Developer full stack | theocedric.chan@cit.edu |
 | **Bliss B. Chavez** | Frontend Developer | bliss.chavez@cit.edu |
 | **Rusty Summer Daclan** | Backend Developer | rustysummer.daclan@cit.edu |
 
@@ -247,35 +241,7 @@ http://127.0.0.1:8000/accounts/login
 
 The application is currently being developed for local use. Deployment instructions will be added in the future.
 
------
-
-## 📸 Screenshots
-
-  - *No current implementation - placeholder to match structure.*
-
------
-
-## 💡 Future Enhancements
-
-  - *No current implementation - placeholder to match structure.*
-
------
-
-## 🤝 Contributing
-
-  - *No current implementation - placeholder to match structure.*
-
------
-
-## ⚖️ License
-
-  - *No current implementation - placeholder to match structure.*
-
------
-
-## 📧 Contact
-
-  - *No current implementation - placeholder to match structure.*
+---
 
 <div align="center">
   <p>Made with ❤️ by the CustoDiTech Team</p>
