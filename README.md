@@ -1,28 +1,25 @@
-📋 CustoDiTech
+# 📋 CustoDiTech
 <div align="center">
 <h3>An Online Reservation and Ordering System for School Supplies</h3>
 <p>Automating the request and distribution process at CIT-University</p>
 </div>
 
-📖 Table of Contents
-Overview
+## 📖 Table of Contents
 
-Features
+- [Overview](#-overview)
+- [Features](#-features)
+- [Tech Stack](#️-tech-stack)
+- [Prerequisites](#-prerequisites)
+- [Setup & Installation](#️-setup--installation)
+- [Team Members](#-team-members)
+- [Deployment](#-deployment)
 
-Tech Stack
+---
 
-Prerequisites
-
-Setup & Installation
-
-Team Members
-
-Deployment
-
-🌟 Overview
+# 🌟 Overview
 Welcome to the official repository for CustoDiTech (also known as the "WildShoppers Portal"), a web-based platform designed to automate the process of requesting and distributing school supplies for students and staff at the Cebu Institute of Technology - University.
 
-🎯 Purpose
+# 🎯 Purpose
 This system allows students to browse and order available items online, and it provides an administrative dashboard for custodial staff to manage inventory, approve requests, and track supplies efficiently. The goal is to provide:
 
 Faster service for students and staff
@@ -31,7 +28,7 @@ Improved resource management and inventory tracking
 
 Modernization of the school supply distribution process
 
-✨ Features
+# ✨ Features
 Core Features
 🔐 Supabase Authentication
 
@@ -65,7 +62,7 @@ Track stock levels to prevent shortages.
 
 Efficiently manage school resources.
 
-🛠️ Tech Stack
+# 🛠️ Tech Stack
 Backend Framework
 Django - High-level Python web framework
 
@@ -90,7 +87,7 @@ Git - Distributed version control system
 
 GitHub - Code hosting and collaboration platform
 
-📋 Prerequisites
+# 📋 Prerequisites
 Before you begin, ensure you have the following installed on your system:
 
 Python 3.8 or higher
@@ -109,7 +106,7 @@ Supabase Account
 
 You will need a free Supabase account and a project created to get your API keys.
 
-⚙️ Setup & Installation
+# ⚙️ Setup & Installation
 Follow these steps to get a local copy of the project up and running.
 
 Step 1: Clone the Repository
