@@ -213,6 +213,62 @@ def checkout_reservation_view(request):
                 return redirect('my_reservations')
     return redirect('my_orders')
 
+@student_required
+def student_profile_view(request):
+    user_id = request.user.id
+    
+    # Handle form submissions for updating profile or password
+    if request.method == 'POST':
+        form_type = request.POST.get('form_type')
+
+        # --- Handle Profile Details Update ---
+        if form_type == 'details':
+            try:
+                params = {
+                    'p_full_name': request.POST.get('full_name'),
+                    'p_phone_number': request.POST.get('phone_number'),
+                    'p_address': request.POST.get('address')
+                }
+                supabase.rpc('update_my_profile', params).execute()
+                messages.success(request, 'Your profile has been updated successfully!')
+            except Exception as e:
+                messages.error(request, f'Error updating profile: {e}')
+        
+        # --- Handle Password Change ---
+        elif form_type == 'password':
+            new_password1 = request.POST.get('new_password1')
+            new_password2 = request.POST.get('new_password2')
+
+            if new_password1 != new_password2:
+                messages.error(request, 'Passwords do not match.')
+            elif len(new_password1) < 6:
+                messages.error(request, 'Password must be at least 6 characters long.')
+            else:
+                try:
+                    # Use the Supabase Auth API to update the user's password
+                    supabase.auth.update_user({'password': new_password1})
+                    messages.success(request, 'Your password has been changed successfully!')
+                except Exception as e:
+                    messages.error(request, f'Error changing password: {e}')
+        
+        return redirect('student_profile')
+
+    # --- Handle GET request to display the page ---
+    profile_data = {}
+    try:
+        # Fetch the user's current profile to pre-fill the form
+        response = supabase.table('user_profiles').select('*').eq('user_id', user_id).single().execute()
+        profile_data = response.data
+    except Exception as e:
+        messages.error(request, f'Could not load your profile: {e}')
+        
+    context = {
+        'profile': profile_data,
+        'active_page': 'profile',
+        'page_title': 'My Profile'
+    }
+    return render(request, 'dashboards/student_profile.html', context)
+
 # --- Admin Views ---
 @admin_required
 def admin_dashboard(request):
@@ -413,3 +469,58 @@ def reports_view(request):
         'active_page': 'reports'
     }
     return render(request, 'dashboards/reports.html', context)
+
+
+@admin_required
+def admin_profile_view(request):
+    user_id = request.user.id
+    
+    # Handle form submissions
+    if request.method == 'POST':
+        form_type = request.POST.get('form_type')
+
+        # Handle Profile Details Update
+        if form_type == 'details':
+            try:
+                params = {
+                    'p_full_name': request.POST.get('full_name'),
+                    'p_phone_number': request.POST.get('phone_number'),
+                    'p_address': request.POST.get('address')
+                }
+                supabase.rpc('update_my_profile', params).execute()
+                messages.success(request, 'Your profile has been updated successfully!')
+            except Exception as e:
+                messages.error(request, f'Error updating profile: {e}')
+        
+        # Handle Password Change
+        elif form_type == 'password':
+            new_password1 = request.POST.get('new_password1')
+            new_password2 = request.POST.get('new_password2')
+
+            if new_password1 != new_password2:
+                messages.error(request, 'Passwords do not match.')
+            elif len(new_password1) < 6:
+                messages.error(request, 'Password must be at least 6 characters long.')
+            else:
+                try:
+                    supabase.auth.update_user({'password': new_password1})
+                    messages.success(request, 'Your password has been changed successfully!')
+                except Exception as e:
+                    messages.error(request, f'Error changing password: {e}')
+        
+        return redirect('admin_profile')
+
+    # Handle GET request to display the page
+    profile_data = {}
+    try:
+        response = supabase.table('user_profiles').select('*').eq('user_id', user_id).single().execute()
+        profile_data = response.data
+    except Exception as e:
+        messages.error(request, f'Could not load your profile: {e}')
+        
+    context = {
+        'profile': profile_data,
+        'active_page': 'profile',
+        'page_title': 'Admin Profile'
+    }
+    return render(request, 'dashboards/admin_profile.html', context)
