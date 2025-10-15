@@ -70,11 +70,43 @@ def dashboard_redirect(request):
 
 @student_required
 def student_dashboard(request):
+    """
+    Renders the main student dashboard with a welcome message and summaries
+    of the most recent reservation and order.
+    """
     raw_name = getattr(request.user, 'get_full_name', lambda: 'Wildcat')()
     display_name = raw_name.split()[0] if isinstance(raw_name, str) else "Wildcat"
+    
+    latest_reservation = None
+    latest_order = None
+    
+    try:
+        user_id = request.user.id
+        
+        # Fetch the most recent reservation
+        res_response = supabase.rpc('get_my_detailed_reservations', {'p_user_id': user_id}).limit(1).execute()
+        if res_response.data:
+            latest_reservation = res_response.data[0]
+            if latest_reservation.get('created_at'):
+                latest_reservation['created_at'] = datetime.fromisoformat(latest_reservation['created_at'])
+            if latest_reservation.get('expires_at'):
+                latest_reservation['expires_at'] = datetime.fromisoformat(latest_reservation['expires_at'])
+
+        # Fetch the most recent order
+        order_response = supabase.rpc('get_my_orders', {'p_user_id': user_id}).limit(1).execute()
+        if order_response.data:
+            latest_order = order_response.data[0]
+            if latest_order.get('created_at'):
+                latest_order['created_at'] = datetime.fromisoformat(latest_order['created_at'])
+
+    except Exception as e:
+        messages.error(request, "Could not load dashboard summaries.")
+
     context = {
         'display_name': display_name,
         'greeting': get_greeting(),
+        'latest_reservation': latest_reservation,
+        'latest_order': latest_order,
         'active_page': 'dashboard',
         'page_title': 'Dashboard',
     }

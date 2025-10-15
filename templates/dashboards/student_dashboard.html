@@ -2,55 +2,79 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/student_dashboard.css' %}?v=1.0">
+    <link rel="stylesheet" href="{% static 'css/student_dashboard.css' %}?v=1.1">
 {% endblock %}
 
 {% block content %}
-<h1 class="welcome-title">{{ greeting }}, {{ display_name }}! 👋</h1>
+<!-- 1. Welcome Card -->
+<div class="welcome-card">
+    <h1>{{ greeting }}, {{ display_name }}! 👋</h1>
+    <p>Manage your reservations and orders with ease.</p>
+</div>
 
-<div class="dashboard-grid">
-    <div class="dashboard-card">
+<!-- 2. Action Cards -->
+<div class="action-cards-grid">
+    <a href="{% url 'browse_products' %}" class="action-card">
         <div class="card-icon">🛍️</div>
         <h2>Browse Products</h2>
-        <p>Explore our wide selection of school supplies and items</p>
-        <a href="{% url 'browse_products' %}" class="card-btn">View Products</a>
-    </div>
-
-    <div class="dashboard-card">
-        <div class="card-icon">📋</div>
+        <p>Explore our wide selection of school supplies and items.</p>
+    </a>
+    <a href="{% url 'my_reservations' %}" class="action-card">
+        <div class="card-icon">📅</div>
         <h2>My Reservations</h2>
-        <p>Check your current and past reservations</p>
-        <a href="{% url 'my_reservations' %}" class="card-btn">View Reservations</a>
-    </div>
+        <p>Check the status of your current and past reservations.</p>
+    </a>
 </div>
 
-<!-- Activity Section -->
-<div class="activity-section">
-    <div class="activity-left">
-        <h3>Recent Reservations <span class="count" id="reservation-count">...</span></h3>
-        <div id="reservations-list" class="activity-list">
-            <div class="loading-item">🐱 Loading...</div>
+<!-- 3. Summary Sections -->
+<div class="summary-section">
+    <h2 class="section-title">Recent Activity</h2>
+    <div class="summary-grid">
+        <!-- Reservation Summary -->
+        <div class="summary-card">
+            <h3>Latest Reservation</h3>
+            {% if latest_reservation %}
+                <div class="item-card">
+                    <img src="{{ latest_reservation.product_image_url|default:'https://placehold.co/200x200/e0e7ff/3730a3?text=Item' }}" alt="{{ latest_reservation.product_name }}" class="item-image">
+                    <div class="item-details">
+                        <h4>{{ latest_reservation.product_name }}</h4>
+                        <div class="details-grid">
+                            <span>Quantity:</span><strong>{{ latest_reservation.quantity }}</strong>
+                            <span>Total Price:</span><strong>₱{% widthratio latest_reservation.product_price 1 latest_reservation.quantity as total %}{{ total|floatformat:2 }}</strong>
+                            <span>Payment:</span><strong>Cash</strong>
+                            <span>Reserved On:</span><strong>{{ latest_reservation.created_at|date:"M d, Y" }}</strong>
+                            <span>Expires On:</span><strong>{{ latest_reservation.expires_at|date:"M d, Y" }}</strong>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <p class="no-items-message">You have no recent reservations.</p>
+            {% endif %}
+            <a href="{% url 'my_reservations' %}" class="view-all-btn">View All Reservations</a>
         </div>
-        <a href="{% url 'my_reservations' %}" class="view-all-btn">View All Reservations</a>
-    </div>
 
-    <div class="activity-right">
-        <h3>Recent Orders <span class="count" id="order-count">...</span></h3>
-        <div id="orders-list" class="activity-list">
-            <div class="loading-item">🐱 Loading...</div>
+        <!-- Order Summary -->
+        <div class="summary-card">
+            <h3>Latest Order</h3>
+            {% if latest_order %}
+                <div class="item-card">
+                    <img src="{{ latest_order.product_image_url|default:'https://placehold.co/200x200/e0e7ff/3730a3?text=Item' }}" alt="{{ latest_order.product_name }}" class="item-image">
+                    <div class="item-details">
+                        <h4>{{ latest_order.product_name }}</h4>
+                        <div class="details-grid">
+                            <span>Date Ordered:</span><strong>{{ latest_order.created_at|date:"M d, Y" }}</strong>
+                            <span>Quantity:</span><strong>{{ latest_order.quantity }}</strong>
+                            <span>Total Price:</span><strong>₱{{ latest_order.total_price|floatformat:2 }}</strong>
+                            <span>Payment:</span><strong>{{ latest_order.payment_method|title }}</strong>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <p class="no-items-message">You have no recent orders.</p>
+            {% endif %}
+            <a href="{% url 'my_orders' %}" class="view-all-btn">View All Orders</a>
         </div>
-        <a href="{% url 'my_orders' %}" class="view-all-btn">View All Orders</a>
     </div>
 </div>
 {% endblock %}
 
-{% block extra_js %}
-<script>
-    // Placeholder script to show empty state.
-    // In a real app, you would fetch data via an API.
-    document.getElementById("reservations-list").innerHTML = `<div class="empty-state"><span>📋 No recent reservations</span></div>`;
-    document.getElementById("orders-list").innerHTML = `<div class="empty-state"><span>📦 No recent orders</span></div>`;
-    document.getElementById("reservation-count").textContent = `0 total`;
-    document.getElementById("order-count").textContent = `0 total`;
-</script>
-{% endblock %}
