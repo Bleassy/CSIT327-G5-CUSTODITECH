@@ -14,8 +14,8 @@ def register(request):
     if request.method == 'POST':
         user_type = request.POST.get('user_type', 'student')
         email = request.POST.get('email')
-        password1 = request.POST.get('password1')
-        password2 = request.POST.get('password2')
+        password1 = request.POST.get('password1', '').strip()
+        password2 = request.POST.get('password2', '').strip()
         full_name = request.POST.get('full_name')
         student_id = request.POST.get('student_id')
         staff_id = request.POST.get('staff_id')
