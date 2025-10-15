@@ -27,7 +27,7 @@ Welcome to the official repository for **CustoDiTech** (also known as the "WildS
 
 ### 🎯 Purpose
 
-This system allows students to browse and order available items online, and it provides an administrative dashboard for custodial staff to manage inventory, approve requests, and track supplies efficiently. The goal is to provide:
+This system allows students to reserve unavailable items and order available items online, and it provides an administrative dashboard for custodial staff to manage inventory, approve requests, and track supplies efficiently. The goal is to provide:
 
   - **Faster** service for students and staff
   - **Improved** resource management and inventory tracking
@@ -44,7 +44,7 @@ This system allows students to browse and order available items online, and it p
 
   - 🛒 **Student Portal**
       - Browse available school supplies from an item catalog.
-      - Place orders/requests for items online.
+      - Place orders/reserve for items online.
       - View order history and status.
 
   - 📊 **Administrative Dashboard**
@@ -104,6 +104,101 @@ Before you begin, ensure you have the following installed on your system:
 -----
 
 ## ⚙️ Setup & Installation
+
+### 📌 **Option 1: Fork the repo to make a contribute**
+
+If you just want to contribute:
+### 1. Fork the repo on GitHub
+```bash
+Open: https://github.com/theo2815/CSIT327-G5-CUSTODITECH
+Click Fork (top-right). This creates your-username/CSIT327-G5-CUSTODITECH
+```
+----
+
+### 2. Clone your fork locally
+```bash
+# replace <your-username> with your GitHub username
+git clone https://github.com/<your-username>/CSIT327-G5-CUSTODITECH.git
+cd CSIT327-G5-CUSTODITECH
+
+```
+----
+
+### 3. Add the original repo as upstream (so you can sync later)
+```bash
+git remote add upstream https://github.com/theo2815/CSIT327-G5-CUSTODITECH.git
+# verify remotes
+git remote -v
+```
+----
+
+### 4. Create a new branch for your changes (never work on main)
+```bash
+# use a descriptive branch name: feature/<what> or fix/<issue>
+git checkout -b feature/add-new-page
+```
+----
+
+### 5. Make changes & stage them
+```bash
+# edit files with your editor, then:
+git add .
+git commit -m "feat: add new page for X (short clear message)"
+
+```
+----
+
+### 6. Keep your branch up-to-date with upstream (recommended before pushing)
+```bash
+# fetch upstream main and rebase (or merge) into your branch
+git fetch upstream
+git checkout main
+git pull upstream main
+git checkout feature/add-new-page
+git rebase main
+# if conflicts appear: resolve, then
+git add <resolved-files>
+git rebase --continue
+
+```
+----
+
+### 7. Push your branch to your fork
+```bash
+git push origin feature/add-new-page
+
+```
+----
+
+### 8. Open a Pull Request (PR)
+```bash
+- Go to your fork on GitHub → switch to feature/add-new-page branch → click Compare & pull request.
+- Fill title and clear description (what you changed, why, how to test).
+- Select base repo: theo2815/CSIT327-G5-CUSTODITECH main (or the repo's target branch).
+```
+----
+
+### 9. Respond to reviews
+   #### If reviewers request changes, update your branch locally, commit, and push again:
+```bash
+# make changes
+git add .
+git commit -m "fix: address review comment about X"
+git push origin feature/add-new-page
+```
+  #### The PR will update automatically.
+----
+
+### 10. After PR is merged
+```bash
+# cleanup local branch
+git checkout main
+git fetch upstream
+git pull upstream main
+git branch -d feature/add-new-page
+git push origin --delete feature/add-new-page   # optional: delete remote branch
+```
+-----
 
 ### 📌 **Option 2: Just Using the Project (Direct Clone)**
 
