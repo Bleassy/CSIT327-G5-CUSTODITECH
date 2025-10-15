@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/manage_products.css' %}?v=1.0">
+<link rel="stylesheet" href="{% static 'css/manage_products.css' %}?v=1.1">
 {% endblock %}
 
 {% block content %}
@@ -11,12 +11,21 @@
     <button class="btn btn-add" id="add-product-btn">📦 Add New Product</button>
 </div>
 
+<!-- ✅ Search Bar -->
+<div class="page-controls">
+    <form method="GET" action="{% url 'manage_products' %}" class="search-form">
+        <input type="text" name="search" class="search-input" placeholder="Search by product name or category..." value="{{ search_query }}">
+        <button type="submit" class="btn search-btn">Search</button>
+    </form>
+</div>
+
 <div class="table-container">
     <table class="data-table product-table">
         <thead>
             <tr>
                 <th>Image</th>
                 <th>Product Name</th>
+                <th>Category</th> <!-- ✅ ADDED -->
                 <th>Price</th>
                 <th>Stock</th>
                 <th>Status</th>
@@ -35,6 +44,7 @@
                         <span class="product-table-desc">{{ product.description|truncatewords:10 }}</span>
                     </div>
                 </td>
+                <td>{{ product.category|default:'N/A' }}</td> <!-- ✅ ADDED -->
                 <td>₱{{ product.price|floatformat:2 }}</td>
                 <td>{{ product.stock_quantity }} pcs</td>
                 <td>
@@ -52,6 +62,7 @@
                                 data-description="{{ product.description }}"
                                 data-price="{{ product.price|floatformat:2 }}"
                                 data-stock="{{ product.stock_quantity }}"
+                                data-category="{{ product.category }}"
                                 data-is-available="{{ product.is_available|yesno:'true,false' }}">
                             Edit
                         </button>
@@ -63,8 +74,12 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="6" class="no-data-cell">
-                    You haven't added any products yet. Click "Add New Product" to get started!
+                <td colspan="7" class="no-data-cell">
+                    {% if search_query %}
+                        No products found for "{{ search_query }}".
+                    {% else %}
+                        You haven't added any products yet. Click "Add New Product" to get started!
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
@@ -72,7 +87,7 @@
     </table>
 </div>
 
-<!-- Add Product Modal -->
+<!-- ✅ Add Product Modal -->
 <div id="add-product-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -82,27 +97,31 @@
         <form action="{% url 'add_product' %}" method="post" enctype="multipart/form-data" class="modal-form">
             {% csrf_token %}
             <div class="form-group">
-                <label for="product-name">Product Name</label>
+                <label>Product Name</label>
                 <input type="text" name="product-name" required>
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <input type="text" name="product-category" placeholder="e.g., School Supplies, Uniform" required>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label for="product-price">Price (₱)</label>
+                    <label>Price (₱)</label>
                     <input type="number" name="product-price" step="0.01" min="0" required>
                 </div>
                 <div class="form-group">
-                    <label for="stock-quantity">Stock Quantity</label>
+                    <label>Stock Quantity</label>
                     <input type="number" name="stock-quantity" min="0" required>
                 </div>
             </div>
             <div class="form-group">
-                <label for="product-description">Description</label>
+                <label>Description</label>
                 <textarea name="product-description" rows="3" required></textarea>
             </div>
             <div class="form-group">
-                <label for="product-image">Product Image</label>
+                <label>Product Image</label>
                 <input type="file" name="product-image" accept="image/*" class="image-upload-input">
-                <img src="https://placehold.co/400x200/f1f5f9/64748b?text=Image+Preview" alt="Image Preview" class="image-preview">
+                <img src="https://placehold.co/400x200/f1f5f9/64748b?text=Image+Preview" alt="Preview" class="image-preview">
             </div>
             <div class="form-group checkbox-group">
                 <input type="checkbox" name="is_available" id="add-is-available" checked>
@@ -116,7 +135,7 @@
     </div>
 </div>
 
-<!-- Edit Product Modal -->
+<!-- ✅ Edit Product Modal -->
 <div id="edit-product-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -126,24 +145,28 @@
         <form id="edit-product-form" method="post" class="modal-form">
             {% csrf_token %}
             <div class="form-group">
-                <label for="edit-product-name">Product Name</label>
+                <label>Product Name</label>
                 <input type="text" id="edit-product-name" name="product-name" required>
             </div>
-             <div class="form-row">
-                 <div class="form-group">
-                    <label for="edit-product-price">Price (₱)</label>
+            <div class="form-group">
+                <label>Category</label>
+                <input type="text" id="edit-product-category" name="product-category" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Price (₱)</label>
                     <input type="number" id="edit-product-price" name="product-price" step="0.01" min="0" required>
                 </div>
                 <div class="form-group">
-                    <label for="edit-stock-quantity">Stock Quantity</label>
+                    <label>Stock Quantity</label>
                     <input type="number" id="edit-stock-quantity" name="stock-quantity" min="0" required>
                 </div>
             </div>
             <div class="form-group">
-                <label for="edit-product-description">Description</label>
+                <label>Description</label>
                 <textarea id="edit-product-description" name="product-description" rows="3" required></textarea>
             </div>
-             <div class="form-group checkbox-group">
+            <div class="form-group checkbox-group">
                 <input type="checkbox" id="edit-is-available" name="is_available">
                 <label for="edit-is-available">Available for Students</label>
             </div>
@@ -155,7 +178,7 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
+<!-- ✅ Delete Confirmation Modal -->
 <div id="delete-confirm-modal" class="modal">
     <div class="modal-content modal-sm">
         <div class="modal-header">
@@ -186,12 +209,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('add-product-btn').addEventListener('click', () => openModal(addModal));
 
+    // ✅ Edit Button
     document.querySelectorAll('.btn-edit').forEach(btn => {
         btn.addEventListener('click', () => {
             const data = btn.dataset;
             const form = document.getElementById('edit-product-form');
             form.action = `/dashboard/admin/edit-product/${data.id}/`;
             document.getElementById('edit-product-name').value = data.name;
+            document.getElementById('edit-product-category').value = data.category || '';
             document.getElementById('edit-product-description').value = data.description;
             document.getElementById('edit-product-price').value = data.price;
             document.getElementById('edit-stock-quantity').value = data.stock;
@@ -200,20 +225,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // ✅ Delete Button
     document.querySelectorAll('.btn-delete').forEach(btn => {
         btn.addEventListener('click', () => {
             const productId = btn.dataset.id;
             const productName = btn.dataset.name;
-            
-            // ✅ THE FIX IS HERE
-            // We ensure that productId is valid before setting the form action.
             if (productId) {
                 document.getElementById('delete-product-name').textContent = productName;
                 const form = document.getElementById('delete-product-form');
                 form.action = `/dashboard/admin/delete-product/${productId}/`;
                 openModal(deleteModal);
             } else {
-                console.error("Delete button is missing a product ID.");
+                console.error("Delete button missing product ID.");
             }
         });
     });
@@ -228,16 +251,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // ✅ Image Preview
     document.querySelectorAll('.image-upload-input').forEach(input => {
         const preview = input.nextElementSibling;
         input.addEventListener('change', (event) => {
             const file = event.target.files[0];
-            if (file) {
-                preview.src = URL.createObjectURL(file);
-            }
+            if (file) preview.src = URL.createObjectURL(file);
         });
     });
 });
 </script>
 {% endblock %}
-

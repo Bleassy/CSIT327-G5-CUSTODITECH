@@ -8,7 +8,8 @@ urlpatterns = [
     path('student/my-reservations/', views.my_reservations_view, name='my_reservations'),
     path('student/my-orders/', views.my_orders_view, name='my_orders'),
     path('student/create-order/', views.create_order_view, name='create_order'),
-    path('student/create-reservation/', views.create_reservation_view, name='create_reservation'),   
+    path('student/create-reservation/', views.create_reservation_view, name='create_reservation'),
+    path('student/checkout-reservation/', views.checkout_reservation_view, name='checkout_reservation'),
    
     # --- Admin URLs ---
     path('admin/', views.admin_dashboard, name='admin_dashboard'),
@@ -19,6 +20,7 @@ urlpatterns = [
     path('admin/delete-product/<int:product_id>/', views.delete_product, name='delete_product'),
     path('admin/order-management/', views.order_management_view, name='order_management'),
     path('admin/update-order-status/<int:order_id>/', views.update_order_status, name='update_order_status'),
+    path('admin/delete-order/<int:order_id>/', views.delete_order_view, name='delete_order'),
     path('admin/reports/', views.reports_view, name='reports'),
 ]
 

@@ -3,39 +3,120 @@
 .page-header h1 {
     font-size: 28px;
     font-weight: 700;
+}
+
+.section-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 2.5rem 0 1.5rem 0;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.page-controls {
     margin-bottom: 2rem;
 }
 
-.table-container {
+.search-form {
+    display: flex;
+    max-width: 500px;
+}
+.search-input {
+    flex-grow: 1;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px 0 0 8px;
+    outline: none;
+}
+.search-input:focus {
+    border-color: #1e40af;
+    box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2);
+}
+.search-btn {
+    border-radius: 0 8px 8px 0;
+    background-color: #1e40af;
+    color: white;
+    border: 1px solid #1e40af;
+}
+
+.orders-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.order-card {
     background: white;
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    overflow-x: auto;
+    border: 1px solid #f1f5f9;
+    display: flex;
+    overflow: hidden;
 }
 
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-}
-
-.data-table th, .data-table td {
-    padding: 16px 20px;
-    border-bottom: 1px solid #f1f5f9;
-    vertical-align: middle;
-}
-
-.data-table th {
+.product-image {
+    width: 150px;
+    height: auto;
+    object-fit: cover;
+    flex-shrink: 0;
+    border-right: 1px solid #f1f5f9;
     background-color: #f8fafc;
-    font-size: 12px;
-    font-weight: 600;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
-.data-table tr:last-child td { border-bottom: none; }
-.data-table tr:hover { background-color: #f8fafc; }
-.no-data-cell { text-align: center; padding: 40px; color: #64748b; }
+
+.card-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.product-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.details-grid {
+    display: grid;
+    /* ✅ UPDATED: Changed from a fixed width to 'auto' for better alignment */
+    grid-template-columns: auto 1fr;
+    gap: 0.5rem 1rem;
+    font-size: 14px;
+    color: #64748b;
+    flex-grow: 1;
+}
+.details-grid strong {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.card-footer {
+    border-top: 1px solid #f1f5f9;
+    padding: 1rem 1.5rem;
+    background-color: #f8fafc;
+}
+
+.status-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.status-form label {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.no-data-cell { text-align: center; padding: 40px; color: #64748b; background-color: #f8fafc; border-radius: 8px; }
+.no-data-cell p { margin: 0; }
 
 .badge {
     padding: 4px 12px;
@@ -43,8 +124,9 @@
     font-size: 12px;
     font-weight: 600;
     display: inline-block;
+    white-space: nowrap;
 }
-.badge-reservation { background-color: #fef3c7; color: #92400e; }
+.badge-reservation, .badge-backorder { background-color: #fef3c7; color: #92400e; }
 .badge-order { background-color: #dbeafe; color: #1e40af; }
 
 .status-select {
@@ -59,3 +141,34 @@
 .status-select.status-completed { border-color: #93c5fd; }
 .status-select.status-rejected { border-color: #fca5a5; }
 .status-select.status-cancelled { border-color: #d1d5db; }
+
+.history-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status-badge-lg {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-block;
+    white-space: nowrap;
+}
+.status-badge-lg.status-completed { background-color: #dbeafe; color: #1e40af; }
+.status-badge-lg.status-rejected { background-color: #fee2e2; color: #991b1b; }
+.status-badge-lg.status-cancelled { background-color: #e5e7eb; color: #4b5563; }
+
+.btn-delete {
+    background-color: #ef4444;
+    color: white;
+    padding: 6px 12px;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+}
+.btn-delete:hover {
+    background-color: #dc2626;
+}
+

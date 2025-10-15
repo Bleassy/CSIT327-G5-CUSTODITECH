@@ -2,12 +2,12 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/browse_products.css' %}?v=2.5">
+    <link rel="stylesheet" href="{% static 'css/browse_products.css' %}?v=2.4">
 {% endblock %}
 
 {% block content %}
 <h1 class="welcome-title">Available Products 🛒</h1>
-                      
+             
 {% if messages %}
     <ul class="messages">
         {% for message in messages %}
@@ -24,7 +24,7 @@
             {% if product.stock_quantity == 0 %}
                 <div class="stock-overlay out-of-stock">Out of Stock</div>
             {% elif product.stock_quantity < 10 %}
-                <div class="stock-overlay low-stock">Low Stock</div>
+                 <div class="stock-overlay low-stock">Low Stock</div>
             {% endif %}
         </div>
         <div class="product-info">
@@ -37,12 +37,13 @@
         </div>
         <div class="product-actions">
             {% if product.stock_quantity > 0 %}
+                <!-- ✅ UPDATED: Added data-price to this button -->
                 <button class="btn btn-secondary add-to-cart-btn" 
                         data-id="{{ product.id }}"
                         data-name="{{ product.name }}"
                         data-stock="{{ product.stock_quantity }}"
                         data-price="{{ product.price }}"
-                        data-description="{{ product.description }}" data-image-url="{{ product.image_url }}">
+                        data-image-url="{{ product.image_url }}">
                     Add to Cart
                 </button>
                 <button class="btn btn-primary buy-now-btn" 
@@ -50,15 +51,16 @@
                         data-name="{{ product.name }}"
                         data-stock="{{ product.stock_quantity }}"
                         data-price="{{ product.price }}"
-                        data-description="{{ product.description }}" data-image-url="{{ product.image_url }}">
+                        data-image-url="{{ product.image_url }}">
                     Buy Now
                 </button>
             {% else %}
+                <!-- ✅ UPDATED: Added data-price to this button -->
                 <button class="btn btn-primary reserve-item-btn"
                         data-id="{{ product.id }}"
                         data-name="{{ product.name }}"
                         data-price="{{ product.price }}"
-                        data-description="{{ product.description }}" data-image-url="{{ product.image_url }}">
+                        data-image-url="{{ product.image_url }}">
                     Reserve Item
                 </button>
             {% endif %}
@@ -67,6 +69,7 @@
     {% endfor %}
 </div>
 
+<!-- MODAL 1: Buy Now -->
 <div id="buy-now-modal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header"><h2>Confirm Purchase</h2><span class="close-btn">&times;</span></div>
@@ -77,7 +80,7 @@
                 <input type="hidden" name="deal_method" value="meet-up">
                 <img src="" alt="Product Image" class="modal-product-image">
                 <p class="item-name-modal">You are buying: <strong id="buy-product-name"></strong></p>
-                <p class="modal-product-description"></p> <div class="form-group"><label for="buy-quantity">Quantity</label><input type="number" id="buy-quantity" name="quantity" value="1" min="1" required></div>
+                <div class="form-group"><label for="buy-quantity">Quantity</label><input type="number" id="buy-quantity" name="quantity" value="1" min="1" required></div>
                 <div class="price-summary"><span>Total Price:</span><strong id="total-price">₱0.00</strong></div>
                 <div class="form-group"><label>Payment Method</label><div class="payment-options"><label><input type="radio" name="payment_method" value="cash" checked> Cash</label></div></div>
                 <div class="info-note"><p>Please go to the Custodian Department within 3 days after confirming your product. If you fail to claim it within 3 days, your product will be forfeited.</p></div>
@@ -87,6 +90,7 @@
     </div>
 </div>
 
+<!-- MODAL 2: Add to Cart (In-Stock Reservation) -->
 <div id="reservation-modal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header"><h2>Confirm Reservation</h2><span class="close-btn">&times;</span></div>
@@ -97,8 +101,11 @@
                 <input type="hidden" name="deal_method" value="meet-up">
                 <img src="" alt="Product Image" class="modal-product-image">
                 <p class="item-name-modal">You are reserving: <strong id="reserve-product-name"></strong></p>
-                <p class="modal-product-description"></p> <div class="form-group"><label for="reserve-quantity">Quantity</label><input type="number" id="reserve-quantity" name="quantity" value="1" min="1" required></div>
+                <div class="form-group"><label for="reserve-quantity">Quantity</label><input type="number" id="reserve-quantity" name="quantity" value="1" min="1" required></div>
+                
+                <!-- ✅ ADDED: Total Price Summary -->
                 <div class="price-summary"><span>Total Price:</span><strong id="reserve-total-price">₱0.00</strong></div>
+
                 <div class="form-group"><label>Payment Method</label><div class="payment-options"><label><input type="radio" name="payment_method" value="cash" checked> Cash on Pickup</label></div></div>
                 <div class="date-info"><p><strong>Date Reserved:</strong> <span id="reserve-date"></span></p><p><strong>Reservation Expires:</strong> <span id="expiry-date"></span></p></div>
             </div>
@@ -107,6 +114,7 @@
     </div>
 </div>
 
+<!-- MODAL 3: Reserve Item (Out-of-Stock) -->
 <div id="backorder-modal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header"><h2>Reserve Out-of-Stock Item</h2><span class="close-btn">&times;</span></div>
@@ -117,10 +125,13 @@
                 <input type="hidden" name="deal_method" value="meet-up">
                 <img src="" alt="Product Image" class="modal-product-image">
                 <p class="item-name-modal">Reserving: <strong id="backorder-product-name"></strong></p>
-                <p class="modal-product-description"></p> <p class="instructions">This item is currently out of stock. We will notify you when it becomes available.</p>
+                <p class="instructions">This item is currently out of stock. We will notify you when it becomes available.</p>
                 <div class="form-group"><label for="backorder-quantity">Quantity</label><input type="number" id="backorder-quantity" name="quantity" value="1" min="1" required></div>
+                
+                <!-- ✅ ADDED: Total Price Summary -->
                 <div class="price-summary"><span>Est. Total Price:</span><strong id="backorder-total-price">₱0.00</strong></div>
-                <div class="form-group checkbox-group"><input type="checkbox" name="is_urgent" id="is-urgent"><label for="is-urgent">I urgently need this item.</label></div>
+
+                <div class="form-group checkbox-group"><input type="checkbox" name="is_urgent" id="is-urgent"><label for="is-urgent">I need this badly.</label></div>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-secondary cancel-btn">Cancel</button><button type="submit" class="btn btn-primary">Confirm Reservation</button></div>
         </form>
@@ -144,7 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
             buyModal.querySelector('#buy-product-id').value = data.id;
             buyModal.querySelector('.modal-product-image').src = data.imageUrl;
             buyModal.querySelector('#buy-product-name').textContent = data.name;
-            buyModal.querySelector('.modal-product-description').textContent = data.description; // ✅ ADDED
             const quantityInput = buyModal.querySelector('#buy-quantity');
             quantityInput.max = data.stock;
             const price = parseFloat(data.price);
@@ -166,10 +176,10 @@ document.addEventListener('DOMContentLoaded', () => {
             reserveModal.querySelector('#reserve-product-id').value = data.id;
             reserveModal.querySelector('.modal-product-image').src = data.imageUrl;
             reserveModal.querySelector('#reserve-product-name').textContent = data.name;
-            reserveModal.querySelector('.modal-product-description').textContent = data.description; // ✅ ADDED
             const quantityInput = reserveModal.querySelector('#reserve-quantity');
             quantityInput.max = data.stock;
             
+            // ✅ UPDATED: Add price calculation logic
             const price = parseFloat(data.price);
             const totalPriceEl = reserveModal.querySelector('#reserve-total-price');
             const updateTotal = () => {
@@ -197,8 +207,8 @@ document.addEventListener('DOMContentLoaded', () => {
             backorderModal.querySelector('#backorder-product-id').value = data.id;
             backorderModal.querySelector('.modal-product-image').src = data.imageUrl;
             backorderModal.querySelector('#backorder-product-name').textContent = data.name;
-            backorderModal.querySelector('.modal-product-description').textContent = data.description; // ✅ ADDED
 
+            // ✅ UPDATED: Add price calculation logic
             const quantityInput = backorderModal.querySelector('#backorder-quantity');
             const price = parseFloat(data.price);
             const totalPriceEl = backorderModal.querySelector('#backorder-total-price');
@@ -214,3 +224,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 {% endblock %}
+

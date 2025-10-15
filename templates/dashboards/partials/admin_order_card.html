@@ -1,0 +1,41 @@
+<div class="order-card">
+    <img src="{{ order.product_image_url|default:'https://placehold.co/200x200/e0e7ff/3730a3?text=Item' }}" alt="{{ order.product_name }}" class="product-image">
+    <div class="card-body">
+        <div class="card-header">
+            <h3 class="product-name">{{ order.product_name }}</h3>
+            <span class="badge badge-{{ order.order_type }}">{{ order.order_type|title }}</span>
+        </div>
+        <div class="details-grid">
+            <span>Order ID:</span><strong>#{{ order.id }}</strong>
+            <span>Student:</span><strong>{{ order.student_name|default:'N/A' }}</strong>
+            <span>Student ID:</span><strong>{{ order.student_id|default:'N/A' }}</strong>
+            <span>Date:</span><strong>{{ order.created_at|date:"M d, Y, P" }}</strong>
+            <span>Quantity:</span><strong>{{ order.quantity }} pc(s)</strong> <!-- ✅ ADDED -->
+            <span>Payment:</span><strong>{{ order.payment_method|default:'Cash'|title }}</strong>
+        </div>
+    </div>
+    <div class="card-footer">
+        {% if order.status == 'pending' or order.status == 'approved' %}
+            <form action="{% url 'update_order_status' order.id %}" method="post" class="status-form">
+                {% csrf_token %}
+                <label for="status-{{order.id}}">Status:</label>
+                <select name="status" id="status-{{order.id}}" class="status-select status-{{ order.status }}" onchange="this.form.submit()">
+                    <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="approved" {% if order.status == 'approved' %}selected{% endif %}>Approved</option>
+                    <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>Completed</option>
+                    <option value="rejected" {% if order.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                    <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
+            </form>
+        {% else %}
+            <div class="history-actions">
+                <span class="status-badge-lg status-{{ order.status }}">{{ order.status|title }}</span>
+                <form action="{% url 'delete_order' order.id %}" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this order record?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-delete">Delete</button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+</div>
+

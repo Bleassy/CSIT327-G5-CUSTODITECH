@@ -1,5 +1,36 @@
 /* static/css/manage_products.css */
 
+/* ✅ NEW: Styles for the search bar */
+.page-controls {
+    margin-bottom: 2rem;
+}
+
+.search-form {
+    display: flex;
+    max-width: 500px;
+}
+
+.search-input {
+    flex-grow: 1;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px 0 0 8px;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: #1e40af;
+    box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2);
+}
+
+.search-btn {
+    border-radius: 0 8px 8px 0;
+    background-color: #1e40af;
+    color: white;
+    border: 1px solid #1e40af;
+}
+
 /* Page Header */
 .page-header {
     display: flex;

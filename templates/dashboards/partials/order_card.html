@@ -1,0 +1,17 @@
+<div class="order-card">
+    <img src="{{ order.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ order.product_name }}" class="product-image">
+    <div class="card-body">
+        <div class="card-header">
+            <h3 class="product-name">{{ order.product_name }}</h3>
+            <span class="status-badge status-{{ order.status }}">{{ order.status|title }}</span>
+        </div>
+        <div class="details-grid">
+            <span>Date Ordered:</span><strong>{{ order.created_at|date:"M d, Y" }}</strong>
+            <span>Total Price:</span><strong>₱{{ order.total_price|floatformat:2 }}</strong>
+            <span>Payment:</span><strong>{{ order.payment_method|default:'Cash'|title }}</strong>
+        </div>
+        <div class="info-note">
+            <p>Claim your product at the Custodian Department within 3 days. Unclaimed items will be forfeited.</p>
+        </div>
+    </div>
+</div>

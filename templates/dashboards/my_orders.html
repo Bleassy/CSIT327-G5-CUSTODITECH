@@ -2,37 +2,117 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/my_orders.css' %}?v=1.0">
+    <link rel="stylesheet" href="{% static 'css/my_orders.css' %}?v=1.2">
 {% endblock %}
 
 {% block content %}
 <h1 class="welcome-title">My Orders 📦</h1>
 
-<div class="table-container">
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Date Ordered</th>
-                <th>Total Price</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in orders %}
-            <tr>
-                <!-- ✅ FIXED: Access the flat product_name from the RPC result -->
-                <td>{{ item.product_name|default:'N/A' }}</td>
-                <td>{{ item.created_at|date:"M d, Y" }}</td>
-                <td>₱{{ item.total_price|floatformat:2 }}</td>
-                <td><span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span></td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4" class="no-data-cell">You have not placed any orders.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<!-- Section for Approved Orders -->
+<h2 class="section-title">Approved (Ready for Pickup)</h2>
+<div class="orders-grid">
+    {% for item in approved_orders %}
+    <div class="order-card">
+        <img src="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ item.product_name }}" class="product-image">
+        <div class="card-body">
+            <div class="card-header">
+                <h3 class="product-name">{{ item.product_name }}</h3>
+                <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
+            </div>
+            <div class="details-grid">
+                <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
+                <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong> <!-- ✅ ADDED -->
+                <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
+                <span>Payment:</span><strong>{{ item.payment_method|default:'Cash'|title }}</strong>
+            </div>
+            <div class="info-note">
+                <p>Claim your product at the Custodian Department within 3 days after it has been approved. Unclaimed items will be forfeited.</p>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+        <p class="no-items-message">You have no orders ready for pickup.</p>
+    {% endfor %}
+</div>
+
+<!-- Section for Pending Orders -->
+<h2 class="section-title">Pending Orders</h2>
+<div class="orders-grid">
+    {% for item in pending_orders %}
+    <div class="order-card">
+        <img src="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ item.product_name }}" class="product-image">
+        <div class="card-body">
+            <div class="card-header">
+                <h3 class="product-name">{{ item.product_name }}</h3>
+                <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
+            </div>
+            <div class="details-grid">
+                <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
+                <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong> <!-- ✅ ADDED -->
+                <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
+                <span>Payment:</span><strong>{{ item.payment_method|default:'Cash'|title }}</strong>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+        <p class="no-items-message">You have no pending orders.</p>
+    {% endfor %}
+</div>
+
+<!-- Section for Order History -->
+<h2 class="section-title">Completed Orders</h2>
+<div class="orders-grid">
+    {% for item in completed_orders %}
+    <div class="order-card history">
+        <img src="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ item.product_name }}" class="product-image">
+        <div class="card-body">
+            <div class="card-header">
+                <h3 class="product-name">{{ item.product_name }}</h3>
+                <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
+            </div>
+            <div class="details-grid">
+                <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
+                <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong> <!-- ✅ ADDED -->
+                <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
+                <span>Payment:</span><strong>{{ item.payment_method|default:'Cash'|title }}</strong>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+        <p class="no-items-message">You have no completed orders.</p>
+    {% endfor %}
+</div>
+
+<!-- ✅ NEW: Section for Cancelled or Rejected Orders -->
+<h2 class="section-title">Cancelled or Rejected Orders</h2>
+<div class="orders-grid">
+    {% for item in other_orders %}
+    <div class="order-card history">
+        <img src="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ item.product_name }}" class="product-image">
+        <div class="card-body">
+            <div class="card-header">
+                <h3 class="product-name">{{ item.product_name }}</h3>
+                <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
+            </div>
+            <div class="details-grid">
+                <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
+                <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong> <!-- ✅ ADDED -->
+                <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
+                <span>Payment:</span><strong>{{ item.payment_method|default:'Cash'|title }}</strong>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+        <p class="no-items-message">You have no cancelled or rejected orders.</p>
+    {% endfor %}
 </div>
 {% endblock %}
+

@@ -2,37 +2,128 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/my_reservations.css' %}?v=1.0">
+    <link rel="stylesheet" href="{% static 'css/my_reservations.css' %}?v=1.1">
 {% endblock %}
 
 {% block content %}
 <h1 class="welcome-title">My Reservations 📅</h1>
 
-<div class="table-container">
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Date Reserved</th>
-                <th>Status</th>
-                <th>Deal Method</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in reservations %}
-            <tr>
-                <!-- ✅ FIXED: Access the flat product_name from the RPC result -->
-                <td>{{ item.product_name|default:'N/A' }}</td>
-                <td>{{ item.created_at|date:"M d, Y" }}</td>
-                <td><span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span></td>
-                <td>{{ item.deal_method|default:'N/A'|title }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4" class="no-data-cell">You have not made any reservations.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<!-- Section for Available Reservations -->
+<h2 class="section-title">Available for Pickup</h2>
+<div class="reservations-grid">
+    {% for item in reservations %}
+    <div class="reservation-card">
+        <img src="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ item.product_name }}" class="product-image">
+        <div class="card-body">
+            <h3 class="product-name">{{ item.product_name }}</h3>
+            <div class="details-grid">
+                <span>Quantity:</span><strong>{{ item.quantity }}</strong>
+                <span>Total Price:</span><strong>₱{% widthratio item.product_price 1 item.quantity as total %}{{ total|floatformat:2 }}</strong>
+                <span>Payment:</span><strong>Cash</strong>
+                <span>Reserved On:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
+                <span>Expires On:</span><strong>{{ item.expires_at|date:"M d, Y" }}</strong>
+            </div>
+            <button class="btn btn-primary checkout-btn" 
+                    data-id="{{ item.id }}" 
+                    data-name="{{ item.product_name }}" 
+                    data-quantity="{{ item.quantity }}"
+                    data-price="{% widthratio item.product_price 1 item.quantity %}">
+                Check Out
+            </button>
+        </div>
+    </div>
+    {% empty %}
+        <p class="no-items-message">You have no items reserved for pickup.</p>
+    {% endfor %}
+</div>
+
+<!-- Section for Out-of-Stock Backorders -->
+<h2 class="section-title">Pending Backorders</h2>
+<div class="reservations-grid">
+    {% for item in backorders %}
+    <div class="reservation-card backorder">
+        <img src="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ item.product_name }}" class="product-image">
+        <div class="card-body">
+            <h3 class="product-name">{{ item.product_name }}</h3>
+            <div class="details-grid">
+                <span>Quantity:</span><strong>{{ item.quantity }}</strong>
+                <span>Est. Price:</span><strong>₱{% widthratio item.product_price 1 item.quantity as total %}{{ total|floatformat:2 }}</strong>
+                <span>Reserved On:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
+                <span>Status:</span>
+                {% if item.product_stock_quantity > 0 %}
+                    <strong class="status-available">Now Available!</strong>
+                {% else %}
+                    <strong class="status-unavailable">Out of Stock</strong>
+                {% endif %}
+            </div>
+            {% if item.product_stock_quantity > 0 %}
+                <p class="instructions">This item is back in stock! You can now reserve or buy it from the "Browse Products" page.</p>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+        <p class="no-items-message">You have no pending backorders.</p>
+    {% endfor %}
+</div>
+
+
+<!-- Checkout Confirmation Modal -->
+<div id="checkout-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header"><h2>Confirm Check Out</h2><span class="close-btn">&times;</span></div>
+        <form id="checkout-form" action="{% url 'checkout_reservation' %}" method="post" class="modal-form">
+            {% csrf_token %}
+            <div class="modal-body">
+                <input type="hidden" name="reservation_id" id="checkout-reservation-id">
+                <p>You are about to check out the following item:</p>
+                <div class="summary">
+                    <p><strong>Product:</strong> <span id="checkout-product-name"></span></p>
+                    <p><strong>Quantity:</strong> <span id="checkout-quantity"></span></p>
+                    <p><strong>Total Price:</strong> <span id="checkout-price"></span></p>
+                </div>
+                <p>This will convert your reservation into a formal order. Proceed?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+                <button type="submit" class="btn btn-primary">Confirm Check Out</button>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const checkoutModal = document.getElementById('checkout-modal');
+    if (!checkoutModal) return;
+
+    const openModal = () => checkoutModal.style.display = 'flex';
+    const closeModal = () => checkoutModal.style.display = 'none';
+
+    document.querySelectorAll('.checkout-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const data = button.dataset;
+            checkoutModal.querySelector('#checkout-reservation-id').value = data.id;
+            checkoutModal.querySelector('#checkout-product-name').textContent = data.name;
+            checkoutModal.querySelector('#checkout-quantity').textContent = data.quantity;
+            checkoutModal.querySelector('#checkout-price').textContent = `₱${parseFloat(data.price).toFixed(2)}`;
+            openModal();
+        });
+    });
+
+    checkoutModal.querySelector('.close-btn').addEventListener('click', closeModal);
+    checkoutModal.querySelector('.cancel-btn').addEventListener('click', closeModal);
+    window.addEventListener('click', (e) => { if (e.target === checkoutModal) closeModal(); });
+});
+</script>
+{% endblock %}
+
