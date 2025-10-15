@@ -38,24 +38,24 @@ This system allows students to reserve unavailable items and order available ite
 ### Core Features
 
   - 🔐 **Supabase Authentication**
-      - Secure user sign-up and sign-in handled via API calls to Supabase.
-      - Session management for authenticated users.
-      - Protected routes for student and admin dashboards.
+    - Secure user sign-up and sign-in handled via API calls to Supabase.
+    - Session management for authenticated users.
+    - Protected routes for student and admin dashboards.
 
   - 🛒 **Student Portal**
-      - Browse available school supplies from an item catalog.
-      - Place orders/reserve for items online.
-      - View order history and status.
+    - Browse available school supplies from an item catalog.
+    - Place orders/reserve for items online.
+    - View order history and status.
 
   - 📊 **Administrative Dashboard**
-      - A central hub for custodial staff to manage the system.
-      - View and process incoming student requests.
-      - Approve or decline orders.
+     - A central hub for custodial staff to manage the system.
+     - View and process incoming student requests.
+     - Approve or decline orders.
 
   - 📦 **Inventory Management**
-      - Add, update, and remove items from the supply catalog.
-      - Track stock levels to prevent shortages.
-      - Efficiently manage school resources.
+     - Add, update, and remove items from the supply catalog.
+     - Track stock levels to prevent shortages.
+     - Efficiently manage school resources.
 
 -----
 
