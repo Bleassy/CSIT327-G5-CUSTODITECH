@@ -58,19 +58,19 @@ class SupabaseAuthMiddleware(MiddlewareMixin):
                 user_id = user_data.get('id')
 
                 # ✅ THE FIX IS HERE: Self-healing AND self-refreshing profile logic
+                # On every request, fetch the latest profile from user_profiles table.
                 try:
-                    # Use a regular select without .single() to avoid errors on empty results
-                    profile_res = supabase_service.table('user_profiles').select('full_name, user_type').eq('user_id', user_id).execute()
+                    profile_res = supabase_service.table('user_profiles').select('full_name, user_type').eq('user_id', user_id).single().execute()
                     
                     if profile_res.data:
                         # If a profile exists, inject the LATEST data into user_metadata
-                        profile = profile_res.data[0]
+                        # This ensures the name and role are always up-to-date.
                         if 'user_metadata' not in user_data:
                             user_data['user_metadata'] = {}
-                        user_data['user_metadata']['full_name'] = profile.get('full_name')
-                        user_data['user_metadata']['user_type'] = profile.get('user_type')
+                        user_data['user_metadata']['full_name'] = profile_res.data.get('full_name')
+                        user_data['user_metadata']['user_type'] = profile_res.data.get('user_type')
                     else:
-                        # If no profile exists, create a basic one. This logic will now be reached.
+                        # If no profile exists (edge case), create a basic one.
                         print(f"🛠️ No profile found for {user_data.get('email')}. Creating one now.")
                         initial_metadata = user_data.get('user_metadata', {})
                         supabase_service.table('user_profiles').insert({

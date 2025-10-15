@@ -7,13 +7,13 @@
     padding: 2rem;
     border-radius: 16px;
     margin-bottom: 2rem;
-    height: 150px;
+    height: 100px;
     display: flex;
     flex-direction: column;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 .welcome-card h1 {
-    font-size: 50px;
+    font-size: 40px;
     font-weight: 900;
     margin: 0 0 4px 0;
 }
