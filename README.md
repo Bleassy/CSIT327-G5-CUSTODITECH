@@ -69,9 +69,9 @@ This system allows students to reserve unavailable items and order available ite
 ### **Database & Authentication**
 
   - **Supabase**
-      - PostgreSQL database for data storage.
-      - Handles all user authentication (sign-up, sign-in, sessions).
-      - Supabase Storage for image and file hosting.
+     - PostgreSQL database for data storage.
+     - Handles all user authentication (sign-up, sign-in, sessions).
+     - Supabase Storage for image and file hosting.
 
 ### **Frontend Technologies**
 
@@ -218,7 +218,6 @@ git push -u origin feat/add-shopping-cart
 2. GitHub will automatically detect your newly pushed branch and show a green button that says "Compare & pull request." Click it.
 3. Give your pull request a clear title and a brief description of the changes you made.
 4. Click the "Create pull request" button.
-5. 
 ##### Your work is now submitted for review! The project lead can now review your code, suggest changes, and merge it into the main project.
 
 ----
