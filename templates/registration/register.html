@@ -7,8 +7,11 @@
     <title>CIT Shop - Student Registration</title>
     <link rel="stylesheet" href="{% static 'css/register.css' %}">
 </head>
+
 <body>
     <div class="container">
+
+        <!-- Left Side -->
         <div class="left-side">
             <div class="logo-box">
                 <h1>CIT</h1>
@@ -19,11 +22,12 @@
             <p class="tagline">Shop Smart</p>
             <p class="tagline">Go Wildcats!</p>
         </div>
-        
+
+        <!-- Right Side -->
         <div class="right-side">
             <div class="form-container">
                 <h1>Create Your Student Account</h1>
-                
+
                 {% if messages %}
                     {% for message in messages %}
                         <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">
@@ -34,62 +38,140 @@
 
                 <form method="post">
                     {% csrf_token %}
-                    <!-- The form now always submits as a 'student' -->
                     <input type="hidden" name="user_type" value="student">
-                    
+
                     <!-- Full Name -->
                     <div class="form-group">
                         <label for="full_name">Full Name <span class="required">*</span></label>
-                        <input type="text" id="full_name" name="full_name" placeholder="Juan Dela Cruz" class="form-control" required>
+                        <input type="text" id="full_name" name="full_name"
+                               placeholder="Juan Dela Cruz"
+                               class="form-control"
+                               value="{{ form_data.full_name }}"
+                               pattern="^[a-zA-ZñÑ ]+$"
+                               title="Name can only contain letters and spaces."
+                               required>
                     </div>
 
                     <!-- Student ID -->
                     <div class="form-group">
                         <label for="student_id">Student ID <span class="required">*</span></label>
-                        <input type="text" id="student_id" name="student_id" placeholder="12-3456-789" pattern="\d{2}-\d{4}-\d{3}" class="form-control" required>
+                        <input type="text" id="student_id" name="student_id"
+                               placeholder="12-3456-789"
+                               class="form-control"
+                               value="{{ form_data.student_id }}"
+                               maxlength="12"
+                               required>
                         <small class="help-text">Format: 12-3456-789</small>
                     </div>
 
                     <!-- Email -->
                     <div class="form-group">
                         <label for="email">CIT Institutional Email <span class="required">*</span></label>
-                        <input type="email" id="email" name="email" placeholder="juan.delacruz@cit.edu" pattern="[a-zA-Z0-9._%+-]+@cit\.edu$" class="form-control" required>
+                        <input type="email" id="email" name="email"
+                               placeholder="juan.delacruz@cit.edu"
+                               pattern="[a-zA-Z0-9._%+-]+@cit\.edu$"
+                               class="form-control"
+                               value="{{ form_data.email }}"
+                               required>
                         <small class="help-text">Must end with @cit.edu</small>
                     </div>
 
                     <!-- Phone Number -->
                     <div class="form-group">
                         <label for="phone_number">Phone Number <span class="required">*</span></label>
-                        <input type="text" id="phone_number" name="phone_number" placeholder="+63 912 345 6789" pattern="\+63 \d{3} \d{3} \d{4}" class="form-control" required>
+                        <input type="text" id="phone_number" name="phone_number"
+                               placeholder="+63 912 345 6789"
+                               class="form-control"
+                               value="{{ form_data.phone_number }}"
+                               maxlength="17"
+                               required>
                         <small class="help-text">Format: +63 912 345 6789</small>
                     </div>
 
                     <!-- Address -->
                     <div class="form-group">
                         <label for="address">Address <span class="required">*</span></label>
-                        <input type="text" id="address" name="address" placeholder="Cebu City, Philippines" class="form-control" required>
+                        <input type="text" id="address" name="address"
+                               class="form-control"
+                               value="{{ form_data.address }}"
+                               placeholder="e.g., Mango Avenue, Kamagayan, Cebu City, Cebu"
+                               pattern="^[^,]+, [^,]+, [^,]+, [^,]+$"
+                               title="Please follow the format: Street, Barangay, City, Province"
+                               required>
+                        <small class="help-text">Street, Barangay, City, and Province.</small>
                     </div>
 
                     <!-- Password -->
                     <div class="form-group">
                         <label for="password1">Password <span class="required">*</span></label>
-                        <input type="password" id="password1" name="password1" placeholder="Minimum 6 characters" class="form-control" minlength="6" required>
+                        <input type="password" id="password1" name="password1"
+                               placeholder="Enter your password"
+                               class="form-control"
+                               minlength="8"
+                               pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}"
+                               title="Must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)."
+                               required>
+                        <small class="help-text">Min 8 characters, with uppercase, lowercase, number & special character.</small>
                     </div>
 
                     <!-- Confirm Password -->
                     <div class="form-group">
                         <label for="password2">Confirm Password <span class="required">*</span></label>
-                        <input type="password" id="password2" name="password2" placeholder="Re-enter your password" class="form-control" minlength="6" required>
+                        <input type="password" id="password2" name="password2"
+                               placeholder="Re-enter your password"
+                               class="form-control"
+                               minlength="8"
+                               required>
                     </div>
 
+                    <!-- Register Button -->
                     <button type="submit" class="btn-register">REGISTER</button>
                 </form>
-                
+
+                <!-- Login Link -->
                 <div class="links">
                     <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Script Section -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // Format Student ID: 12-3456-789
+            const studentIdInput = document.getElementById('student_id');
+            studentIdInput.addEventListener('input', function (e) {
+                let value = e.target.value.replace(/\D/g, '');
+                let formattedValue = '';
+
+                if (value.length > 0) formattedValue = value.substring(0, 2);
+                if (value.length > 2) formattedValue += '-' + value.substring(2, 6);
+                if (value.length > 6) formattedValue += '-' + value.substring(6, 9);
+
+                e.target.value = formattedValue;
+            });
+
+            // Format Phone Number: +63 912 345 6789
+            const phoneInput = document.getElementById('phone_number');
+            phoneInput.addEventListener('input', function (e) {
+                let value = e.target.value.replace(/\D/g, '');
+
+                if (value.startsWith('09')) {
+                    value = '639' + value.substring(2);
+                }
+
+                let formattedValue = '';
+                if (value.length > 0) formattedValue = '+' + value.substring(0, 2);
+                if (value.length > 2) formattedValue += ' ' + value.substring(2, 5);
+                if (value.length > 5) formattedValue += ' ' + value.substring(5, 8);
+                if (value.length > 8) formattedValue += ' ' + value.substring(8, 12);
+
+                e.target.value = formattedValue;
+            });
+
+        });
+    </script>
 </body>
 </html>

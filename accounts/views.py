@@ -5,37 +5,77 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 from supabase_client import supabase
+import re
+
 
 
 def register(request):
     """Register a new user with Supabase Auth and create profile"""
     user_type = request.GET.get('type', 'student')
     
+    # This dictionary will hold form data to re-populate the form on error
+    context = {'user_type': user_type}
+
     if request.method == 'POST':
-        user_type = request.POST.get('user_type', 'student')
-        email = request.POST.get('email')
-        password1 = request.POST.get('password1', '').strip()
-        password2 = request.POST.get('password2', '').strip()
-        full_name = request.POST.get('full_name')
-        student_id = request.POST.get('student_id')
-        staff_id = request.POST.get('staff_id')
-        phone_number = request.POST.get('phone_number')
-        address = request.POST.get('address')
+        # Create a dictionary of the submitted data to easily pass back to the template
+        form_data = request.POST.copy()
+        context['form_data'] = form_data
         
+        email = form_data.get('email')
+        password1 = form_data.get('password1', '').strip()
+        password2 = form_data.get('password2', '').strip()
+        full_name = form_data.get('full_name')
+        student_id = form_data.get('student_id')
+        phone_number = form_data.get('phone_number')
+        address = form_data.get('address')
         
-        # Validation
+        errors = False
+        
+        # --- Start Consolidated Validation ---
+        if full_name and not re.match(r"^[a-zA-ZñÑ .]+$", full_name):
+             messages.error(request, 'Full name can only contain letters, spaces, and periods.')
+             errors = True
+        
         if not email or not email.endswith('@cit.edu'):
             messages.error(request, 'Only CIT institutional email addresses (@cit.edu) are allowed.')
-            return render(request, 'registration/register.html', {'user_type': user_type})
+            errors = True
+
+        if phone_number:
+            # This pattern matches the format "+63 912 345 6789"
+            phone_pattern = re.compile(r"^\+63 9\d{2} \d{3} \d{4}$")
+            if not phone_pattern.match(phone_number):
+                messages.error(request, 'Please enter a valid Philippine mobile number (e.g., 09123456789).')
+                errors = True
+        
+        if address and address.count(',') < 2:
+            messages.error(request, 'Please provide a more complete address following the format: Street, Barangay, City, Province.')
+            errors = True
+        
+        if len(password1) < 8:
+            messages.error(request, 'Password must be at least 8 characters long.')
+            errors = True
+        if not re.search(r'[A-Z]', password1):
+            messages.error(request, 'Password must contain at least one uppercase letter.')
+            errors = True
+        if not re.search(r'[a-z]', password1):
+            messages.error(request, 'Password must contain at least one lowercase letter.')
+            errors = True
+        if not re.search(r'[0-9]', password1):
+            messages.error(request, 'Password must contain at least one number.')
+            errors = True
+        if not re.search(r'[@$!%*?&]', password1):
+            messages.error(request, 'Password must contain at least one special character (@$!%*?&).')
+            errors = True
         
         if password1 != password2:
             messages.error(request, 'Passwords do not match.')
-            return render(request, 'registration/register.html', {'user_type': user_type})
-        
-        if len(password1) < 6:
-            messages.error(request, 'Password must be at least 6 characters long.')
-            return render(request, 'registration/register.html', {'user_type': user_type})
-        
+            errors = True
+
+        # If any validation checks failed, re-render the form with errors and user data
+        if errors:
+            return render(request, 'registration/register.html', context)
+        # --- End Consolidated Validation ---
+
         try:
             # Sign up user with Supabase
             response = supabase.auth.sign_up({
@@ -44,9 +84,8 @@ def register(request):
                 'options': {
                     'data': {
                         'full_name': full_name,
-                        'user_type': user_type,
-                        'student_id': student_id if user_type == 'student' else None,
-                        'staff_id': staff_id if user_type == 'admin' else None,
+                        'user_type': 'student', # Hardcoded for this form
+                        'student_id': student_id,
                         'phone_number': phone_number,
                         'address': address,
                     }
@@ -54,24 +93,22 @@ def register(request):
             })
             
             if response.user:
-                # Create profile in user_profiles table
+                # Insert into 'user_profiles' table (optional but good practice)
                 try:
                     supabase.table('user_profiles').insert({
                         'user_id': response.user.id,
                         'email': email,
                         'full_name': full_name,
-                        'user_type': user_type,
-                        'student_id': student_id if user_type == 'student' else None,
-                        'staff_id': staff_id if user_type == 'admin' else None,
+                        'user_type': 'student',
+                        'student_id': student_id,
                         'phone_number': phone_number,
                         'address': address,
                     }).execute()
                     print(f"✅ Profile created for user: {email}")
                 except Exception as e:
                     print(f"⚠️ Profile creation failed: {e}")
-                    # Don't block registration if profile creation fails
                 
-                messages.success(request, 'Registration successful! You can now login.')
+                messages.success(request, 'Registration successful!!')
                 return redirect('login')
             else:
                 messages.error(request, 'Registration failed. Please try again.')
@@ -81,9 +118,9 @@ def register(request):
             if 'already registered' in error_message.lower():
                 messages.error(request, 'This email is already registered.')
             else:
-                messages.error(request, f'Registration error: {error_message}')
+                messages.error(request, f'An unexpected error occurred: {error_message}')
     
-    return render(request, 'registration/register.html', {'user_type': user_type})
+    return render(request, 'registration/register.html', context)
 
 
 def login_view(request):
@@ -150,6 +187,8 @@ def logout_view(request):
     # Clear Django session
     if 'supa_access_token' in request.session:
         del request.session['supa_access_token']
+
+    messages.success(request, "You have been logged out successfully.")
     
     return redirect('login')
 
@@ -247,6 +286,8 @@ def reset_password(request):
                 del request.session['reset_email']
             if 'supa_access_token' in request.session:
                 del request.session['supa_access_token']
+
+            messages.success(request, 'Your password has been successfully reset. Please log in.')
             
             return redirect('login')
         except Exception as e:

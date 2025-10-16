@@ -99,3 +99,14 @@
 .summary { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
 .summary p { margin: 0 0 0.5rem 0; }
 .modal-footer { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 24px; }
+
+.success-message {
+    color: #155724; /* Dark green text */
+    background-color: #d4edda; /* Light green background */
+    padding: 12px 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #c3e6cb; /* Slightly darker green border */
+    font-weight: 500;
+    text-align: center;
+}
