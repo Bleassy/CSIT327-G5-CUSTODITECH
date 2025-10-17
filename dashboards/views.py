@@ -405,15 +405,23 @@ def manage_products_view(request):
 @admin_required
 def add_product(request):
     if request.method == 'POST':
-        # ✅ THE FIX IS HERE: The entire 'try...except' block is now correctly indented.
         try:
             image_url = None
             image_file = request.FILES.get('product-image')
+            
             if image_file:
                 file_ext = image_file.name.split('.')[-1]
                 file_name = f'product_{uuid.uuid4()}.{file_ext}'
-                supabase.storage.from_('product_images').upload(file=image_file.read(), path=file_name, file_options={"content-type": image_file.content_type})
-                image_url = supabase.storage.from_('product_images').get_public_url(file_name)
+                
+                # ✅ FIX: Use the service client for storage uploads
+                supabase_service.storage.from_('product_images').upload(
+                    file=image_file.read(), 
+                    path=file_name, 
+                    file_options={"content-type": image_file.content_type}
+                )
+                
+                # ✅ FIX: Use the service client to get the public URL
+                image_url = supabase_service.storage.from_('product_images').get_public_url(file_name)
             
             stock = int(request.POST.get('stock-quantity', 0))
 
@@ -430,7 +438,9 @@ def add_product(request):
             if request.POST.get('product-category') == 'Uniforms':
                  product_data['size'] = request.POST.get('product-size')
 
+            # This part is already correct
             response = supabase_service.table('products').insert(product_data).execute()
+            
             messages.success(request, f"Product '{product_data['name']}' added successfully!")
             
             if response.data:
@@ -441,6 +451,7 @@ def add_product(request):
                 )
         except Exception as e:
             messages.error(request, f"Failed to add product: {e}")
+            
     return redirect('manage_products')
 
 @admin_required
