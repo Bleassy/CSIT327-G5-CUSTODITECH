@@ -6,6 +6,17 @@
 {% endblock %}
 
 {% block content %}
+
+{% if messages %}
+<div class="message-container">
+    {% for message in messages %}
+        <div class="message {{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 <!-- 1. Welcome Card -->
 <div class="welcome-card">
     <h1>{{ greeting }}, {{ display_name }}! 👋</h1>

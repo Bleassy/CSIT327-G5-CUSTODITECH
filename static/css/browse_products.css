@@ -153,3 +153,89 @@
     font-weight: 500;
     text-align: center;
 }
+
+
+/* Add these new styles to your static/css/browse_products.css file */
+
+/* --- Search Bar --- */
+.search-container {
+    margin-bottom: 2.5rem;
+}
+.search-input {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+.search-input:focus {
+    outline: none;
+    border-color: #800000;
+    box-shadow: 0 0 0 3px rgba(128, 0, 0, 0.1);
+}
+
+/* --- Category Title --- */
+.category-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+/* --- Product Card Interaction --- */
+.product-card {
+    cursor: pointer; /* Indicates the card is clickable */
+}
+
+/* --- Product Details Modal --- */
+.details-layout {
+    display: flex;
+    gap: 2rem;
+}
+.details-image-container {
+    flex-basis: 40%;
+    flex-shrink: 0;
+}
+.details-image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+.details-info {
+    flex-basis: 60%;
+}
+.details-name {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+}
+.details-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+}
+.details-price {
+    font-size: 22px;
+    font-weight: 700;
+    color: #8B0000;
+}
+.details-stock {
+    font-size: 14px;
+    background-color: #f1f5f9;
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    color: #475569;
+}
+
+#product-details-modal .modal-content {
+    max-width: 700px; /* Or any other size you prefer */
+}

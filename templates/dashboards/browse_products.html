@@ -2,11 +2,11 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/browse_products.css' %}?v=2.4">
+    <link rel="stylesheet" href="{% static 'css/browse_products.css' %}?v=2.5">
 {% endblock %}
 
 {% block content %}
-<h1 class="welcome-title">Available Products 🛒</h1>
+<h1 class="welcome-title">Browse Products 🛒</h1>
              
 {% if messages %}
     <ul class="messages">
@@ -16,60 +16,85 @@
     </ul>
 {% endif %}
 
-<div class="product-grid">
-    {% for product in products %}
-    <div class="product-card">
-        <div class="product-image-container">
-            <img src="{{ product.image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ product.name }}" class="product-image">
-            {% if product.stock_quantity == 0 %}
-                <div class="stock-overlay out-of-stock">Out of Stock</div>
-            {% elif product.stock_quantity < 10 %}
-                 <div class="stock-overlay low-stock">Low Stock</div>
-            {% endif %}
-        </div>
-        <div class="product-info">
-            <h3 class="product-name">{{ product.name }}</h3>
-            <p class="product-description">{{ product.description|truncatewords:15 }}</p>
-            <div class="product-meta">
-                <span class="product-price">₱{{ product.price|floatformat:2 }}</span>
-                <span class="product-stock">{{ product.stock_quantity }} pcs available</span>
-            </div>
-        </div>
-        <div class="product-actions">
-            {% if product.stock_quantity > 0 %}
-                <!-- ✅ UPDATED: Added data-price to this button -->
-                <button class="btn btn-secondary add-to-cart-btn" 
-                        data-id="{{ product.id }}"
-                        data-name="{{ product.name }}"
-                        data-stock="{{ product.stock_quantity }}"
-                        data-price="{{ product.price }}"
-                        data-image-url="{{ product.image_url }}">
-                    Add to Cart
-                </button>
-                <button class="btn btn-primary buy-now-btn" 
-                        data-id="{{ product.id }}"
-                        data-name="{{ product.name }}"
-                        data-stock="{{ product.stock_quantity }}"
-                        data-price="{{ product.price }}"
-                        data-image-url="{{ product.image_url }}">
-                    Buy Now
-                </button>
-            {% else %}
-                <!-- ✅ UPDATED: Added data-price to this button -->
-                <button class="btn btn-primary reserve-item-btn"
-                        data-id="{{ product.id }}"
-                        data-name="{{ product.name }}"
-                        data-price="{{ product.price }}"
-                        data-image-url="{{ product.image_url }}">
-                    Reserve Item
-                </button>
-            {% endif %}
-        </div>
-    </div>
-    {% endfor %}
+<div class="search-container">
+    <input type="search" id="product-search-input" class="search-input" placeholder="Search for a product..." value="{{ search_query }}">
 </div>
 
-<!-- MODAL 1: Buy Now -->
+{% if categorized_products %}
+    {% for category, product_list in categorized_products.items %}
+    <section class="category-section" data-category="{{ category }}">
+        <h2 class="category-title">{{ category }}</h2>
+        <div class="product-grid">
+            {% for product in product_list %}
+            <div class="product-card"
+                 data-id="{{ product.id }}"
+                 data-name="{{ product.name }}"
+                 data-size="{{ product.size|default:'' }}"
+                 data-category="{{ category }}"
+                 data-description="{{ product.description|default:'' }}"
+                 data-price="{{ product.price|floatformat:2 }}"
+                 data-stock="{{ product.stock_quantity }}"
+                 data-image-url="{{ product.image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}">
+                
+                <div class="product-image-container">
+                    <img src="{{ product.image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ product.name }}" class="product-image">
+                    {% if product.stock_quantity == 0 %}
+                        <div class="stock-overlay out-of-stock">Out of Stock</div>
+                    {% elif product.stock_quantity < 10 %}
+                        <div class="stock-overlay low-stock">Low Stock</div>
+                    {% endif %}
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">{{ product.name }}{% if product.size %} - {{ product.size }}{% endif %}</h3>
+                    <div class="product-meta">
+                        <span class="product-price">₱{{ product.price|floatformat:2 }}</span>
+                        <span class="product-stock">{{ product.stock_quantity }} pcs available</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endfor %}
+{% else %}
+    <div class="no-products-message">
+        {% if search_query %}
+            <p>No products found for "{{ search_query }}". Try a different search term!</p>
+        {% else %}
+            <p>There are no products available at the moment. Please check back later.</p>
+        {% endif %}
+    </div>
+{% endif %}
+
+
+<div id="product-details-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Product Details</h2>
+            <span class="close-btn">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="details-layout">
+                <div class="details-image-container">
+                    <img id="details-image" src="" alt="Product Image" class="details-image">
+                </div>
+                <div class="details-info">
+                    <h3 id="details-name" class="details-name"></h3>
+                    <p id="details-description" class="modal-product-description"></p>
+                    <div class="details-meta">
+                        <span id="details-price" class="details-price"></span>
+                        <span id="details-stock" class="details-stock"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="details-add-to-cart-btn">Add to Cart</button>
+            <button type="button" class="btn btn-primary" id="details-buy-now-btn">Buy Now</button>
+        </div>
+    </div>
+</div>
+
 <div id="buy-now-modal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header"><h2>Confirm Purchase</h2><span class="close-btn">&times;</span></div>
@@ -90,7 +115,6 @@
     </div>
 </div>
 
-<!-- MODAL 2: Add to Cart (In-Stock Reservation) -->
 <div id="reservation-modal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header"><h2>Confirm Reservation</h2><span class="close-btn">&times;</span></div>
@@ -102,10 +126,7 @@
                 <img src="" alt="Product Image" class="modal-product-image">
                 <p class="item-name-modal">You are reserving: <strong id="reserve-product-name"></strong></p>
                 <div class="form-group"><label for="reserve-quantity">Quantity</label><input type="number" id="reserve-quantity" name="quantity" value="1" min="1" required></div>
-                
-                <!-- ✅ ADDED: Total Price Summary -->
                 <div class="price-summary"><span>Total Price:</span><strong id="reserve-total-price">₱0.00</strong></div>
-
                 <div class="form-group"><label>Payment Method</label><div class="payment-options"><label><input type="radio" name="payment_method" value="cash" checked> Cash on Pickup</label></div></div>
                 <div class="date-info"><p><strong>Date Reserved:</strong> <span id="reserve-date"></span></p><p><strong>Reservation Expires:</strong> <span id="expiry-date"></span></p></div>
             </div>
@@ -114,7 +135,6 @@
     </div>
 </div>
 
-<!-- MODAL 3: Reserve Item (Out-of-Stock) -->
 <div id="backorder-modal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header"><h2>Reserve Out-of-Stock Item</h2><span class="close-btn">&times;</span></div>
@@ -127,101 +147,164 @@
                 <p class="item-name-modal">Reserving: <strong id="backorder-product-name"></strong></p>
                 <p class="instructions">This item is currently out of stock. We will notify you when it becomes available.</p>
                 <div class="form-group"><label for="backorder-quantity">Quantity</label><input type="number" id="backorder-quantity" name="quantity" value="1" min="1" required></div>
-                
-                <!-- ✅ ADDED: Total Price Summary -->
                 <div class="price-summary"><span>Est. Total Price:</span><strong id="backorder-total-price">₱0.00</strong></div>
-
                 <div class="form-group checkbox-group"><input type="checkbox" name="is_urgent" id="is-urgent"><label for="is-urgent">I need this badly.</label></div>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-secondary cancel-btn">Cancel</button><button type="submit" class="btn btn-primary">Confirm Reservation</button></div>
         </form>
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Get All Modal Elements ---
+    const detailsModal = document.getElementById('product-details-modal');
+    const buyModal = document.getElementById('buy-now-modal');
+    const reserveModal = document.getElementById('reservation-modal');
+    const backorderModal = document.getElementById('backorder-modal');
+
     // --- General Modal Controls ---
+    const openModal = (modal) => { if (modal) modal.style.display = 'flex'; };
     const closeModal = (modal) => { if (modal) modal.style.display = 'none'; };
     document.querySelectorAll('.close-btn, .cancel-btn').forEach(btn => btn.onclick = () => closeModal(btn.closest('.modal')));
     window.onclick = (event) => { if (event.target.classList.contains('modal')) closeModal(event.target); };
+    
+    // --- LIVE PRODUCT SEARCH/FILTER ---
+    const searchInput = document.getElementById('product-search-input');
+    const productCards = document.querySelectorAll('.product-card');
+    const categorySections = document.querySelectorAll('.category-section');
 
-    // --- MODAL 1: Buy Now ---
-    const buyModal = document.getElementById('buy-now-modal');
-    document.querySelectorAll('.buy-now-btn').forEach(button => {
-        button.onclick = () => {
-            const data = button.dataset;
-            buyModal.querySelector('#buy-product-id').value = data.id;
-            buyModal.querySelector('.modal-product-image').src = data.imageUrl;
-            buyModal.querySelector('#buy-product-name').textContent = data.name;
-            const quantityInput = buyModal.querySelector('#buy-quantity');
-            quantityInput.max = data.stock;
-            const price = parseFloat(data.price);
-            const totalPriceEl = buyModal.querySelector('#total-price');
-            const updateTotal = () => {
-                totalPriceEl.textContent = `₱${(price * (parseInt(quantityInput.value) || 0)).toFixed(2)}`;
-            };
-            quantityInput.oninput = updateTotal;
-            updateTotal();
-            buyModal.style.display = 'flex';
-        };
-    });
+    searchInput.addEventListener('input', () => {
+        const searchTerm = searchInput.value.toLowerCase().trim();
 
-    // --- MODAL 2: Add to Cart (In-Stock Reservation) ---
-    const reserveModal = document.getElementById('reservation-modal');
-    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-        button.onclick = () => {
-            const data = button.dataset;
-            reserveModal.querySelector('#reserve-product-id').value = data.id;
-            reserveModal.querySelector('.modal-product-image').src = data.imageUrl;
-            reserveModal.querySelector('#reserve-product-name').textContent = data.name;
-            const quantityInput = reserveModal.querySelector('#reserve-quantity');
-            quantityInput.max = data.stock;
+        // Loop through all product cards and hide/show them
+        productCards.forEach(card => {
+            const productName = card.dataset.name.toLowerCase();
+            const categoryName = card.dataset.category.toLowerCase();
             
-            // ✅ UPDATED: Add price calculation logic
-            const price = parseFloat(data.price);
-            const totalPriceEl = reserveModal.querySelector('#reserve-total-price');
-            const updateTotal = () => {
-                totalPriceEl.textContent = `₱${(price * (parseInt(quantityInput.value) || 0)).toFixed(2)}`;
-            };
-            quantityInput.oninput = updateTotal;
-            updateTotal();
-
-            // Date logic
-            const today = new Date();
-            const expiry = new Date();
-            expiry.setDate(today.getDate() + 3);
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            reserveModal.querySelector('#reserve-date').textContent = today.toLocaleDateString('en-US', options);
-            reserveModal.querySelector('#expiry-date').textContent = expiry.toLocaleDateString('en-US', options);
-            reserveModal.style.display = 'flex';
-        };
-    });
-
-    // --- MODAL 3: Reserve Item (Out-of-Stock) ---
-    const backorderModal = document.getElementById('backorder-modal');
-    document.querySelectorAll('.reserve-item-btn').forEach(button => {
-        button.onclick = () => {
-            const data = button.dataset;
-            backorderModal.querySelector('#backorder-product-id').value = data.id;
-            backorderModal.querySelector('.modal-product-image').src = data.imageUrl;
-            backorderModal.querySelector('#backorder-product-name').textContent = data.name;
-
-            // ✅ UPDATED: Add price calculation logic
-            const quantityInput = backorderModal.querySelector('#backorder-quantity');
-            const price = parseFloat(data.price);
-            const totalPriceEl = backorderModal.querySelector('#backorder-total-price');
-            const updateTotal = () => {
-                totalPriceEl.textContent = `₱${(price * (parseInt(quantityInput.value) || 0)).toFixed(2)}`;
-            };
-            quantityInput.oninput = updateTotal;
-            updateTotal();
+            // Check if the search term is in the name OR the category
+            const cardShouldBeVisible = productName.includes(searchTerm) || categoryName.includes(searchTerm);
             
-            backorderModal.style.display = 'flex';
-        };
+            card.style.display = cardShouldBeVisible ? 'flex' : 'none';
+        });
+
+        // Loop through all category sections to hide them if they are empty
+        categorySections.forEach(section => {
+            // Check for any visible cards within this section
+            const visibleCards = section.querySelectorAll('.product-card[style*="display: flex"]');
+            
+            // If there are no visible cards, hide the whole section title
+            section.style.display = visibleCards.length > 0 ? 'block' : 'none';
+        });
     });
+
+    document.querySelectorAll('.product-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const data = card.dataset;
+            detailsModal.querySelector('#details-image').src = data.imageUrl;
+            const detailsNameEl = detailsModal.querySelector('#details-name');
+            if (data.size) {
+            detailsNameEl.textContent = `${data.name} - ${data.size}`;
+            } else {
+            detailsNameEl.textContent = data.name;
+            }
+            detailsModal.querySelector('#details-description').textContent = data.description;
+            detailsModal.querySelector('#details-price').textContent = `₱${data.price}`;
+            detailsModal.querySelector('#details-stock').textContent = `${data.stock} pcs available`;
+            const addToCartBtn = detailsModal.querySelector('#details-add-to-cart-btn');
+            const buyNowBtn = detailsModal.querySelector('#details-buy-now-btn');
+            Object.assign(addToCartBtn.dataset, data);
+            Object.assign(buyNowBtn.dataset, data);
+            if (parseInt(data.stock) === 0) {
+                addToCartBtn.textContent = 'Reserve (Out of Stock)';
+                buyNowBtn.style.display = 'none';
+            } else {
+                addToCartBtn.textContent = 'Add to Cart';
+                buyNowBtn.style.display = 'inline-block';
+            }
+            openModal(detailsModal);
+        });
+    });
+
+    // --- RE-ROUTE BUTTON CLICKS FROM DETAILS MODAL ---
+    document.getElementById('details-buy-now-btn').addEventListener('click', function() {
+        closeModal(detailsModal);
+        openBuyNowModal(this.dataset);
+    });
+    
+    document.getElementById('details-add-to-cart-btn').addEventListener('click', function() {
+        closeModal(detailsModal);
+        const stock = parseInt(this.dataset.stock);
+        if (stock > 0) {
+            openReservationModal(this.dataset);
+        } else {
+            openBackorderModal(this.dataset);
+        }
+    });
+
+    // --- HELPER FUNCTIONS ---
+    function openBuyNowModal(data) {
+        buyModal.querySelector('#buy-product-id').value = data.id;
+        buyModal.querySelector('.modal-product-image').src = data.imageUrl;
+        buyModal.querySelector('#buy-product-name').textContent = data.name;
+        const quantityInput = buyModal.querySelector('#buy-quantity');
+        quantityInput.max = data.stock;
+        const price = parseFloat(data.price);
+        const totalPriceEl = buyModal.querySelector('#total-price');
+        const updateTotal = () => {
+            const quantity = parseInt(quantityInput.value) || 0;
+            totalPriceEl.textContent = `₱${(price * quantity).toFixed(2)}`;
+        };
+        quantityInput.value = 1;
+        quantityInput.oninput = updateTotal;
+        updateTotal();
+        openModal(buyModal);
+    }
+
+    function openReservationModal(data) {
+        reserveModal.querySelector('#reserve-product-id').value = data.id;
+        reserveModal.querySelector('.modal-product-image').src = data.imageUrl;
+        reserveModal.querySelector('#reserve-product-name').textContent = data.name;
+        const quantityInput = reserveModal.querySelector('#reserve-quantity');
+        quantityInput.max = data.stock;
+        const price = parseFloat(data.price);
+        const totalPriceEl = reserveModal.querySelector('#reserve-total-price');
+        const updateTotal = () => {
+            const quantity = parseInt(quantityInput.value) || 0;
+            totalPriceEl.textContent = `₱${(price * quantity).toFixed(2)}`;
+        };
+        quantityInput.value = 1;
+        quantityInput.oninput = updateTotal;
+        updateTotal();
+
+        const today = new Date();
+        const expiry = new Date();
+        expiry.setDate(today.getDate() + 3);
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        reserveModal.querySelector('#reserve-date').textContent = today.toLocaleDateString('en-US', options);
+        reserveModal.querySelector('#expiry-date').textContent = expiry.toLocaleDateString('en-US', options);
+        openModal(reserveModal);
+    }
+
+    function openBackorderModal(data) {
+        backorderModal.querySelector('#backorder-product-id').value = data.id;
+        backorderModal.querySelector('.modal-product-image').src = data.imageUrl;
+        backorderModal.querySelector('#backorder-product-name').textContent = data.name;
+        const quantityInput = backorderModal.querySelector('#backorder-quantity');
+        const price = parseFloat(data.price);
+        const totalPriceEl = backorderModal.querySelector('#backorder-total-price');
+        const updateTotal = () => {
+            const quantity = parseInt(quantityInput.value) || 0;
+            totalPriceEl.textContent = `₱${(price * quantity).toFixed(2)}`;
+        };
+        quantityInput.value = 1;
+        quantityInput.oninput = updateTotal;
+        updateTotal();
+        openModal(backorderModal);
+    }
 });
 </script>
 {% endblock %}
-

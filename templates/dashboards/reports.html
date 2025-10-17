@@ -27,6 +27,66 @@
     </div>
 </div>
 
+<div class="report-section">
+    <h2>Unavailable Products</h2>
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Current Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in unavailable_products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.category }}</td>
+                    <td><span class="status-highlight-unavailable">{{ product.stock_quantity }} pcs</span></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="no-data-cell">
+                        <p>👍 All products are currently available.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="low-stock-section">
+    <h2>Low-Stock Items (Needs Reordering)</h2>
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Remaining Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in low_stock_products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.category }}</td>
+                    <td><span class="stock-highlight">{{ product.stock_quantity }} pcs</span></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="no-data-cell">
+                        <p>👍 No items are currently low on stock.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <div class="activity-log-section">
     <div class="page-header">
         <h2>System Activity Log</h2>

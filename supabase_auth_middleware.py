@@ -18,18 +18,21 @@ class SupabaseUser:
 
         # Properties for Django Admin compatibility
         self.is_active = True
-        self.is_staff = (self.user_type == 'admin')
-        self.is_superuser = (self.user_type == 'admin')
+        # ✅ THE FIX IS HERE: Let Django's system handle staff/superuser for its own admin
+        # This SupabaseUser is for the front-facing app, not the /admin/ panel.
+        self.is_staff = False
+        self.is_superuser = False
 
     def get_full_name(self):
         # This now correctly reads the refreshed user_metadata
         return self.user_metadata.get('full_name', self.username)
     
+    # We can keep these for any custom checks, but they won't grant /admin/ access
     def has_perm(self, perm, obj=None):
-        return self.is_superuser
+        return self.user_type == 'admin'
 
     def has_module_perms(self, app_label):
-        return self.is_superuser
+        return self.user_type == 'admin'
 
 
 class SupabaseAuthMiddleware(MiddlewareMixin):
@@ -37,6 +40,15 @@ class SupabaseAuthMiddleware(MiddlewareMixin):
     Middleware that validates Supabase JWT and ensures the user profile is fresh.
     """
     def process_request(self, request):
+        
+        # ✅ THE FIX IS HERE: Add this check at the very top.
+        # If the path is for the Django admin, let Django's own auth handle it.
+        # We also check if a user is already authenticated by Django's session middleware.
+        if request.path.startswith('/admin'):
+            # If Django's session middleware already authenticated a user, just return.
+            if hasattr(request, 'user') and request.user.is_authenticated:
+                return
+        
         token = request.session.get('supa_access_token')
         
         if not token:
@@ -57,20 +69,15 @@ class SupabaseAuthMiddleware(MiddlewareMixin):
                 user_data = response.json()
                 user_id = user_data.get('id')
 
-                # ✅ THE FIX IS HERE: Self-healing AND self-refreshing profile logic
-                # On every request, fetch the latest profile from user_profiles table.
                 try:
                     profile_res = supabase_service.table('user_profiles').select('full_name, user_type').eq('user_id', user_id).single().execute()
                     
                     if profile_res.data:
-                        # If a profile exists, inject the LATEST data into user_metadata
-                        # This ensures the name and role are always up-to-date.
                         if 'user_metadata' not in user_data:
                             user_data['user_metadata'] = {}
                         user_data['user_metadata']['full_name'] = profile_res.data.get('full_name')
                         user_data['user_metadata']['user_type'] = profile_res.data.get('user_type')
                     else:
-                        # If no profile exists (edge case), create a basic one.
                         print(f"🛠️ No profile found for {user_data.get('email')}. Creating one now.")
                         initial_metadata = user_data.get('user_metadata', {})
                         supabase_service.table('user_profiles').insert({
@@ -83,13 +90,11 @@ class SupabaseAuthMiddleware(MiddlewareMixin):
                 except Exception as profile_e:
                     print(f"--- FAILED TO SYNC PROFILE: {profile_e} ---")
 
-                # Initialize the user object with the (potentially updated) user_data
                 request.user = SupabaseUser(user_data)
             else:
                 request.user = AnonymousUser()
                 if 'supa_access_token' in request.session:
                     del request.session['supa_access_token']
-                      
+                          
         except Exception as e:
             request.user = AnonymousUser()
-

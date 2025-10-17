@@ -4,6 +4,7 @@ from supabase_client import supabase, supabase_service
 import pytz
 from datetime import datetime
 import uuid
+from collections import defaultdict
 
 # --- Decorators for Access Control ---
 def student_required(function):
@@ -115,22 +116,37 @@ def student_dashboard(request):
 @student_required
 def browse_products_view(request):
     """
-    Renders the page for browsing ALL products, including those that are out of stock.
+    Renders the page for browsing products, categorized and searchable.
     """
+    search_query = request.GET.get('search', '').strip()
+    categorized_products = defaultdict(list)
+    
     try:
-        # ✅ THE FIX IS HERE:
-        # Removed the .eq('is_available', True) filter to fetch ALL products.
-        # This allows the template to decide which buttons to show for each item.
-        response = supabase.table('products').select('*').order('created_at', desc=True).execute()
+        # Start the base query
+        query = supabase.table('products').select('*').order('created_at', desc=True)
+
+        # If there's a search query, add the filter to the query
+        if search_query:
+            query = query.ilike('name', f'%{search_query}%')
+        
+        # ✅ FIX: Execute the 'query' variable that you built.
+        response = query.execute() 
         products = response.data
+
+        if products:
+            for product in products:
+                # This correctly groups products with 'None' or no category
+                category_name = product.get('category') or 'Uncategorized'
+                categorized_products[category_name].append(product)
+    
     except Exception as e:
         messages.error(request, f"Could not fetch products: {e}")
-        products = []
-    
+
     context = {
-        'products': products,
-        'active_page': 'browse',
-        'page_title': 'Browse Products',
+        'categorized_products': dict(categorized_products), 
+    'search_query': search_query,
+    'active_page': 'browse',
+    'page_title': 'Browse Products',
     }
     return render(request, 'dashboards/browse_products.html', context)
 
@@ -142,20 +158,29 @@ def my_reservations_view(request):
         response = supabase.rpc('get_my_detailed_reservations', {'p_user_id': user_id}).execute()
         
         if response.data:
-           for item in response.data:
-                if item.get('created_at'):
-                    item['created_at'] = datetime.fromisoformat(item['created_at'])
-                if item.get('expires_at'):
-                    item['expires_at'] = datetime.fromisoformat(item['expires_at'])
-                if item['order_type'] == 'reservation':
-                    reservations.append(item)
-                else:
-                    backorders.append(item)
+            for item in response.data:
+                # ✅ THE FIX IS HERE:
+                # Only process items that are explicitly in a 'pending' state.
+                # This prevents already processed or cancelled items from appearing.
+                if item.get('status') == 'pending':
+                    if item.get('created_at'):
+                        item['created_at'] = datetime.fromisoformat(item['created_at'])
+                    if item.get('expires_at'):
+                        item['expires_at'] = datetime.fromisoformat(item['expires_at'])
+                    
+                    if item['order_type'] == 'reservation':
+                        reservations.append(item)
+                    elif item['order_type'] == 'backorder':
+                        backorders.append(item)
+                            
     except Exception as e:
         messages.error(request, f"Could not fetch your reservations: {e}")
+        
     context = {
-        'reservations': reservations, 'backorders': backorders,
-        'active_page': 'reservations', 'page_title': 'My Reservations',
+        'reservations': reservations, 
+        'backorders': backorders,
+        'active_page': 'reservations', 
+        'page_title': 'My Reservations',
     }
     return render(request, 'dashboards/my_reservations.html', context)
 
@@ -301,6 +326,36 @@ def student_profile_view(request):
     }
     return render(request, 'dashboards/student_profile.html', context)
 
+
+@student_required
+def cancel_reservation_view(request, reservation_id):
+    """
+    Allows a student to cancel their own reservation.
+    """
+    if request.method == 'POST':
+        try:
+            # We will use the same RPC as the admin's 'cancel' function
+            # It's efficient to reuse backend logic.
+            supabase.rpc('cancel_or_reject_order', {
+                'p_order_id': reservation_id, 
+                'p_new_status': 'cancelled'
+            }).execute()
+            
+            messages.success(request, "Your reservation has been successfully cancelled.")
+            
+            # Log this activity for the admin (optional but good practice)
+            log_activity(
+                request.user, 
+                'RESERVATION_CANCELLED_BY_USER',
+                {'order_id': reservation_id}
+            )
+            
+        except Exception as e:
+            messages.error(request, f"Could not cancel the reservation: {e}")
+            
+    # Redirect back to the reservations page regardless of method (POST or GET)
+    return redirect('my_reservations')
+
 # --- Admin Views ---
 @admin_required
 def admin_dashboard(request):
@@ -329,6 +384,15 @@ def manage_products_view(request):
             query = query.or_(f'name.ilike.%{search_query}%,category.ilike.%{search_query}%')
         response = query.execute()
         products = response.data if response.data else []
+
+        products = sorted(
+            products, 
+            key=lambda p: (
+                p.get('is_available', True), # Sorts False (Unavailable) before True (Available)
+                not (0 < p.get('stock_quantity', 0) < 10) # Sorts True (Low Stock) before False
+            )
+        )
+
     except Exception as e:
         messages.error(request, f"Error fetching products: {e}")
         products = []
@@ -350,6 +414,8 @@ def add_product(request):
                 file_name = f'product_{uuid.uuid4()}.{file_ext}'
                 supabase.storage.from_('product_images').upload(file=image_file.read(), path=file_name, file_options={"content-type": image_file.content_type})
                 image_url = supabase.storage.from_('product_images').get_public_url(file_name)
+            
+            stock = int(request.POST.get('stock-quantity', 0))
 
             product_data = {
                 'name': request.POST.get('product-name'),
@@ -358,9 +424,13 @@ def add_product(request):
                 'stock_quantity': int(request.POST.get('stock-quantity')),
                 'category': request.POST.get('product-category'),
                 'image_url': image_url,
-                'is_available': 'is_available' in request.POST
+                'is_available': stock > 0 and 'is_available' in request.POST
             }
-            response = supabase.table('products').insert(product_data).execute()
+
+            if request.POST.get('product-category') == 'Uniforms':
+                 product_data['size'] = request.POST.get('product-size')
+
+            response = supabase_service.table('products').insert(product_data).execute()
             messages.success(request, f"Product '{product_data['name']}' added successfully!")
             
             if response.data:
@@ -377,15 +447,59 @@ def add_product(request):
 def edit_product(request, product_id):
     if request.method == 'POST':
         try:
+            # 1. Get the category from the form and store it in a variable
+            category = request.POST.get('product-category')
+            stock = int(request.POST.get('stock-quantity'))
+
+            # 2. Start building your update_data dictionary
             update_data = {
                 'name': request.POST.get('product-name'),
                 'description': request.POST.get('product-description'),
                 'price': float(request.POST.get('product-price')),
-                'stock_quantity': int(request.POST.get('stock-quantity')),
-                'category': request.POST.get('product-category'),
-                'is_available': 'is_available' in request.POST
+                'stock_quantity': stock,
+                'category': category, # Use the variable here
+                'is_available': stock > 0 and 'is_available' in request.POST
             }
-            supabase.table('products').update(update_data).eq('id', product_id).execute()
+
+            # 3. Add the 'size' key to the dictionary ONLY if the category is 'Uniforms'
+            if category == 'Uniforms':
+                update_data['size'] = request.POST.get('product-size')
+            else:
+                # This is good practice: clear the size if the category is changed from Uniforms
+                update_data['size'] = None 
+            
+            # ✅ START: NEW IMAGE UPLOAD LOGIC
+            new_image_file = request.FILES.get('product-image')
+            if new_image_file:
+                # 1. Generate a unique file name
+                file_ext = new_image_file.name.split('.')[-1]
+                file_name = f'product_{uuid.uuid4()}.{file_ext}'
+                
+                # 2. Upload the new file to Supabase Storage
+                supabase_service.storage.from_('product_images').upload(
+                    file=new_image_file.read(), 
+                    path=file_name, 
+                    file_options={"content-type": new_image_file.content_type}
+                )
+                
+                # 3. Get the public URL and add it to the update data
+                new_image_url = supabase_service.storage.from_('product_images').get_public_url(file_name)
+                update_data['image_url'] = new_image_url
+
+                # 4. (Recommended) Delete the old image to save space
+                old_image_url = request.POST.get('current-image-url')
+                if old_image_url and old_image_url.strip():
+                    try:
+                        # Extract just the file name from the full URL
+                        old_file_name = old_image_url.split('/')[-1]
+                        supabase_service.storage.from_('product_images').remove([old_file_name])
+                    except Exception as e:
+                        # If deletion fails, just print a message and continue
+                        print(f"Could not remove old image '{old_file_name}': {e}")
+            
+            # 4. Now, execute the update with the completed dictionary
+            supabase_service.table('products').update(update_data).eq('id', product_id).execute()
+            
             messages.success(request, "Product updated successfully!")
             
             log_activity(
@@ -395,6 +509,7 @@ def edit_product(request, product_id):
             )
         except Exception as e:
             messages.error(request, f"Failed to update product: {e}")
+            
     return redirect('manage_products')
 
 @admin_required
@@ -440,6 +555,41 @@ def order_management_view(request):
     return render(request, 'dashboards/order_management.html', context)
 
 @admin_required
+def batch_update_products(request):
+    """
+    Handles batch actions for products (e.g., mark as available, delete).
+    """
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        # The product_ids will be a comma-separated string, e.g., "1,5,12"
+        product_ids_str = request.POST.get('product_ids')
+        
+        if not all([action, product_ids_str]):
+            messages.error(request, "Invalid batch action request.")
+            return redirect('manage_products')
+
+        # Convert the string of IDs into a list of integers
+        product_ids = [int(pid) for pid in product_ids_str.split(',')]
+
+        try:
+            if action == 'mark-available':
+                supabase.table('products').update({'is_available': True}).in_('id', product_ids).execute()
+                messages.success(request, f"{len(product_ids)} product(s) marked as available.")
+                # Log the batch activity
+                log_activity(
+                   request.user, 
+                   f'PRODUCT_BATCH_{action.upper().replace("-", "_")}',
+                   {'count': len(product_ids), 'product_ids': product_ids}
+                )
+            else:
+                messages.warning(request, "The requested batch action is no longer supported.")
+
+        except Exception as e:
+            messages.error(request, f"An error occurred during the batch update: {e}")
+            
+    return redirect('manage_products')
+
+@admin_required
 def update_order_status(request, order_id):
     if request.method == 'POST':
         new_status = request.POST.get('status')
@@ -477,10 +627,20 @@ def reports_view(request):
     search_query = request.GET.get('search', '').strip()
     report_data = {}
     log_entries = []
+    low_stock_products = []
+    unavailable_products = []
     
     try:
         report_data = supabase.rpc('get_report_stats').execute().data
         log_response = supabase.rpc('get_activity_log', {'p_search_term': search_query}).execute()
+        low_stock_response = supabase.table('products').select('*').gt('stock_quantity', 0).lt('stock_quantity', 10).order('stock_quantity', desc=False).execute()
+        if low_stock_response.data:
+            low_stock_products = low_stock_response.data
+        
+        unavailable_response = supabase.table('products').select('*').eq('is_available', False).order('name').execute()
+        if unavailable_response.data:
+            unavailable_products = unavailable_response.data
+        
         
         if log_response.data:
             for entry in log_response.data:
@@ -497,6 +657,8 @@ def reports_view(request):
         'total_orders': report_data.get('total_orders', 0),
         'status_counts': report_data.get('status_counts', {}),
         'log_entries': log_entries,
+        'low_stock_products': low_stock_products,
+        'unavailable_products': unavailable_products,
         'search_query': search_query,
         'active_page': 'reports'
     }
@@ -556,3 +718,5 @@ def admin_profile_view(request):
         'page_title': 'Admin Profile'
     }
     return render(request, 'dashboards/admin_profile.html', context)
+
+

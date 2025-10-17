@@ -121,6 +121,7 @@
 }
 .badge-available { background-color: #dcfce7; color: #166534; }
 .badge-unavailable { background-color: #fee2e2; color: #991b1b; }
+.badge-low-stock { background-color: #fefce8; color: #a16207; }
 
 /* Modal Styles */
 .modal {
@@ -213,4 +214,157 @@
     border: 1px solid #c3e6cb; /* Slightly darker green border */
     font-weight: 500;
     text-align: center;
+}
+
+.low-stock-row {
+    background-color: #fefce8 !important; /* A light yellow background */
+    --tw-ring-color: #f59e0b; /* A yellow ring for focus */
+}
+
+.low-stock-row:hover {
+    background-color: #fef9c3 !important; /* A slightly darker yellow on hover */
+}
+
+.low-stock-row td {
+    color: #a16207; /* A darker text color for readability on yellow */
+}
+
+.unavailable-row {
+    background-color: #fee2e2 !important; /* A light red background */
+}
+
+.unavailable-row:hover {
+    background-color: #fecaca !important; /* A slightly darker red on hover */
+}
+
+.unavailable-row td {
+    color: #991b1b; /* A darker text color for readability on red */
+}
+
+.row-selected {
+    background-color: #eff6ff !important; /* A light blue background */
+}
+
+.batch-action-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    max-width: 600px;
+    background-color: #1e293b; /* Dark blue-gray */
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1001;
+    animation: slideUp 0.3s ease-out;
+}
+
+.batch-buttons {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn-batch {
+    background-color: #334155;
+    color: #f1f5f9;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-batch.btn-danger {
+    background-color: #dc2626;
+    color: white;
+}
+
+.btn-batch:hover {
+    background-color: #475569;
+}
+
+.btn-batch.btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+.btn-batch:disabled {
+    background-color: #475569; /* A darker gray */
+    color: #94a3b8; /* Lighter text */
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.modal-lg {
+    max-width: 800px;
+}
+
+.details-layout {
+    display: flex;
+    gap: 2rem;
+}
+
+.details-image-container {
+    flex-basis: 40%;
+    flex-shrink: 0;
+}
+
+.details-image {
+    width: 100%;
+    height: 300px; /* Give the image a fixed height */
+    object-fit: cover; /* Make the image cover the area without stretching */
+    border-radius: 8px;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.details-info {
+    flex-basis: 60%;
+}
+
+.details-info h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+}
+
+.details-info p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #475569;
+    margin: 0 0 1.5rem 0;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.75rem 1.5rem;
+    font-size: 14px;
+    background-color: #f8fafc;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.details-grid span {
+    color: #64748b;
+}
+
+.details-grid strong {
+    font-weight: 600;
+    color: #1e293b;
 }

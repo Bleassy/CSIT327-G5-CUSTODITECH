@@ -147,3 +147,38 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* --- Message/Alert Styling (New Design) --- */
+.message-container {
+    margin-bottom: 2rem; 
+}
+
+.message {
+    padding: 1rem 1.5rem;
+    border-radius: 10px; /* Creates the pill shape */
+    font-size: 16px;
+    font-weight: 500; /* Use 400 for normal weight, 500 for slightly bolder */
+    border: 1px solid transparent;
+}
+
+/* Specific background/text colors for different message types */
+.message.warning {
+    background-color: #fef3c7; /* Light amber background */
+    color: #92400e; /* Dark amber text */
+    border-color: #fde68a; /* Slightly darker border for definition */
+}
+.message.error {
+    background-color: #fee2e2; /* Light red background */
+    color: #991b1b; /* Dark red text */
+    border-color: #fecaca;
+}
+.message.success {
+    background-color: #dcfce7; /* Light green background */
+    color: #166534; /* Dark green text */
+    border-color: #bbf7d0;
+}
+.message.info {
+    background-color: #dbeafe; /* Light blue background */
+    color: #1e40af; /* Dark blue text */
+    border-color: #bfdbfe;
+}

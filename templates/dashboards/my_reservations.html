@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/my_reservations.css' %}?v=1.1">
+    <link rel="stylesheet" href="{% static 'css/my_reservations.css' %}?v=1.5">
 {% endblock %}
 
 {% block content %}
@@ -16,28 +16,28 @@
     </ul>
 {% endif %}
 
-<!-- Section for Available Reservations -->
 <h2 class="section-title">Available for Pickup</h2>
 <div class="reservations-grid">
     {% for item in reservations %}
-    <div class="reservation-card">
+    <div class="reservation-card" 
+         data-id="{{ item.id }}" 
+         data-name="{{ item.product_name }}"
+         data-size="{{ item.product_size|default:'' }}"
+         data-description="{{ item.product_description|default:'No description available.' }}"
+         data-image-url="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}"
+         data-quantity="{{ item.quantity }}"
+         data-total-price="{% widthratio item.product_price 1 item.quantity as total %}{{ total|floatformat:2 }}"
+         data-created-at="{{ item.created_at|date:'M d, Y' }}"
+         data-expires-at="{{ item.expires_at|date:'M d, Y' }}">
+        
         <img src="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ item.product_name }}" class="product-image">
         <div class="card-body">
-            <h3 class="product-name">{{ item.product_name }}</h3>
+            <h3 class="product-name">{{ item.product_name }}{% if item.product_size %} - {{ item.product_size }}{% endif %}</h3>
             <div class="details-grid">
                 <span>Quantity:</span><strong>{{ item.quantity }}</strong>
                 <span>Total Price:</span><strong>₱{% widthratio item.product_price 1 item.quantity as total %}{{ total|floatformat:2 }}</strong>
-                <span>Payment:</span><strong>Cash</strong>
-                <span>Reserved On:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
                 <span>Expires On:</span><strong>{{ item.expires_at|date:"M d, Y" }}</strong>
             </div>
-            <button class="btn btn-primary checkout-btn" 
-                    data-id="{{ item.id }}" 
-                    data-name="{{ item.product_name }}" 
-                    data-quantity="{{ item.quantity }}"
-                    data-price="{% widthratio item.product_price 1 item.quantity %}">
-                Check Out
-            </button>
         </div>
     </div>
     {% empty %}
@@ -45,18 +45,26 @@
     {% endfor %}
 </div>
 
-<!-- Section for Out-of-Stock Backorders -->
 <h2 class="section-title">Pending Backorders</h2>
 <div class="reservations-grid">
     {% for item in backorders %}
-    <div class="reservation-card backorder">
+    <div class="reservation-card backorder"
+         data-id="{{ item.id }}"
+         data-name="{{ item.product_name }}"
+         data-size="{{ item.product_size|default:'' }}"
+         data-description="{{ item.product_description|default:'No description available.' }}"
+         data-image-url="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}"
+         data-quantity="{{ item.quantity }}"
+         data-total-price="{% widthratio item.product_price 1 item.quantity as total %}{{ total|floatformat:2 }}"
+         data-created-at="{{ item.created_at|date:'M d, Y' }}"
+         data-status="{% if item.product_stock_quantity > 0 %}available{% else %}unavailable{% endif %}">
+        
         <img src="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ item.product_name }}" class="product-image">
         <div class="card-body">
-            <h3 class="product-name">{{ item.product_name }}</h3>
+            <h3 class="product-name">{{ item.product_name }}{% if item.product_size %} - {{ item.product_size }}{% endif %}</h3>
             <div class="details-grid">
                 <span>Quantity:</span><strong>{{ item.quantity }}</strong>
                 <span>Est. Price:</span><strong>₱{% widthratio item.product_price 1 item.quantity as total %}{{ total|floatformat:2 }}</strong>
-                <span>Reserved On:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
                 <span>Status:</span>
                 {% if item.product_stock_quantity > 0 %}
                     <strong class="status-available">Now Available!</strong>
@@ -64,9 +72,6 @@
                     <strong class="status-unavailable">Out of Stock</strong>
                 {% endif %}
             </div>
-            {% if item.product_stock_quantity > 0 %}
-                <p class="instructions">This item is back in stock! You can now reserve or buy it from the "Browse Products" page.</p>
-            {% endif %}
         </div>
     </div>
     {% empty %}
@@ -74,8 +79,62 @@
     {% endfor %}
 </div>
 
+<div id="reservation-details-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header"><h2>Reservation Details</h2><span class="close-btn">&times;</span></div>
+        <div class="modal-body">
+            <div class="details-layout">
+                <div class="details-image-container">
+                    <img id="res-details-image" src="" alt="Product Image" class="details-image">
+                </div>
+                <div class="details-info">
+                    <h3 id="res-details-name" class="details-name"></h3>
+                    <p id="res-details-description" class="details-description"></p>
+                    <div class="details-summary-grid">
+                        <span>Quantity:</span><strong id="res-details-quantity"></strong>
+                        <span>Total Price:</span><strong id="res-details-total-price"></strong>
+                        <span>Payment:</span><strong>Cash on Pickup</strong>
+                        <span>Reserved On:</span><strong id="res-details-created-at"></strong>
+                        <span>Expires On:</span><strong id="res-details-expires-at"></strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" id="res-cancel-btn">Cancel Reservation</button>
+            <button type="button" class="btn btn-primary" id="res-checkout-btn">Check Out</button>
+        </div>
+    </div>
+</div>
 
-<!-- Checkout Confirmation Modal -->
+<div id="backorder-details-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header"><h2>Backorder Details</h2><span class="close-btn">&times;</span></div>
+        <div class="modal-body">
+            <div class="details-layout">
+                <div class="details-image-container">
+                    <img id="bo-details-image" src="" alt="Product Image" class="details-image">
+                </div>
+                <div class="details-info">
+                    <h3 id="bo-details-name" class="details-name"></h3>
+                    <p id="bo-details-description" class="details-description"></p>
+                    <div class="details-summary-grid">
+                        <span>Quantity:</span><strong id="bo-details-quantity"></strong>
+                        <span>Est. Price:</span><strong id="bo-details-total-price"></strong>
+                        <span>Reserved On:</span><strong id="bo-details-created-at"></strong>
+                        <span>Status:</span><strong id="bo-details-status"></strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" id="bo-cancel-btn">Cancel Backorder</button>
+            <button type="button" class="btn btn-primary" id="bo-checkout-btn" style="display: none;">Check Out</button>
+        </div>
+    </div>
+</div>
+
+
 <div id="checkout-modal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header"><h2>Confirm Check Out</h2><span class="close-btn">&times;</span></div>
@@ -92,8 +151,27 @@
                 <p>This will convert your reservation into a formal order. Proceed?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-secondary cancel-modal-btn">Cancel</button>
                 <button type="submit" class="btn btn-primary">Confirm Check Out</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="cancel-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header"><h2>Confirm Cancellation</h2><span class="close-btn">&times;</span></div>
+        <form id="cancel-form" method="post"> {% csrf_token %}
+            <div class="modal-body">
+                <p>Are you sure you want to cancel your reservation for:</p>
+                <div class="summary">
+                    <p><strong>Product:</strong> <span id="cancel-product-name"></span></p>
+                </div>
+                <p>This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary cancel-modal-btn">Keep Reservation</button>
+                <button type="submit" class="btn btn-danger">Yes, Cancel It</button>
             </div>
         </form>
     </div>
@@ -103,27 +181,125 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Get All Modals ---
+    const detailsModal = document.getElementById('reservation-details-modal');
+    const backorderModal = document.getElementById('backorder-details-modal');
     const checkoutModal = document.getElementById('checkout-modal');
-    if (!checkoutModal) return;
+    const cancelModal = document.getElementById('cancel-modal');
 
-    const openModal = () => checkoutModal.style.display = 'flex';
-    const closeModal = () => checkoutModal.style.display = 'none';
+    // --- General Modal Controls ---
+    const openModal = (modal) => modal.style.display = 'flex';
+    const closeModal = (modal) => modal.style.display = 'none';
+    document.querySelectorAll('.close-btn, .cancel-modal-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeModal(btn.closest('.modal'));
+        });
+    });
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) closeModal(e.target);
+    });
 
-    document.querySelectorAll('.checkout-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            const data = button.dataset;
-            checkoutModal.querySelector('#checkout-reservation-id').value = data.id;
-            checkoutModal.querySelector('#checkout-product-name').textContent = data.name;
-            checkoutModal.querySelector('#checkout-quantity').textContent = data.quantity;
-            checkoutModal.querySelector('#checkout-price').textContent = `₱${parseFloat(data.price).toFixed(2)}`;
-            openModal();
+    // --- Logic for "Available for Pickup" cards ---
+    document.querySelectorAll('.reservation-card:not(.backorder)').forEach(card => {
+        card.addEventListener('click', () => {
+            const data = card.dataset;
+            const resNameEl = detailsModal.querySelector('#res-details-name');
+            
+            detailsModal.querySelector('#res-details-image').src = data.imageUrl;
+            resNameEl.textContent = data.size ? `${data.name} - ${data.size}` : data.name;
+            detailsModal.querySelector('#res-details-description').textContent = data.description;
+            detailsModal.querySelector('#res-details-quantity').textContent = data.quantity;
+            detailsModal.querySelector('#res-details-total-price').textContent = `₱${data.totalPrice}`;
+            detailsModal.querySelector('#res-details-created-at').textContent = data.createdAt;
+            detailsModal.querySelector('#res-details-expires-at').textContent = data.expiresAt;
+            
+            const checkoutBtn = detailsModal.querySelector('#res-checkout-btn');
+            const cancelBtn = detailsModal.querySelector('#res-cancel-btn');
+            Object.assign(checkoutBtn.dataset, data);
+            Object.assign(cancelBtn.dataset, data);
+            
+            openModal(detailsModal);
         });
     });
 
-    checkoutModal.querySelector('.close-btn').addEventListener('click', closeModal);
-    checkoutModal.querySelector('.cancel-btn').addEventListener('click', closeModal);
-    window.addEventListener('click', (e) => { if (e.target === checkoutModal) closeModal(); });
+    // --- Logic for "Pending Backorders" cards ---
+    document.querySelectorAll('.reservation-card.backorder').forEach(card => {
+        card.addEventListener('click', () => {
+            const data = card.dataset;
+            const boNameEl = backorderModal.querySelector('#bo-details-name');
+
+            backorderModal.querySelector('#bo-details-image').src = data.imageUrl;
+            boNameEl.textContent = data.size ? `${data.name} - ${data.size}` : data.name;
+            backorderModal.querySelector('#bo-details-description').textContent = data.description;
+            backorderModal.querySelector('#bo-details-quantity').textContent = data.quantity;
+            backorderModal.querySelector('#bo-details-total-price').textContent = `₱${data.totalPrice}`;
+            backorderModal.querySelector('#bo-details-created-at').textContent = data.createdAt;
+            
+            const statusEl = backorderModal.querySelector('#bo-details-status');
+            const checkoutBtn = backorderModal.querySelector('#bo-checkout-btn');
+            const cancelBtn = backorderModal.querySelector('#bo-cancel-btn');
+
+            if (data.status === 'available') {
+                statusEl.textContent = 'Now Available!';
+                statusEl.className = 'status-available';
+                checkoutBtn.style.display = 'inline-block';
+            } else {
+                statusEl.textContent = 'Out of Stock';
+                statusEl.className = 'status-unavailable';
+                checkoutBtn.style.display = 'none';
+            }
+            
+            Object.assign(checkoutBtn.dataset, data);
+            Object.assign(cancelBtn.dataset, data);
+
+            openModal(backorderModal);
+        });
+    });
+
+    // --- Reroute clicks from details modals to confirmation modals ---
+    document.getElementById('res-checkout-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeModal(detailsModal);
+        openCheckoutModal(this.dataset);
+    });
+    document.getElementById('res-cancel-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeModal(detailsModal);
+        openCancelModal(this.dataset);
+    });
+    
+    document.getElementById('bo-checkout-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeModal(backorderModal);
+        openCheckoutModal(this.dataset);
+    });
+    document.getElementById('bo-cancel-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeModal(backorderModal);
+        openCancelModal(this.dataset);
+    });
+
+    // --- Helper functions to open confirmation modals ---
+    function openCheckoutModal(data) {
+        const checkoutNameEl = checkoutModal.querySelector('#checkout-product-name');
+        checkoutNameEl.textContent = data.size ? `${data.name} - ${data.size}` : data.name;
+
+        checkoutModal.querySelector('#checkout-reservation-id').value = data.id;
+        checkoutModal.querySelector('#checkout-quantity').textContent = data.quantity;
+        checkoutModal.querySelector('#checkout-price').textContent = `₱${parseFloat(data.totalPrice).toFixed(2)}`;
+        openModal(checkoutModal);
+    }
+    
+    function openCancelModal(data) {
+        const form = cancelModal.querySelector('#cancel-form');
+        form.action = `/dashboard/student/cancel-reservation/${data.id}/`; 
+        
+        const cancelNameEl = cancelModal.querySelector('#cancel-product-name');
+        cancelNameEl.textContent = data.size ? `${data.name} - ${data.size}` : data.name;
+
+        openModal(cancelModal);
+    }
 });
 </script>
 {% endblock %}
-

@@ -52,3 +52,33 @@
 @media (max-width: 992px) {
     .reports-grid { grid-template-columns: 1fr; }
 }
+
+.report-section, .low-stock-section {
+    margin-bottom: 3rem;
+}
+
+.report-section h2, .low-stock-section h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.stock-highlight {
+    background-color: #fefce8;
+    color: #a16207;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 13px;
+    border: 1px solid #fef9c3;
+}
+
+.status-highlight-unavailable {
+    background-color: #fee2e2;
+    color: #991b1b;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 13px;
+    border: 1px solid #fecaca;
+}
