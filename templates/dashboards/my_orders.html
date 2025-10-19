@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/my_orders.css' %}?v=1.2">
+    <link rel="stylesheet" href="{% static 'css/my_orders.css' %}?v=1.5">
 {% endblock %}
 
 {% block content %}
@@ -16,103 +16,426 @@
     </ul>
 {% endif %}
 
-<!-- Section for Approved Orders -->
-<h2 class="section-title">Approved (Ready for Pickup)</h2>
-<div class="orders-grid">
-    {% for item in approved_orders %}
-    <div class="order-card">
-        <img src="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ item.product_name }}" class="product-image">
-        <div class="card-body">
-            <div class="card-header">
-                <h3 class="product-name">{{ item.product_name }}</h3>
-                <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
-            </div>
-            <div class="details-grid">
-                <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
-                <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong> <!-- ✅ ADDED -->
-                <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
-                <span>Payment:</span><strong>{{ item.payment_method|default:'Cash'|title }}</strong>
-            </div>
-            <div class="info-note">
-                <p>Claim your product at the Custodian Department within 3 days after it has been approved. Unclaimed items will be forfeited.</p>
-            </div>
-        </div>
-    </div>
-    {% empty %}
-        <p class="no-items-message">You have no orders ready for pickup.</p>
-    {% endfor %}
+<div class="search-container">
+    <input type="search" id="order-search-input" class="search-input"
+           placeholder="Search by name, category, or status (approved, pending, completed, cancelled, rejected)..."
+           value="{{ search_query }}">
 </div>
 
-<!-- Section for Pending Orders -->
-<h2 class="section-title">Pending Orders</h2>
-<div class="orders-grid">
-    {% for item in pending_orders %}
-    <div class="order-card">
-        <img src="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ item.product_name }}" class="product-image">
-        <div class="card-body">
-            <div class="card-header">
-                <h3 class="product-name">{{ item.product_name }}</h3>
-                <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
+<form id="batch-order-form" method="POST" action="{% url 'batch_delete_orders' %}">
+    {% csrf_token %}
+    <input type="hidden" name="order_ids" id="batch-order-ids">
+
+    <section class="order-section" data-section-status="approved">
+        <h2 class="section-title">Approved (Ready for Pickup)</h2>
+        <div class="orders-grid">
+            {% for item in approved_orders %}
+            <div class="order-card"
+                 data-id="{{ item.id }}"
+                 data-name="{{ item.product_name }}"
+                 data-size="{{ item.product_size|default:'' }}"
+                 data-category="{{ item.product_category|default:'N/A' }}"
+                 data-description="{{ item.product_description|default:'No description available.' }}"
+                 data-image-url="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}"
+                 data-quantity="{{ item.quantity }}"
+                 data-total-price="{{ item.total_price|floatformat:2 }}"
+                 data-payment-method="{{ item.payment_method|default:'Cash'|title }}"
+                 data-created-at="{{ item.created_at|date:'M d, Y' }}"
+                 data-status="{{ item.status }}">
+
+                <img src="{{ item.product_image_url|default:'...' }}" alt="{{ item.product_name }}" class="product-image">
+                <div class="card-body">
+                     <div class="card-header">
+                          <h3 class="product-name">{{ item.product_name }}{% if item.product_size %} - {{ item.product_size }}{% endif %}</h3>
+                         <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
+                     </div>
+                     <div class="details-grid">
+                         <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
+                         <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong>
+                         <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
+                     </div>
+                      <div class="info-note">
+                          <p>Claim your product at the Custodian Department within 3 days after it has been approved. Unclaimed items will be forfeited.</p>
+                      </div>
+                </div>
             </div>
-            <div class="details-grid">
-                <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
-                <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong> <!-- ✅ ADDED -->
-                <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
-                <span>Payment:</span><strong>{{ item.payment_method|default:'Cash'|title }}</strong>
-            </div>
+            {% empty %} <p class="no-items-message">You have no orders ready for pickup.</p> {% endfor %}
         </div>
-    </div>
-    {% empty %}
-        <p class="no-items-message">You have no pending orders.</p>
-    {% endfor %}
+    </section>
+
+    <section class="order-section" data-section-status="pending">
+        <h2 class="section-title">Pending Orders</h2>
+        <div class="orders-grid">
+            {% for item in pending_orders %}
+             <div class="order-card" data-id="{{ item.id }}" data-name="{{ item.product_name }}" data-size="{{ item.product_size|default:'' }}" data-category="{{ item.product_category|default:'N/A' }}" data-description="{{ item.product_description|default:'No description available.' }}" data-image-url="{{ item.product_image_url|default:'...' }}" data-quantity="{{ item.quantity }}" data-total-price="{{ item.total_price|floatformat:2 }}" data-payment-method="{{ item.payment_method|default:'Cash'|title }}" data-created-at="{{ item.created_at|date:'M d, Y' }}" data-status="{{ item.status }}">
+                <img src="{{ item.product_image_url|default:'...' }}" alt="{{ item.product_name }}" class="product-image">
+                 <div class="card-body">
+                     <div class="card-header">
+                          <h3 class="product-name">{{ item.product_name }}{% if item.product_size %} - {{ item.product_size }}{% endif %}</h3>
+                         <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
+                     </div>
+                     <div class="details-grid">
+                          <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
+                          <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong>
+                          <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
+                     </div>
+                 </div>
+            </div>
+            {% empty %} <p class="no-items-message">You have no pending orders.</p> {% endfor %}
+        </div>
+    </section>
+
+    <section class="order-section" data-section-status="completed">
+        <h2 class="section-title">Completed Orders</h2>
+        {% if completed_orders %}
+        <div class="select-all-container">
+            <input type="checkbox" id="select-all-completed" class="select-all-checkbox" data-section="completed">
+            <label for="select-all-completed">Select All Completed</label>
+        </div>
+        {% endif %}
+        <div class="orders-grid completed-grid">
+            {% for item in completed_orders %}
+             <div class="order-card history" data-id="{{ item.id }}" data-name="{{ item.product_name }}" data-size="{{ item.product_size|default:'' }}" data-category="{{ item.product_category|default:'N/A' }}" data-description="{{ item.product_description|default:'...' }}" data-image-url="{{ item.product_image_url|default:'...' }}" data-quantity="{{ item.quantity }}" data-total-price="{{ item.total_price|floatformat:2 }}" data-payment-method="{{ item.payment_method|default:'Cash'|title }}" data-created-at="{{ item.created_at|date:'M d, Y' }}" data-status="{{ item.status }}">
+                 <input type="checkbox" class="order-checkbox completed-checkbox" value="{{ item.id }}">
+                <img src="{{ item.product_image_url|default:'...' }}" alt="{{ item.product_name }}" class="product-image">
+                 <div class="card-body">
+                     <div class="card-header">
+                          <h3 class="product-name">{{ item.product_name }}{% if item.product_size %} - {{ item.product_size }}{% endif %}</h3>
+                         <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
+                     </div>
+                     <div class="details-grid">
+                          <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
+                          <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong>
+                          <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
+                     </div>
+                 </div>
+            </div>
+            {% empty %} <p class="no-items-message">You have no completed orders.</p> {% endfor %}
+        </div>
+    </section>
+
+    <section class="order-section" data-section-status="cancelled rejected">
+        <h2 class="section-title">Cancelled or Rejected Orders</h2>
+        {% if other_orders %}
+        <div class="select-all-container">
+            <input type="checkbox" id="select-all-other" class="select-all-checkbox" data-section="other">
+            <label for="select-all-other">Select All Cancelled/Rejected</label>
+        </div>
+        {% endif %}
+        <div class="orders-grid other-grid">
+            {% for item in other_orders %}
+            <div class="order-card history" data-id="{{ item.id }}" data-name="{{ item.product_name }}" data-size="{{ item.product_size|default:'' }}" data-category="{{ item.product_category|default:'N/A' }}" data-description="{{ item.product_description|default:'...' }}" data-image-url="{{ item.product_image_url|default:'...' }}" data-quantity="{{ item.quantity }}" data-total-price="{{ item.total_price|floatformat:2 }}" data-payment-method="{{ item.payment_method|default:'Cash'|title }}" data-created-at="{{ item.created_at|date:'M d, Y' }}" data-status="{{ item.status }}">
+                 <input type="checkbox" class="order-checkbox other-checkbox" value="{{ item.id }}">
+                <img src="{{ item.product_image_url|default:'...' }}" alt="{{ item.product_name }}" class="product-image">
+                 <div class="card-body">
+                     <div class="card-header">
+                          <h3 class="product-name">{{ item.product_name }}{% if item.product_size %} - {{ item.product_size }}{% endif %}</h3>
+                         <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
+                     </div>
+                     <div class="details-grid">
+                          <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
+                          <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong>
+                          <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
+                     </div>
+                 </div>
+            </div>
+            {% empty %} <p class="no-items-message">You have no cancelled or rejected orders.</p> {% endfor %}
+        </div>
+    </section>
+</form>
+
+<div id="batch-action-bar" class="batch-action-bar" style="display: none;">
+    <span id="selected-count">0 items selected</span>
+    <button type="button" class="btn btn-danger" id="batch-delete-btn">Delete Selected</button>
 </div>
 
-<!-- Section for Order History -->
-<h2 class="section-title">Completed Orders</h2>
-<div class="orders-grid">
-    {% for item in completed_orders %}
-    <div class="order-card history">
-        <img src="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ item.product_name }}" class="product-image">
-        <div class="card-body">
-            <div class="card-header">
-                <h3 class="product-name">{{ item.product_name }}</h3>
-                <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
-            </div>
-            <div class="details-grid">
-                <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
-                <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong> <!-- ✅ ADDED -->
-                <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
-                <span>Payment:</span><strong>{{ item.payment_method|default:'Cash'|title }}</strong>
+
+<div id="order-details-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header"><h2>Order Details</h2><span class="close-btn">&times;</span></div>
+        <div class="modal-body">
+            <div class="details-layout">
+                <div class="details-image-container"> <img id="details-image" src="" alt="Product Image" class="details-image"> </div>
+                <div class="details-info">
+                    <h3 id="details-name" class="details-name"></h3>
+                    <p><strong>Category:</strong> <span id="details-category"></span></p>
+                    <p id="details-description" class="details-description"></p>
+                    <div class="details-summary-grid">
+                        <span>Date Ordered:</span><strong id="details-created-at"></strong>
+                        <span>Quantity:</span><strong id="details-quantity"></strong>
+                        <span>Total Price:</span><strong id="details-total-price"></strong>
+                        <span>Payment Method:</span><strong id="details-payment-method"></strong>
+                        <span>Status:</span><strong id="details-status-text"></strong>
+                    </div>
+                     <div class="info-note" id="details-claim-note" style="display: none;"> <p>Claim your product at the Custodian Department within 3 days after it has been approved. Unclaimed items will be forfeited.</p> </div>
+                </div>
             </div>
         </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary cancel-modal-btn">Close</button>
+            <button type="button" class="btn btn-danger" id="details-delete-btn" style="display: none;">Delete Order</button>
+        </div>
     </div>
-    {% empty %}
-        <p class="no-items-message">You have no completed orders.</p>
-    {% endfor %}
 </div>
 
-<!-- ✅ NEW: Section for Cancelled or Rejected Orders -->
-<h2 class="section-title">Cancelled or Rejected Orders</h2>
-<div class="orders-grid">
-    {% for item in other_orders %}
-    <div class="order-card history">
-        <img src="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ item.product_name }}" class="product-image">
-        <div class="card-body">
-            <div class="card-header">
-                <h3 class="product-name">{{ item.product_name }}</h3>
-                <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
-            </div>
-            <div class="details-grid">
-                <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
-                <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong> <!-- ✅ ADDED -->
-                <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
-                <span>Payment:</span><strong>{{ item.payment_method|default:'Cash'|title }}</strong>
-            </div>
+<div id="batch-delete-confirm-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header"><h2>Confirm Batch Deletion</h2><span class="close-btn">&times;</span></div>
+        <div class="modal-body">
+            <p>Are you sure you want to permanently delete <strong id="batch-delete-count">0</strong> order(s)?</p>
+            <p>This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary cancel-modal-btn">Cancel</button>
+            <button type="button" class="btn btn-danger" id="confirm-batch-delete-btn">Yes, Delete Selected</button>
         </div>
     </div>
-    {% empty %}
-        <p class="no-items-message">You have no cancelled or rejected orders.</p>
-    {% endfor %}
 </div>
+
+<div id="delete-confirm-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header"><h2>Confirm Deletion</h2><span class="close-btn">&times;</span></div>
+        <form id="delete-single-order-form" method="post">
+            {% csrf_token %}
+            <div class="modal-body">
+                <p>Are you sure you want to permanently delete the order for:</p>
+                <div class="summary">
+                    <p><strong>Product:</strong> <span id="delete-confirm-product-name"></span></p>
+                </div>
+                <p>This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary cancel-modal-btn">Cancel</button>
+                <button type="submit" class="btn btn-danger">Yes, Delete Order</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
 {% endblock %}
 
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Get Modals & Elements ---
+    const detailsModal = document.getElementById('order-details-modal');
+    const deleteConfirmModal = document.getElementById('delete-confirm-modal');
+    const batchDeleteConfirmModal = document.getElementById('batch-delete-confirm-modal');
+    const batchActionBar = document.getElementById('batch-action-bar');
+    const selectedCountSpan = document.getElementById('selected-count');
+    const batchDeleteBtn = document.getElementById('batch-delete-btn');
+    const batchForm = document.getElementById('batch-order-form');
+    const batchOrderIdsInput = document.getElementById('batch-order-ids');
+    const allOrderCards = document.querySelectorAll('.order-card');
+
+    // Checkboxes
+    const allOrderCheckboxes = document.querySelectorAll('.order-checkbox');
+    const selectAllCompletedCheckbox = document.getElementById('select-all-completed');
+    const completedCheckboxes = document.querySelectorAll('.completed-checkbox');
+    const selectAllOtherCheckbox = document.getElementById('select-all-other');
+    const otherCheckboxes = document.querySelectorAll('.other-checkbox');
+
+    // --- General Modal Controls ---
+    const openModal = (modal) => modal.style.display = 'flex';
+    const closeModal = (modal) => modal.style.display = 'none';
+    document.querySelectorAll('.close-btn, .cancel-modal-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeModal(btn.closest('.modal'));
+        });
+    });
+    window.addEventListener('click', (e) => {
+        // Check if the modal exists before trying to close it
+        if (e.target.classList.contains('modal') && e.target) { 
+             closeModal(e.target);
+        }
+    });
+
+    // --- Search Functionality ---
+    const searchInput = document.getElementById('order-search-input');
+    const orderSections = document.querySelectorAll('.order-section');
+    function filterOrders() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        let anyCardVisibleOverall = false;
+        orderSections.forEach(section => {
+            let sectionHasVisibleCards = false;
+            const sectionStatus = section.dataset.sectionStatus.toLowerCase();
+            section.querySelectorAll('.order-card').forEach(card => {
+                const productName = card.dataset.name.toLowerCase();
+                const category = card.dataset.category.toLowerCase();
+                const status = card.dataset.status.toLowerCase();
+                const cardMatches = productName.includes(searchTerm) || category.includes(searchTerm) || status.includes(searchTerm) || sectionStatus.split(' ').some(s => s.includes(searchTerm));
+                card.style.display = cardMatches ? 'flex' : 'none';
+                if (cardMatches) { sectionHasVisibleCards = true; anyCardVisibleOverall = true; }
+            });
+            section.style.display = sectionHasVisibleCards ? 'block' : 'none';
+        });
+    }
+    searchInput.addEventListener('input', filterOrders);
+    if (searchInput.value) filterOrders();
+
+    // --- Order Details Modal Logic ---
+    allOrderCards.forEach(card => {
+        const checkbox = card.querySelector('.order-checkbox');
+        if (checkbox) checkbox.addEventListener('click', (e) => e.stopPropagation());
+
+        card.addEventListener('click', () => {
+            // Check if the detailsModal actually exists before proceeding
+            if (!detailsModal) {
+                 console.error("Details modal not found!");
+                 return; 
+            }
+            
+            const data = card.dataset;
+            detailsModal.querySelector('#details-image').src = data.imageUrl;
+            const nameEl = detailsModal.querySelector('#details-name');
+            nameEl.textContent = data.size ? `${data.name} - ${data.size}` : data.name;
+            detailsModal.querySelector('#details-category').textContent = data.category;
+            detailsModal.querySelector('#details-description').textContent = data.description;
+            detailsModal.querySelector('#details-created-at').textContent = data.createdAt;
+            detailsModal.querySelector('#details-quantity').textContent = `${data.quantity} pc(s)`;
+            detailsModal.querySelector('#details-total-price').textContent = `₱${data.totalPrice}`;
+            detailsModal.querySelector('#details-payment-method').textContent = data.paymentMethod;
+
+            const statusTextEl = detailsModal.querySelector('#details-status-text');
+            statusTextEl.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+            statusTextEl.innerHTML = `<span class="status-badge status-${data.status}">${statusTextEl.textContent}</span>`;
+
+            const claimNote = detailsModal.querySelector('#details-claim-note');
+            claimNote.style.display = (data.status === 'approved') ? 'block' : 'none';
+
+            const deleteBtn = detailsModal.querySelector('#details-delete-btn');
+             if (deleteBtn) { // Check if delete button exists
+                 if (['completed', 'cancelled', 'rejected'].includes(data.status)) {
+                     deleteBtn.style.display = 'inline-block';
+                     deleteBtn.dataset.id = data.id;
+                     deleteBtn.dataset.name = data.name;
+                     deleteBtn.dataset.size = data.size;
+                 } else {
+                     deleteBtn.style.display = 'none';
+                 }
+            }
+
+            openModal(detailsModal);
+        });
+    });
+
+    // --- Event Listener for the Delete Button in Details Modal ---
+    const detailsDeleteBtn = document.getElementById('details-delete-btn');
+    if (detailsDeleteBtn) {
+        detailsDeleteBtn.addEventListener('click', function(e) {
+            e.stopPropagation(); 
+            // Check if deleteConfirmModal exists before trying to open
+            if (deleteConfirmModal) {
+                 closeModal(detailsModal);
+                 openDeleteConfirmModal(this.dataset);
+            } else {
+                 console.error("Delete confirmation modal not found!");
+            }
+        });
+    }
+
+    // --- Batch Action Logic ---
+    function updateBatchActionBar() {
+        const selectedCheckboxes = document.querySelectorAll('.order-checkbox:checked');
+        const count = selectedCheckboxes.length;
+        if (batchActionBar) { // Check if batch bar exists
+             if (count > 0) {
+                 batchActionBar.style.display = 'flex';
+                 selectedCountSpan.textContent = `${count} item${count > 1 ? 's' : ''} selected`;
+             } else {
+                 batchActionBar.style.display = 'none';
+             }
+        }
+        allOrderCheckboxes.forEach(cb => {
+            cb.closest('.order-card').classList.toggle('selected', cb.checked);
+        });
+    }
+    if (selectAllCompletedCheckbox) {
+        selectAllCompletedCheckbox.addEventListener('change', () => {
+            completedCheckboxes.forEach(cb => cb.checked = selectAllCompletedCheckbox.checked);
+            updateBatchActionBar();
+        });
+    }
+    if (selectAllOtherCheckbox) {
+        selectAllOtherCheckbox.addEventListener('change', () => {
+            otherCheckboxes.forEach(cb => cb.checked = selectAllOtherCheckbox.checked);
+            updateBatchActionBar();
+        });
+    }
+    allOrderCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            if (!checkbox.checked) {
+                if (checkbox.classList.contains('completed-checkbox') && selectAllCompletedCheckbox) selectAllCompletedCheckbox.checked = false;
+                if (checkbox.classList.contains('other-checkbox') && selectAllOtherCheckbox) selectAllOtherCheckbox.checked = false;
+            }
+            updateBatchActionBar();
+        });
+    });
+    if (batchDeleteBtn) {
+        batchDeleteBtn.addEventListener('click', () => {
+            const selectedIds = Array.from(document.querySelectorAll('.order-checkbox:checked')).map(cb => cb.value);
+            const count = selectedIds.length;
+
+            if (count === 0) {
+                alert('Please select at least one order to delete.');
+                return;
+            }
+
+            // Populate the batch delete confirmation modal
+            if (batchDeleteConfirmModal) {
+                 batchDeleteConfirmModal.querySelector('#batch-delete-count').textContent = count;
+                 // Store IDs on the confirm button inside the modal
+                 const confirmBtn = batchDeleteConfirmModal.querySelector('#confirm-batch-delete-btn');
+                 if(confirmBtn) {
+                    confirmBtn.dataset.ids = selectedIds.join(',');
+                 }
+                 openModal(batchDeleteConfirmModal);
+            } else {
+                 console.error("Batch delete confirmation modal not found!");
+                 // Fallback to default confirm if modal is missing (optional)
+                 // if (confirm(`Are you sure...?`)) { submitBatchDelete(selectedIds); }
+            }
+        });
+    }
+
+    // ✅ NEW: Event Listener for the CONFIRM Batch Delete Button (inside the new modal)
+    const confirmBatchDeleteBtn = document.getElementById('confirm-batch-delete-btn');
+    if (confirmBatchDeleteBtn) {
+        confirmBatchDeleteBtn.addEventListener('click', function() {
+            const idsToSubmit = this.dataset.ids;
+            if (idsToSubmit) {
+                submitBatchDelete(idsToSubmit);
+            } else {
+                console.error("No IDs found to submit for batch delete.");
+                closeModal(batchDeleteConfirmModal); // Close modal on error
+            }
+        });
+    }
+
+    // ✅ NEW: Helper function to submit the batch delete form
+    function submitBatchDelete(idsString) {
+        batchOrderIdsInput.value = idsString;
+        batchForm.submit();
+        // No need to close modal here, page will reload on form submission
+    }
+    updateBatchActionBar(); 
+
+    // --- Helper Function to Open Delete Confirmation Modal ---
+    function openDeleteConfirmModal(data) {
+         // Check if modal exists before accessing its elements
+         if (!deleteConfirmModal) {
+              console.error("Cannot open delete confirmation modal - it was not found.");
+              return;
+         }
+        const form = deleteConfirmModal.querySelector('#delete-single-order-form');
+        form.action = `/dashboard/student/delete-order/${data.id}/`; 
+        const confirmNameEl = deleteConfirmModal.querySelector('#delete-confirm-product-name');
+        confirmNameEl.textContent = data.size ? `${data.name} - ${data.size}` : data.name; 
+        openModal(deleteConfirmModal);
+    }
+});
+</script>
+{% endblock %}

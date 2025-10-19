@@ -12,6 +12,9 @@ urlpatterns = [
     path('student/checkout-reservation/', views.checkout_reservation_view, name='checkout_reservation'),
     path('student/profile/', views.student_profile_view, name='student_profile'), 
     path('student/cancel-reservation/<int:reservation_id>/', views.cancel_reservation_view, name='cancel_reservation'),
+    path('student/batch-delete-orders/', views.batch_delete_orders_view, name='batch_delete_orders'),
+    path('student/delete-order/<int:order_id>/', views.delete_single_order_view, name='delete_single_order'),
+
 
    
     # --- Admin URLs ---
@@ -27,5 +30,6 @@ urlpatterns = [
     path('admin/update-order-status/<int:order_id>/', views.update_order_status, name='update_order_status'),
     path('admin/delete-order/<int:order_id>/', views.delete_order_view, name='delete_order'),
     path('admin/reports/', views.reports_view, name='reports'),
+    path('admin/batch-delete-orders/', views.admin_batch_delete_orders_view, name='admin_batch_delete_orders'),
 ]
 

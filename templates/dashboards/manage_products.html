@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/manage_products.css' %}?v=1.3">
+<link rel="stylesheet" href="{% static 'css/manage_products.css' %}?v=1.4"> {# ✅ Version bumped #}
 {% endblock %}
 
 {% block content %}
@@ -12,10 +12,10 @@
 </div>
 
 <div class="page-controls">
-    <form method="GET" action="{% url 'manage_products' %}" class="search-form">
-        <input type="text" name="search" class="search-input" placeholder="Search by product name or category..." value="{{ search_query }}">
-        <button type="submit" class="btn search-btn">Search</button>
-    </form>
+    <div class="search-form"> <input type="search" id="product-search-input" class="search-input" 
+               placeholder="Filter by name, category, or status (e.g., 'low stock', 'available')..." 
+               value=""> {# Removed server-side value #}
+    </div>
 </div>
 
 <form id="batch-action-form" method="POST" action="{% url 'batch_update_products' %}">
@@ -37,9 +37,13 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="product-table-body">
                 {% for product in products %}
-                <tr class="{% if not product.is_available %}unavailable-row{% elif product.stock_quantity < 10 and product.stock_quantity > 0 %}low-stock-row{% endif %}">
+                <tr class="product-row {% if not product.is_available %}unavailable-row{% elif product.stock_quantity < 10 and product.stock_quantity > 0 %}low-stock-row{% endif %}"
+                    data-name="{{ product.name|lower }}"
+                    data-category="{{ product.category|default:''|lower }}"
+                    data-status="{% if product.stock_quantity < 10 and product.stock_quantity > 0 %}low stock{% elif product.is_available %}available{% else %}unavailable{% endif %}">
+                    
                     <td><input type="checkbox" class="product-checkbox" value="{{ product.id }}"></td>
                     <td>
                         <img src="{{ product.image_url|default:'https://placehold.co/100x100/e0e7ff/3730a3?text=Item' }}" alt="{{ product.name }}" class="product-thumbnail">
@@ -70,7 +74,7 @@
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <button type="button" class="btn btn-edit" 
+                            <button type="button" class="btn btn-edit"
                                     data-id="{{ product.id }}"
                                     data-name="{{ product.name }}"
                                     data-description="{{ product.description }}"
@@ -89,7 +93,7 @@
                     </td>
                 </tr>
                 {% empty %}
-                <tr>
+                <tr id="initial-empty-row">
                     <td colspan="8" class="no-data-cell">
                         {% if search_query %}
                             No products found for "{{ search_query }}".
@@ -99,6 +103,10 @@
                     </td>
                 </tr>
                 {% endfor %}
+                
+                <tr id="no-results-row" style="display: none;">
+                     <td colspan="8" class="no-data-cell">No products found matching your filter.</td>
+                 </tr>
             </tbody>
         </table>
     </div>
@@ -121,54 +129,54 @@
         <form action="{% url 'add_product' %}" method="post" enctype="multipart/form-data" class="modal-form">
             {% csrf_token %}
             <div class="form-group">
-                <label>Product Name</label>
-                <input type="text" name="product-name" required>
-            </div>
-            <div class="form-group">
-                <label>Category</label>
-                <select name="product-category" class="category-select" required>
-                    <option value="" disabled selected>Select a category</option>
-                    <option value="Uniforms">Uniforms</option>
-                    <option value="Accessories">Accessories</option>
-                    <option value="Office & School Supplies">Office & School Supplies</option>
-                    <option value="Equipment & Tools">Equipment & Tools</option>
-                    <option value="Merchandise & Souvenirs">Merchandise & Souvenirs</option>
-                </select>
-            </div>
-            <div class="form-group size-selection" style="display: none;">
-                <label>Size</label>
-                <select name="product-size">
-                    <option value="XS">XS</option>
-                    <option value="S">S</option>
-                    <option value="M">M</option>
-                    <option value="L">L</option>
-                    <option value="XL">XL</option>
-                    <option value="XXL">XXL</option>
-                </select>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Price (₱)</label>
-                    <input type="number" name="product-price" step="0.01" min="0" required>
-                </div>
-                <div class="form-group">
-                    <label>Stock Quantity</label>
-                    <input type="number" name="stock-quantity" min="0" required>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Description</label>
-                <textarea name="product-description" rows="3" required></textarea>
-            </div>
-            <div class="form-group">
-                <label>Product Image</label>
-                <input type="file" name="product-image" accept="image/*" class="image-upload-input">
-                <img src="https://placehold.co/400x200/f1f5f9/64748b?text=Image+Preview" alt="Preview" class="image-preview">
-            </div>
-            <div class="form-group checkbox-group">
-                <input type="checkbox" name="is_available" id="add-is-available" checked>
-                <label for="add-is-available">Available for Students</label>
-            </div>
+                 <label>Product Name</label>
+                 <input type="text" name="product-name" required>
+             </div>
+             <div class="form-group">
+                 <label>Category</label>
+                 <select name="product-category" class="category-select" required>
+                     <option value="" disabled selected>Select a category</option>
+                     <option value="Uniforms">Uniforms</option>
+                     <option value="Accessories">Accessories</option>
+                     <option value="Office & School Supplies">Office & School Supplies</option>
+                     <option value="Equipment & Tools">Equipment & Tools</option>
+                     <option value="Merchandise & Souvenirs">Merchandise & Souvenirs</option>
+                 </select>
+             </div>
+             <div class="form-group size-selection" style="display: none;">
+                 <label>Size</label>
+                 <select name="product-size">
+                     <option value="XS">XS</option>
+                     <option value="S">S</option>
+                     <option value="M">M</option>
+                     <option value="L">L</option>
+                     <option value="XL">XL</option>
+                     <option value="XXL">XXL</option>
+                 </select>
+             </div>
+             <div class="form-row">
+                 <div class="form-group">
+                     <label>Price (₱)</label>
+                     <input type="number" name="product-price" step="0.01" min="0" required>
+                 </div>
+                 <div class="form-group">
+                     <label>Stock Quantity</label>
+                     <input type="number" name="stock-quantity" min="0" required>
+                 </div>
+             </div>
+             <div class="form-group">
+                 <label>Description</label>
+                 <textarea name="product-description" rows="3" required></textarea>
+             </div>
+             <div class="form-group">
+                 <label>Product Image</label>
+                 <input type="file" name="product-image" accept="image/*" class="image-upload-input">
+                 <img src="https://placehold.co/400x200/f1f5f9/64748b?text=Image+Preview" alt="Preview" class="image-preview">
+             </div>
+             <div class="form-group checkbox-group">
+                 <input type="checkbox" name="is_available" id="add-is-available" checked>
+                 <label for="add-is-available">Available for Students</label>
+             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
                 <button type="submit" class="btn btn-primary">Add Product</button>
@@ -186,55 +194,55 @@
         <form id="edit-product-form" method="post" enctype="multipart/form-data" class="modal-form">
             {% csrf_token %}
             <div class="form-group">
-                <label>Product Name</label>
-                <input type="text" id="edit-product-name" name="product-name" required>
-            </div>
-            <div class="form-group">
-                <label>Category</label>
-                <select id="edit-product-category" name="product-category" class="category-select" required>
-                    <option value="" disabled>Select a category</option>
-                    <option value="Uniforms">Uniforms</option>
-                    <option value="Accessories">Accessories</option>
-                    <option value="Office & School Supplies">Office & School Supplies</option>
-                    <option value="Equipment & Tools">Equipment & Tools</option>
-                    <option value="Merchandise & Souvenirs">Merchandise & Souvenirs</option>
-                </select>
-            </div>
-            <div class="form-group size-selection" style="display: none;">
-                <label>Size</label>
-                <select id="edit-product-size" name="product-size">
-                    <option value="XS">XS</option>
-                    <option value="S">S</option>
-                    <option value="M">M</option>
-                    <option value="L">L</option>
-                    <option value="XL">XL</option>
-                    <option value="XXL">XXL</option>
-                </select>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Price (₱)</label>
-                    <input type="number" id="edit-product-price" name="product-price" step="0.01" min="0" required>
-                </div>
-                <div class="form-group">
-                    <label>Stock Quantity</label>
-                    <input type="number" id="edit-stock-quantity" name="stock-quantity" min="0" required>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Description</label>
-                <textarea id="edit-product-description" name="product-description" rows="3" required></textarea>
-            </div>
-            <div class="form-group">
-                <label>Product Image (Optional)</label>
-                <input type="file" name="product-image" accept="image/*" class="image-upload-input">
-                <input type="hidden" id="edit-current-image-url" name="current-image-url">
-                <img src="https://placehold.co/400x200/f1f5f9/64748b?text=Image+Preview" alt="Image Preview" class="image-preview">
-            </div>
-            <div class="form-group checkbox-group">
-                <input type="checkbox" id="edit-is-available" name="is_available">
-                <label for="edit-is-available">Available for Students</label>
-            </div>
+                 <label>Product Name</label>
+                 <input type="text" id="edit-product-name" name="product-name" required>
+             </div>
+             <div class="form-group">
+                 <label>Category</label>
+                 <select id="edit-product-category" name="product-category" class="category-select" required>
+                     <option value="" disabled>Select a category</option>
+                     <option value="Uniforms">Uniforms</option>
+                     <option value="Accessories">Accessories</option>
+                     <option value="Office & School Supplies">Office & School Supplies</option>
+                     <option value="Equipment & Tools">Equipment & Tools</option>
+                     <option value="Merchandise & Souvenirs">Merchandise & Souvenirs</option>
+                 </select>
+             </div>
+             <div class="form-group size-selection" style="display: none;">
+                 <label>Size</label>
+                 <select id="edit-product-size" name="product-size">
+                     <option value="XS">XS</option>
+                     <option value="S">S</option>
+                     <option value="M">M</option>
+                     <option value="L">L</option>
+                     <option value="XL">XL</option>
+                     <option value="XXL">XXL</option>
+                 </select>
+             </div>
+             <div class="form-row">
+                 <div class="form-group">
+                     <label>Price (₱)</label>
+                     <input type="number" id="edit-product-price" name="product-price" step="0.01" min="0" required>
+                 </div>
+                 <div class="form-group">
+                     <label>Stock Quantity</label>
+                     <input type="number" id="edit-stock-quantity" name="stock-quantity" min="0" required>
+                 </div>
+             </div>
+             <div class="form-group">
+                 <label>Description</label>
+                 <textarea id="edit-product-description" name="product-description" rows="3" required></textarea>
+             </div>
+             <div class="form-group">
+                 <label>Product Image (Optional)</label>
+                 <input type="file" name="product-image" accept="image/*" class="image-upload-input">
+                 <input type="hidden" id="edit-current-image-url" name="current-image-url">
+                 <img src="https://placehold.co/400x200/f1f5f9/64748b?text=Image+Preview" alt="Image Preview" class="image-preview">
+             </div>
+             <div class="form-group checkbox-group">
+                 <input type="checkbox" id="edit-is-available" name="is_available">
+                 <label for="edit-is-available">Available for Students</label>
+             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
                 <button type="submit" class="btn btn-primary">Update Product</button>
@@ -249,7 +257,9 @@
             <h2>Confirm Deletion</h2>
             <span class="close-btn">&times;</span>
         </div>
-        <p>Are you sure you want to delete "<strong id="delete-product-name"></strong>"? This action cannot be undone.</p>
+        <div class="modal-body">
+            <p>Are you sure you want to delete "<strong id="delete-product-name"></strong>"? This action cannot be undone.</p>
+        </div>
         <form id="delete-product-form" method="post">
             {% csrf_token %}
             <div class="modal-footer">
@@ -289,16 +299,36 @@
         </div>
     </div>
 </div>
+
+<div id="batch-delete-confirm-modal" class="modal">
+    <div class="modal-content modal-sm"> 
+        <div class="modal-header">
+            <h2>Confirm Batch Deletion</h2>
+            <span class="close-btn">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to permanently delete <strong id="batch-delete-count">0</strong> product(s)?</p>
+            <p>This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+            <button type="button" class="btn btn-danger" id="confirm-batch-delete-btn">Yes, Delete Selected</button>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
+
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // --- 1. GET ALL ELEMENTS ---
+    // --- Get Elements ---
     const addModal = document.getElementById('add-product-modal');
     const editModal = document.getElementById('edit-product-modal');
     const deleteModal = document.getElementById('delete-confirm-modal');
     const detailsModal = document.getElementById('product-details-modal');
-    
+    const batchDeleteConfirmModal = document.getElementById('batch-delete-confirm-modal');
+
     const selectAllCheckbox = document.getElementById('select-all-checkbox');
     const productCheckboxes = document.querySelectorAll('.product-checkbox');
     const batchActionBar = document.getElementById('batch-action-bar');
@@ -308,224 +338,234 @@ document.addEventListener('DOMContentLoaded', () => {
     const batchProductIdsInput = document.getElementById('batch-product-ids-input');
     const batchEditBtn = document.getElementById('batch-edit-btn');
 
-    // --- 2. HELPER FUNCTIONS ---
+    // ✅ Get Search and Table Elements
+    const searchInput = document.getElementById('product-search-input');
+    const tableBody = document.getElementById('product-table-body');
+    const productRows = tableBody?.querySelectorAll('tr.product-row');
+    const noResultsRow = document.getElementById('no-results-row');
+    const initialEmptyRow = document.getElementById('initial-empty-row');
+
+    // --- Helper Functions ---
     const openModal = (modal) => { if(modal) modal.style.display = 'block'; };
     const closeModal = (modal) => { if(modal) modal.style.display = 'none'; };
 
     function updateBatchActionBar() {
         const selectedCheckboxes = document.querySelectorAll('.product-checkbox:checked');
         const count = selectedCheckboxes.length;
-
-        if (count > 0) {
-            batchActionBar.style.display = 'flex';
-            selectedCountSpan.textContent = `${count} item${count > 1 ? 's' : ''} selected`;
-        } else {
-            batchActionBar.style.display = 'none';
+        if (batchActionBar) {
+            batchActionBar.style.display = count > 0 ? 'flex' : 'none';
+            if(selectedCountSpan) selectedCountSpan.textContent = `${count} item${count > 1 ? 's' : ''} selected`;
         }
-
-        batchEditBtn.disabled = (count !== 1);
-
+        if (batchEditBtn) batchEditBtn.disabled = (count !== 1);
         productCheckboxes.forEach(checkbox => {
-            checkbox.closest('tr').classList.toggle('row-selected', checkbox.checked);
+            checkbox.closest('tr')?.classList.toggle('row-selected', checkbox.checked);
         });
     }
 
-    // --- 3. ATTACH EVENT LISTENERS ---
+    function submitBatchDelete(idsString, action) {
+        if (batchActionInput && batchProductIdsInput && batchActionForm) {
+            batchActionInput.value = action;
+            batchProductIdsInput.value = idsString;
+            batchActionForm.submit();
+        } else { console.error("Batch form elements not found!"); }
+    }
 
-    // ✅ START: NEW ROW CLICK LOGIC
-    document.querySelectorAll('.data-table tbody tr').forEach(row => {
-        if (!row.querySelector('.product-checkbox')) return; 
+    // ✅ NEW: Live Product Filter Function
+    function filterProducts() {
+        if (!searchInput || !productRows || !noResultsRow) {
+             console.warn("Search elements not found, skipping filter.");
+             return;
+        }
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        let visibleRowCount = 0;
+        productRows.forEach(row => {
+            const productName = row.dataset.name || '';
+            const category = row.dataset.category || '';
+            const status = row.dataset.status || '';
 
+            const rowMatches = productName.includes(searchTerm) || 
+                               category.includes(searchTerm) || 
+                               status.includes(searchTerm);
+
+            row.style.display = rowMatches ? '' : 'none';
+            if (rowMatches) visibleRowCount++;
+        });
+        if (noResultsRow) noResultsRow.style.display = (visibleRowCount === 0 && productRows.length > 0) ? '' : 'none';
+        if (initialEmptyRow) {
+            initialEmptyRow.style.display = (searchTerm.length > 0 || productRows.length > 0) ? 'none' : '';
+        }
+    }
+
+    // --- Event Listeners ---
+
+    // ✅ NEW: Attach listener to the search input
+    if (searchInput) {
+        searchInput.addEventListener('input', filterProducts);
+        filterProducts(); // Run once on load
+    } else {
+         console.warn("Search input not found.");
+    }
+
+    // ✅ RESTORED: All original, working event listeners
+    document.querySelectorAll('.data-table tbody tr.product-row').forEach(row => {
         row.addEventListener('click', (event) => {
-            if (event.target.tagName === 'BUTTON' || event.target.tagName === 'A' || event.target.tagName === 'INPUT') {
-                return;
-            }
-            
-            // Populate and open the details modal
+            if (event.target.tagName === 'INPUT' || event.target.closest('button')) { return; }
             const editButton = row.querySelector('.btn-edit');
-            if (editButton) {
+            if (editButton && detailsModal) {
                 const data = editButton.dataset;
-                
-                // Populate the modal with data
-                document.getElementById('details-product-image').src = row.querySelector('.product-thumbnail').src;
-                document.getElementById('details-product-name').textContent = data.name;
-                document.getElementById('details-product-description').textContent = data.description;
-                document.getElementById('details-category').textContent = data.category;
-                document.getElementById('details-price').textContent = `₱${data.price}`;
-                document.getElementById('details-stock').textContent = `${data.stock} pcs`;
-
-                // Status badge logic
-                const statusBadge = document.getElementById('details-status-badge');
-                const stock = parseInt(data.stock);
-                const isAvailable = data.isAvailable === 'true';
-
-                if (!isAvailable) {
-                    statusBadge.className = 'badge badge-unavailable';
-                    statusBadge.textContent = 'Unavailable';
-                } else if (stock > 0 && stock < 10) {
-                    statusBadge.className = 'badge badge-low-stock';
-                    statusBadge.textContent = 'Low Stock';
-                } else {
-                    statusBadge.className = 'badge badge-available';
-                    statusBadge.textContent = 'Available';
+                detailsModal.querySelector('#details-product-image').src = row.querySelector('.product-thumbnail')?.src || '';
+                detailsModal.querySelector('#details-product-name').textContent = data.name || '';
+                detailsModal.querySelector('#details-product-description').textContent = data.description || '';
+                detailsModal.querySelector('#details-category').textContent = data.category || 'N/A';
+                detailsModal.querySelector('#details-price').textContent = `₱${data.price || '0.00'}`;
+                detailsModal.querySelector('#details-stock').textContent = `${data.stock || 0} pcs`;
+                const statusBadge = detailsModal.querySelector('#details-status-badge');
+                if (statusBadge) {
+                    const stock = parseInt(data.stock || 0);
+                    const isAvailable = data.isAvailable === 'true';
+                    if (!isAvailable) { statusBadge.className = 'badge badge-unavailable'; statusBadge.textContent = 'Unavailable'; }
+                    else if (stock > 0 && stock < 10) { statusBadge.className = 'badge badge-low-stock'; statusBadge.textContent = 'Low Stock'; }
+                    else { statusBadge.className = 'badge badge-available'; statusBadge.textContent = 'Available'; }
                 }
-                
-                // Store the original buttons on the modal itself for later use
                 detailsModal.sourceEditBtn = editButton;
                 detailsModal.sourceDeleteBtn = row.querySelector('.btn-delete');
-
                 openModal(detailsModal);
             }
         });
     });
-    // ✅ END: NEW ROW CLICK LOGIC
 
-    // ✅ ADDED: Logic for buttons INSIDE the details modal
-    document.getElementById('details-edit-btn').addEventListener('click', () => {
-        if (detailsModal.sourceEditBtn) {
-            closeModal(detailsModal);
-            detailsModal.sourceEditBtn.click(); // Trigger the original edit button
-        }
-    });
+    const detailsEditBtn = document.getElementById('details-edit-btn');
+    if (detailsEditBtn) { detailsEditBtn.addEventListener('click', () => { if (detailsModal?.sourceEditBtn) { closeModal(detailsModal); detailsModal.sourceEditBtn.click(); } }); }
+    
+    const detailsDeleteBtn = document.getElementById('details-delete-btn');
+    if (detailsDeleteBtn) { detailsDeleteBtn.addEventListener('click', () => { if (detailsModal?.sourceDeleteBtn) { closeModal(detailsModal); detailsModal.sourceDeleteBtn.click(); } }); }
 
-    document.getElementById('details-delete-btn').addEventListener('click', () => {
-        if (detailsModal.sourceDeleteBtn) {
-            closeModal(detailsModal);
-            detailsModal.sourceDeleteBtn.click(); // Trigger the original delete button
-        }
-    });
+    const addProductBtn = document.getElementById('add-product-btn');
+    if (addProductBtn) addProductBtn.addEventListener('click', () => openModal(addModal));
 
-    // Open "Add Product" modal
-    document.getElementById('add-product-btn').addEventListener('click', () => openModal(addModal));
-
-    // Individual "Edit" buttons in each row (still needed for the modal logic)
     document.querySelectorAll('.product-table .btn-edit').forEach(btn => {
         btn.addEventListener('click', () => {
             const data = btn.dataset;
             const form = document.getElementById('edit-product-form');
+            if (!editModal || !form) return;
             form.action = `/dashboard/admin/edit-product/${data.id}/`;
-            document.getElementById('edit-product-name').value = data.name;
-            const categorySelect = document.getElementById('edit-product-category');
-            categorySelect.value = data.category || '';
-            document.getElementById('edit-product-description').value = data.description;
-            document.getElementById('edit-product-price').value = data.price;
-            document.getElementById('edit-stock-quantity').value = data.stock;
-
+            form.querySelector('#edit-product-name').value = data.name || '';
+            form.querySelector('#edit-product-category').value = data.category || '';
+            form.querySelector('#edit-product-description').value = data.description || '';
+            form.querySelector('#edit-product-price').value = data.price || '0.00';
+            form.querySelector('#edit-stock-quantity').value = data.stock || '0';
             const imagePreview = form.querySelector('.image-preview');
-            const currentImageUrlInput = document.getElementById('edit-current-image-url');
+            const currentImageUrlInput = form.querySelector('#edit-current-image-url');
             const imageFileInput = form.querySelector('.image-upload-input');
-            imageFileInput.value = ''; // Clear any previously selected file
-            currentImageUrlInput.value = data.imageUrl || ''; // Store the old URL
-
-            // Show the current image or a placeholder
-            if (data.imageUrl) {
-            imagePreview.src = data.imageUrl;
-            imagePreview.style.display = 'block';
-            } else {
-            imagePreview.src = 'https://placehold.co/400x200/f1f5f9/64748b?text=No+Current+Image';
-            imagePreview.style.display = 'block';
+            if (imageFileInput) imageFileInput.value = '';
+            if (currentImageUrlInput) currentImageUrlInput.value = data.imageUrl || '';
+            if (imagePreview) {
+                imagePreview.src = data.imageUrl || 'https://placehold.co/400x200/f1f5f9/64748b?text=No+Current+Image';
+                imagePreview.style.display = 'block';
             }
-
-            const sizeSelect = document.getElementById('edit-product-size');
-            const sizeContainer = sizeSelect.closest('.size-selection');
-            if (data.category === 'Uniforms') {
-                sizeContainer.style.display = 'block';
-                sizeSelect.value = data.size || 'XS';
-            } else {
-                sizeContainer.style.display = 'none';
+            const sizeSelect = form.querySelector('#edit-product-size');
+            const sizeContainer = sizeSelect?.closest('.size-selection');
+            if (sizeContainer && sizeSelect) {
+                if (data.category === 'Uniforms') {
+                    sizeContainer.style.display = 'block';
+                    sizeSelect.value = data.size || 'XS';
+                } else {
+                    sizeContainer.style.display = 'none';
+                }
             }
-            document.getElementById('edit-is-available').checked = data.isAvailable === 'true';
+            const isAvailableCheckbox = form.querySelector('#edit-is-available');
+            if (isAvailableCheckbox) isAvailableCheckbox.checked = data.isAvailable === 'true';
             openModal(editModal);
         });
     });
-    
-    // Batch Edit button click
-    batchEditBtn.addEventListener('click', () => {
-        const selectedCheckbox = document.querySelector('.product-checkbox:checked');
-        if (selectedCheckbox) {
-            const originalEditButton = selectedCheckbox.closest('tr').querySelector('.btn-edit');
-            if (originalEditButton) originalEditButton.click();
-        }
-    });
 
-    // Individual "Delete" buttons in each row
-    document.querySelectorAll('.btn-delete').forEach(btn => {
+    if (batchEditBtn) { batchEditBtn.addEventListener('click', () => { document.querySelector('.product-checkbox:checked')?.closest('tr')?.querySelector('.btn-edit')?.click(); }); }
+
+    document.querySelectorAll('.product-table .btn-delete').forEach(btn => {
         btn.addEventListener('click', () => {
             const productId = btn.dataset.id;
             const productName = btn.dataset.name;
-            if (productId) {
-                document.getElementById('delete-product-name').textContent = productName;
-                const form = document.getElementById('delete-product-form');
-                form.action = `/dashboard/admin/delete-product/${productId}/`;
+            if (productId && deleteModal) {
+                deleteModal.querySelector('#delete-product-name').textContent = productName || 'this product';
+                const form = deleteModal.querySelector('#delete-product-form');
+                if (form) form.action = `/dashboard/admin/delete-product/${productId}/`;
                 openModal(deleteModal);
             }
         });
     });
 
-    // Generic modal close buttons and outside click
     document.querySelectorAll('.close-btn, .cancel-btn').forEach(btn => {
-        btn.addEventListener('click', () => closeModal(btn.closest('.modal')));
+        btn.addEventListener('click', () => {
+            const modal = btn.closest('.modal');
+            if(modal) closeModal(modal);
+        });
     });
     window.addEventListener('click', (event) => {
-        if (event.target.classList.contains('modal')) closeModal(event.target);
+        if (event.target.classList.contains('modal') && event.target.style.display !== 'none') {
+            closeModal(event.target);
+        }
     });
 
-    // Dynamic size field for category dropdowns
     document.querySelectorAll('.category-select').forEach(select => {
         select.addEventListener('change', (event) => {
-            const modalContent = select.closest('.modal-content');
-            const sizeField = modalContent.querySelector('.size-selection');
-            if (sizeField) {
-                sizeField.style.display = (event.target.value === 'Uniforms') ? 'block' : 'none';
-            }
+            const sizeField = event.target.closest('.modal-content')?.querySelector('.size-selection');
+            if (sizeField) sizeField.style.display = (event.target.value === 'Uniforms') ? 'block' : 'none';
         });
+        if (select.closest('#edit-product-modal')) select.dispatchEvent(new Event('change'));
     });
 
-    // Image preview on file upload
     document.querySelectorAll('.image-upload-input').forEach(input => {
-    // Find the preview image within the same form-group container
-    const preview = input.closest('.form-group').querySelector('.image-preview');
-    if (preview) {
-        input.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                preview.src = URL.createObjectURL(file);
-                preview.style.display = 'block'; // Ensure it's visible
-            }
-        });
-    }
-});
+        const preview = input.closest('.form-group')?.querySelector('.image-preview');
+        if (preview) {
+            input.addEventListener('change', (event) => {
+                const file = event.target.files?.[0];
+                if (file) {
+                    preview.src = URL.createObjectURL(file);
+                    preview.style.display = 'block';
+                    preview.onload = () => URL.revokeObjectURL(preview.src);
+                }
+            });
+        }
+    });
 
-    // Batch Action & Select All Logic
     if (selectAllCheckbox) {
         selectAllCheckbox.addEventListener('change', () => {
             productCheckboxes.forEach(checkbox => { checkbox.checked = selectAllCheckbox.checked; });
             updateBatchActionBar();
         });
     }
-
     productCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', (event) => {
-            // Prevent the row click from firing when clicking the checkbox directly
             event.stopPropagation();
-            if (!checkbox.checked) {
-                if (selectAllCheckbox) selectAllCheckbox.checked = false;
-            }
+            if (!checkbox.checked && selectAllCheckbox) selectAllCheckbox.checked = false;
             updateBatchActionBar();
         });
     });
 
     document.querySelectorAll('.btn-batch[data-action="delete-selected"]').forEach(button => {
         button.addEventListener('click', () => {
-            const action = button.dataset.action;
             const selectedIds = Array.from(document.querySelectorAll('.product-checkbox:checked')).map(cb => cb.value);
-            if (selectedIds.length === 0) return alert('Please select at least one product.');
-            if (action === 'delete-selected' && !confirm(`Are you sure you want to delete ${selectedIds.length} product(s)?`)) return;
-            batchActionInput.value = action;
-            batchProductIdsInput.value = selectedIds.join(',');
-            batchActionForm.submit();
+            const count = selectedIds.length;
+            if (count === 0) { alert('Please select at least one product.'); return; }
+            if (batchDeleteConfirmModal) {
+                batchDeleteConfirmModal.querySelector('#batch-delete-count').textContent = count;
+                const confirmBtn = batchDeleteConfirmModal.querySelector('#confirm-batch-delete-btn');
+                if(confirmBtn) confirmBtn.dataset.ids = selectedIds.join(',');
+                openModal(batchDeleteConfirmModal);
+            } else { console.error("Batch delete confirmation modal not found!"); }
         });
     });
+
+    const confirmBatchDeleteBtn = document.getElementById('confirm-batch-delete-btn');
+    if (confirmBatchDeleteBtn) {
+        confirmBatchDeleteBtn.addEventListener('click', function() {
+            const idsToSubmit = this.dataset.ids;
+            if (idsToSubmit) submitBatchDelete(idsToSubmit, 'delete-selected');
+            else { console.error("No IDs found for batch delete."); closeModal(batchDeleteConfirmModal); }
+        });
+    }
+
+    updateBatchActionBar();
 });
 </script>
 {% endblock %}

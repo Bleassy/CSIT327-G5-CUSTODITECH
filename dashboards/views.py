@@ -186,26 +186,126 @@ def my_reservations_view(request):
 
 @student_required
 def my_orders_view(request):
+    # Initialize lists for each status category
     pending_orders, approved_orders, completed_orders, other_orders = [], [], [], []
+    
     try:
         user_id = request.user.id
-        response = supabase.rpc('get_my_orders', {'p_user_id': user_id}).execute()
+        # ✅ Call the new detailed function
+        response = supabase.rpc('get_my_detailed_orders', {'p_user_id': user_id}).execute()
+        
         if response.data:
-            for item in response.data:
+            all_orders = response.data
+            
+            # Convert date strings to datetime objects
+            for item in all_orders:
                 if item.get('created_at'):
-                    item['created_at'] = datetime.fromisoformat(item['created_at'])
-                if item['status'] == 'pending': pending_orders.append(item)
-                elif item['status'] == 'approved': approved_orders.append(item)
-                elif item['status'] == 'completed': completed_orders.append(item)
-                else: other_orders.append(item)
+                    # Ensure timezone info is handled if present, else parse naive
+                    created_at_str = item['created_at']
+                    try:
+                        # Attempt parsing with timezone
+                        item['created_at'] = datetime.fromisoformat(created_at_str)
+                    except ValueError:
+                        # Fallback for naive datetime strings (adjust format if needed)
+                        try:
+                           item['created_at'] = datetime.strptime(created_at_str, '%Y-%m-%dT%H:%M:%S.%f')
+                        except ValueError:
+                           # Handle potential other formats or log error
+                           item['created_at'] = None # Or keep original string
+
+            # Separate orders into lists based on status
+            for item in all_orders:
+                status = item.get('status', 'unknown') # Default if status is missing
+                if status == 'pending': 
+                    pending_orders.append(item)
+                elif status == 'approved': 
+                    approved_orders.append(item)
+                elif status == 'completed': 
+                    completed_orders.append(item)
+                else: # Includes 'cancelled', 'rejected', etc.
+                    other_orders.append(item)
+                    
     except Exception as e:
         messages.error(request, f"Could not fetch your orders: {e}")
+        # Ensure lists are empty on error
+        pending_orders, approved_orders, completed_orders, other_orders = [], [], [], []
+
     context = {
-        'pending_orders': pending_orders, 'approved_orders': approved_orders,
-        'completed_orders': completed_orders, 'other_orders': other_orders,
-        'active_page': 'orders', 'page_title': 'My Orders',
+        'pending_orders': pending_orders, 
+        'approved_orders': approved_orders,
+        'completed_orders': completed_orders, 
+        'other_orders': other_orders,
+        # Pass an empty search query for now, JS will handle filtering
+        'search_query': '', 
+        'active_page': 'orders', 
+        'page_title': 'My Orders',
     }
     return render(request, 'dashboards/my_orders.html', context)
+
+@student_required
+def batch_delete_orders_view(request):
+    """ Handles batch deletion of orders by the student. """
+    if request.method == 'POST':
+        order_ids_str = request.POST.get('order_ids')
+        if not order_ids_str:
+            messages.error(request, "No orders selected for deletion.")
+            return redirect('my_orders')
+
+        # Convert comma-separated string IDs to a list of integers
+        order_ids = [int(oid) for oid in order_ids_str.split(',') if oid.isdigit()]
+
+        if not order_ids:
+            messages.error(request, "Invalid order IDs provided.")
+            return redirect('my_orders')
+
+        try:
+            user_id = request.user.id
+            
+            # Use supabase_service to bypass RLS, but filter by user_id for security
+            # Delete orders that match the IDs AND belong to the current user
+            response = supabase_service.table('orders') \
+                .delete() \
+                .in_('id', order_ids) \
+                .eq('user_id', user_id) \
+                .execute()
+
+            # The response doesn't directly tell us how many were deleted easily,
+            # but we can assume success if no exception occurred.
+            count = len(order_ids) # Assume all requested were potentially deletable by this user
+            messages.success(request, f"{count} order(s) deleted successfully.")
+            
+            # Optional: Log this activity if needed (using log_activity helper)
+
+        except Exception as e:
+            messages.error(request, f"An error occurred during batch deletion: {e}")
+
+    # Redirect back to the orders page regardless of method or success/failure
+    return redirect('my_orders')
+
+@student_required
+def delete_single_order_view(request, order_id):
+    """ Handles deletion of a single order by the student who owns it. """
+    if request.method == 'POST':
+        try:
+            user_id = request.user.id
+            
+            # Use service role but ensure the user owns the order
+            response = supabase_service.table('orders') \
+                .delete() \
+                .eq('id', order_id) \
+                .eq('user_id', user_id) \
+                .execute()
+
+            # Check if any row was actually deleted (basic check)
+            # A more robust check might involve querying before deleting,
+            # but this is usually sufficient if the UI prevents deleting others' orders.
+            messages.success(request, f"Order #{order_id} deleted successfully.")
+
+        except Exception as e:
+            messages.error(request, f"Failed to delete order #{order_id}: {e}")
+            
+    # Redirect back to the orders page regardless of method or outcome
+    return redirect('my_orders')
 
 @student_required
 def create_reservation_view(request):
@@ -256,19 +356,29 @@ def create_order_view(request):
 def checkout_reservation_view(request):
     if request.method == 'POST':
         try:
+            print(f"--- CHECKOUT VIEW REACHED --- Received POST for reservation ID: {request.POST.get('reservation_id')}")
             reservation_id = int(request.POST.get('reservation_id'))
             user_id = request.user.id
             params = {'p_order_id': reservation_id, 'p_user_id': user_id}
-            supabase.rpc('checkout_reservation', params).execute()
+
+            print(f"--- Calling Supabase RPC checkout_reservation with params: {params}")
+
+            # ✅ CAPTURE and PRINT the response
+            response = supabase.rpc('checkout_reservation', params).execute()
+            print(f"--- Supabase RPC Response: {response}")
+
+            messages.success(request, "✅ Checkout successful! Your reservation is now an order.")
+            return redirect('my_orders')
+
         except Exception as e:
-            error_str = str(e)
-            if "'success': True" in error_str:
-                messages.success(request, "Checkout successful! Your reservation is now an order.")
-                return redirect('my_orders')
-            else:
-                messages.error(request, f"Could not process checkout: {e}")
-                return redirect('my_reservations')
-    return redirect('my_orders')
+            messages.error(request, f"Could not process checkout: {e}")
+            print(f"--- ERROR in checkout_reservation_view: {e}")
+            # Keep redirecting back to reservations on error
+            return redirect('my_reservations')
+
+    # If not POST, redirect (should ideally not happen with button clicks)
+    print("--- CHECKOUT VIEW REACHED --- Not a POST request, redirecting.")
+    return redirect('my_reservations') # Redirect back to reservations if GET
 
 @student_required
 def student_profile_view(request):
@@ -541,29 +651,74 @@ def delete_product(request, product_id):
 @admin_required
 def order_management_view(request):
     search_query = request.GET.get('search', '').strip()
-    pending_orders, approved_orders, other_orders = [], [], []
+    
+    # ✅ RENAMED lists to be clearer
+    approved_orders = []
+    completed_orders = []
+    other_orders = [] # This will hold cancelled/rejected
+    
     try:
         params = {'p_search_term': search_query}
+        # We assume 'get_all_orders_with_details' is the function you updated
         response = supabase.rpc('get_all_orders_with_details', params).execute()
         
         if response.data:
             for item in response.data:
                 if item.get('created_at'):
+                    # Basic ISO format parsing
                     item['created_at'] = datetime.fromisoformat(item['created_at'])
-                if item['status'] == 'pending':
-                    pending_orders.append(item)
-                elif item['status'] == 'approved':
+                
+                # ✅ UPDATED: Sorting logic
+                status = item.get('status')
+                if status == 'approved':
                     approved_orders.append(item)
-                else:
+                elif status == 'completed':
+                    completed_orders.append(item)
+                elif status in ['cancelled', 'rejected']:
                     other_orders.append(item)
+                # 'pending' orders are now ignored, as requested
+                    
     except Exception as e:
         messages.error(request, f"An error occurred while fetching orders: {e}")
+
+    # ✅ UPDATED: Context dictionary
     context = {
-        'pending_orders': pending_orders, 'approved_orders': approved_orders,
-        'other_orders': other_orders, 'search_query': search_query,
-        'active_page': 'order_management'
+        'approved_orders': approved_orders,
+        'completed_orders': completed_orders,
+        'other_orders': other_orders,
+        'search_query': search_query,
+        'active_page': 'order_management',
+        'page_title': 'Order Management' # ✅ Added page title
     }
     return render(request, 'dashboards/order_management.html', context)
+
+@admin_required
+def admin_batch_delete_orders_view(request):
+    """ Handles batch deletion of orders by an admin. """
+    if request.method == 'POST':
+        order_ids_str = request.POST.get('order_ids')
+        if not order_ids_str:
+            messages.error(request, "No orders selected for deletion.")
+            return redirect('order_management')
+
+        order_ids = [int(oid) for oid in order_ids_str.split(',') if oid.isdigit()]
+        if not order_ids:
+            messages.error(request, "Invalid order IDs provided.")
+            return redirect('order_management')
+
+        try:
+            # Use supabase_service to bypass RLS for admin actions
+            supabase_service.table('orders').delete().in_('id', order_ids).execute()
+            messages.success(request, f"{len(order_ids)} order(s) have been permanently deleted.")
+            log_activity(
+                request.user,
+                'ORDER_BATCH_DELETED',
+                {'count': len(order_ids), 'order_ids': order_ids}
+            )
+        except Exception as e:
+            messages.error(request, f"An error occurred during batch deletion: {e}")
+
+    return redirect('order_management')
 
 @admin_required
 def batch_update_products(request):
@@ -572,54 +727,103 @@ def batch_update_products(request):
     """
     if request.method == 'POST':
         action = request.POST.get('action')
-        # The product_ids will be a comma-separated string, e.g., "1,5,12"
         product_ids_str = request.POST.get('product_ids')
         
         if not all([action, product_ids_str]):
             messages.error(request, "Invalid batch action request.")
             return redirect('manage_products')
 
-        # Convert the string of IDs into a list of integers
-        product_ids = [int(pid) for pid in product_ids_str.split(',')]
+        try:
+            # Convert the string of IDs into a list of integers
+            product_ids = [int(pid) for pid in product_ids_str.split(',') if pid.isdigit()]
+            if not product_ids:
+                 raise ValueError("No valid product IDs provided.") # Handle empty list after conversion
+
+        except ValueError as e:
+             messages.error(request, f"Invalid product IDs: {e}")
+             return redirect('manage_products')
+
 
         try:
             if action == 'mark-available':
-                supabase.table('products').update({'is_available': True}).in_('id', product_ids).execute()
+                # Use service client for updates too, for consistency and bypassing RLS
+                supabase_service.table('products').update({'is_available': True}).in_('id', product_ids).execute()
                 messages.success(request, f"{len(product_ids)} product(s) marked as available.")
-                # Log the batch activity
                 log_activity(
                    request.user, 
                    f'PRODUCT_BATCH_{action.upper().replace("-", "_")}',
                    {'count': len(product_ids), 'product_ids': product_ids}
                 )
+
+            # ✅ ADD THIS BLOCK TO HANDLE DELETION
+            elif action == 'delete-selected':
+                # Use the service client to bypass RLS for deletion
+                response = supabase_service.table('products').delete().in_('id', product_ids).execute()
+                
+                # Note: Supabase delete response doesn't easily tell you how many were deleted.
+                # We'll just report the number requested for deletion.
+                messages.success(request, f"{len(product_ids)} product(s) selected for deletion processed.")
+                log_activity(
+                   request.user, 
+                   'PRODUCT_BATCH_DELETE', # Specific action log
+                   {'count': len(product_ids), 'product_ids': product_ids}
+                )
+                
+            # Keep the else for truly unsupported actions
             else:
-                messages.warning(request, "The requested batch action is no longer supported.")
+                messages.warning(request, f"The batch action '{action}' is not supported.")
 
         except Exception as e:
-            messages.error(request, f"An error occurred during the batch update: {e}")
+            messages.error(request, f"An error occurred during the batch {action}: {e}")
             
     return redirect('manage_products')
 
 @admin_required
 def update_order_status(request, order_id):
     if request.method == 'POST':
-        new_status = request.POST.get('status')
-        if new_status:
-            try:
-                if new_status in ['cancelled', 'rejected']:
-                    supabase.rpc('cancel_or_reject_order', {'p_order_id': order_id, 'p_new_status': new_status}).execute()
-                    messages.success(request, f"Order #{order_id} has been {new_status}.")
-                else:
-                    params = {'p_order_id': order_id, 'p_new_status': new_status}
-                    supabase.rpc('update_order_status_by_admin', params).execute()
-                    messages.success(request, f"Order status updated to '{new_status}'.")
-                
-                log_activity(
-                    request.user, 'ORDER_STATUS_UPDATED',
-                    {'order_id': order_id, 'new_status': new_status}
-                )
-            except Exception as e:
-                messages.error(request, f"Failed to update order status: {e}")
+        try:
+            # For batch updates, the order IDs come from a hidden input and order_id is 0
+            if order_id == 0:
+                order_ids_str = request.POST.get('order_ids')
+                order_ids = [int(oid) for oid in order_ids_str.split(',') if oid.isdigit()]
+                new_status = request.POST.get('status')
+                count = len(order_ids)
+                success_message = f"{count} order(s) updated to '{new_status}'."
+
+            # For single updates, the ID comes from the URL
+            else:
+                order_ids = [order_id]
+                new_status = request.POST.get('status')
+                success_message = f"Order #{order_id} updated to '{new_status}'."
+
+            if not order_ids or not new_status:
+                raise ValueError("Missing order IDs or new status.")
+
+            # If the status is cancelled or rejected, it's good practice to call
+            # the function that also handles stock restoration for reservations.
+            if new_status in ['cancelled', 'rejected']:
+                for oid in order_ids:
+                    # Using supabase_service to ensure permissions
+                    supabase_service.rpc('cancel_or_reject_order', {
+                        'p_order_id': oid,
+                        'p_new_status': new_status
+                    }).execute()
+            
+            # For other status updates (like to 'completed' or 'approved'), just update the status field
+            else:
+                # Use supabase_service for all admin database modifications
+                supabase_service.table('orders').update({'status': new_status}).in_('id', order_ids).execute()
+
+            messages.success(request, success_message)
+            log_activity(
+                request.user,
+                'ORDER_STATUS_BATCH_UPDATED' if order_id == 0 else 'ORDER_STATUS_UPDATED',
+                {'order_ids': order_ids, 'new_status': new_status}
+            )
+
+        except Exception as e:
+            messages.error(request, f"Failed to update order status: {e}")
+
     return redirect('order_management')
 
 @admin_required

@@ -1,34 +1,39 @@
 /* static/css/manage_products.css */
 
-/* ✅ NEW: Styles for the search bar */
+/* --- New Search Bar Styles (from student side, adapted) --- */
 .page-controls {
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem; /* Increased margin */
 }
 
 .search-form {
     display: flex;
-    max-width: 500px;
+    
 }
 
 .search-input {
     flex-grow: 1;
-    padding: 10px 15px;
+    padding: 14px 20px;
     font-size: 16px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px 0 0 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px; /* Fully rounded corners */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     outline: none;
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
 }
 
 .search-input:focus {
-    border-color: #1e40af;
-    box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2);
+    outline: none;
+    border-color: #1e40af; /* Admin primary color for focus */
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    z-index: 2;
+    position: relative;
 }
 
+/* Hide the old search button as it's no longer needed for live filtering */
 .search-btn {
-    border-radius: 0 8px 8px 0;
-    background-color: #1e40af;
-    color: white;
-    border: 1px solid #1e40af;
+    display: none;
 }
 
 /* Page Header */
@@ -54,6 +59,8 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
+    width: auto;
+    margin-top: 0; 
 }
 .btn-add { background-color: #1e40af; color: white; }
 .btn-add:hover { background-color: #1c3d90; }
@@ -257,8 +264,10 @@
     padding: 1rem 1.5rem;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    justify-content: space-between;
     display: flex;
     justify-content: space-between;
+    gap: 1.5rem;
     align-items: center;
     z-index: 1001;
     animation: slideUp 0.3s ease-out;
@@ -367,4 +376,22 @@
 .details-grid strong {
     font-weight: 600;
     color: #1e293b;
+}
+
+/* Danger button styles */
+.btn-danger {
+    background-color: #ef4444; /* Red */
+    color: white;
+}
+.btn-danger:hover {
+    background-color: #dc2626; /* Darker Red */
+}
+
+/* Secondary button styles (for Cancel) */
+.btn-secondary {
+    background-color: #e2e8f0;
+    color: #475569;
+}
+.btn-secondary:hover {
+    background-color: #cbd5e1;
 }

@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/order_management.css' %}?v=1.2">
+    <link rel="stylesheet" href="{% static 'css/order_management.css' %}?v=1.3"> {# Incremented version #}
 {% endblock %}
 
 {% block content %}
@@ -11,46 +11,454 @@
 </div>
 
 <div class="page-controls">
-    <form method="GET" action="{% url 'order_management' %}" class="search-form">
-        <input type="text" name="search" class="search-input" placeholder="Search by student name or ID..." value="{{ search_query }}">
-        <button type="submit" class="btn search-btn">Search</button>
-    </form>
+    <div class="search-form">
+        <input type="search" id="admin-order-search" class="search-input" placeholder="Search by Student Name/ID, Product Name, Category, or Status..." value="{{ search_query }}">
+    </div>
 </div>
 
-<!-- Section for Pending Orders -->
-<h2 class="section-title">Pending Orders</h2>
-<div class="orders-grid">
-    {% for order in pending_orders %}
-        {% include 'dashboards/partials/admin_order_card.html' with order=order %}
-    {% empty %}
-        <div class="no-data-cell"><p>No pending orders found.</p></div>
-    {% endfor %}
-</div>
+<!-- Form for Batch Status Update (Approved section) -->
+<form id="batch-status-form" method="POST" action="{% url 'update_order_status' order_id=0 %}"> {# Dummy URL, will be overridden #}
+    {% csrf_token %}
+    <input type="hidden" name="order_ids" id="batch-status-order-ids">
+    <input type="hidden" name="status" id="batch-status-action">
+</form>
 
-<!-- Section for Approved Orders -->
-<h2 class="section-title">Approved Orders</h2>
-<div class="orders-grid">
-    {% for order in approved_orders %}
-        {% include 'dashboards/partials/admin_order_card.html' with order=order %}
-    {% empty %}
-        <div class="no-data-cell"><p>No approved orders found.</p></div>
-    {% endfor %}
-</div>
+<!-- ✅ UPDATED: Form for Batch Deletion (Completed/Other sections) now points to the correct admin URL -->
+<form id="batch-delete-form" method="POST" action="{% url 'admin_batch_delete_orders' %}">
+    {% csrf_token %}
+    <input type="hidden" name="order_ids" id="batch-delete-order-ids">
+</form>
 
-<!-- Section for Order History -->
-<h2 class="section-title">Order History (Completed, Cancelled, etc.)</h2>
-<div class="orders-grid">
-    {% for order in other_orders %}
-        {% include 'dashboards/partials/admin_order_card.html' with order=order %}
-    {% empty %}
-        <div class="no-data-cell">
-            {% if search_query %}
-                <p>No historical orders found for "{{ search_query }}".</p>
-            {% else %}
-                <p>No order history found.</p>
-            {% endif %}
+
+<!-- Approved Orders Section -->
+<section class="order-section" data-section-status="approved">
+    <h2 class="section-title">Approved Orders</h2>
+    {% if approved_orders %}
+    <div class="select-all-container">
+        <input type="checkbox" class="select-all-checkbox" data-section="approved">
+        <label>Select All Approved</label>
+    </div>
+    {% endif %}
+    <div class="orders-grid">
+        {% for order in approved_orders %}
+        <div class="order-card" data-id="{{ order.id }}" data-name="{{ order.product_name }}" data-size="{{ order.product_size|default:'' }}" data-category="{{ order.product_category|default:'N/A' }}" data-description="{{ order.product_description|default:'No description available.' }}" data-image-url="{{ order.product_image_url|default:'...' }}" data-quantity="{{ order.quantity }}" data-total-price="{{ order.total_price|floatformat:2 }}" data-payment-method="{{ order.payment_method|default:'Cash'|title }}" data-created-at="{{ order.created_at|date:'M d, Y' }}" data-status="{{ order.status }}" data-student-name="{{ order.student_name|default:'N/A' }}" data-student-id="{{ order.student_id|default:'N/A' }}">
+            <span class="status-badge status-{{ order.status }}">{{ order.status|title }}</span>
+            <input type="checkbox" class="order-checkbox approved-checkbox" value="{{ order.id }}">
+            <img src="{{ order.product_image_url|default:'...' }}" alt="{{ order.product_name }}" class="product-image">
+            <div class="card-body">
+                <h3 class="product-name">{{ order.product_name }}{% if order.product_size %} - {{ order.product_size }}{% endif %}</h3>
+                <div class="details-grid">
+                    <span>Order ID:</span><strong>#{{ order.id }}</strong>
+                    <span>Student:</span><strong>{{ order.student_name|default:'N/A' }} ({{ order.student_id|default:'N/A' }})</strong>
+                    <span>Date:</span><strong>{{ order.created_at|date:"M d, Y" }}</strong>
+                    <span>Quantity:</span><strong>{{ order.quantity }}</strong>
+                    <span>Total Price:</span><strong>₱{{ order.total_price|floatformat:2 }}</strong>
+                    <span>Payment:</span><strong>{{ order.payment_method|default:'Cash'|title }}</strong>
+                </div>
+            </div>
         </div>
-    {% endfor %}
+        {% empty %}
+        <div class="no-data-cell"><p>No approved orders found.</p></div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Completed Orders Section -->
+<section class="order-section" data-section-status="completed">
+    <h2 class="section-title">Completed Orders</h2>
+    {% if completed_orders %}
+    <div class="select-all-container">
+        <input type="checkbox" class="select-all-checkbox" data-section="completed">
+        <label>Select All Completed</label>
+    </div>
+    {% endif %}
+    <div class="orders-grid">
+        {% for order in completed_orders %}
+        <div class="order-card" data-id="{{ order.id }}" data-name="{{ order.product_name }}" data-size="{{ order.product_size|default:'' }}" data-category="{{ order.product_category|default:'N/A' }}" data-description="{{ order.product_description|default:'No description available.' }}" data-image-url="{{ order.product_image_url|default:'...' }}" data-quantity="{{ order.quantity }}" data-total-price="{{ order.total_price|floatformat:2 }}" data-payment-method="{{ order.payment_method|default:'Cash'|title }}" data-created-at="{{ order.created_at|date:'M d, Y' }}" data-status="{{ order.status }}" data-student-name="{{ order.student_name|default:'N/A' }}" data-student-id="{{ order.student_id|default:'N/A' }}">
+            <span class="status-badge status-{{ order.status }}">{{ order.status|title }}</span>
+            <input type="checkbox" class="order-checkbox completed-checkbox" value="{{ order.id }}">
+            <img src="{{ order.product_image_url|default:'...' }}" alt="{{ order.product_name }}" class="product-image">
+            <div class="card-body">
+                <h3 class="product-name">{{ order.product_name }}{% if order.product_size %} - {{ order.product_size }}{% endif %}</h3>
+                <div class="details-grid">
+                    <span>Order ID:</span><strong>#{{ order.id }}</strong>
+                    <span>Student:</span><strong>{{ order.student_name|default:'N/A' }} ({{ order.student_id|default:'N/A' }})</strong>
+                    <span>Date:</span><strong>{{ order.created_at|date:"M d, Y" }}</strong>
+                    <span>Quantity:</span><strong>{{ order.quantity }}</strong>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-data-cell"><p>No completed orders found.</p></div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Cancelled/Rejected Orders Section -->
+<section class="order-section" data-section-status="cancelled rejected">
+    <h2 class="section-title">Cancelled & Rejected Orders</h2>
+    {% if other_orders %}
+    <div class="select-all-container">
+        <input type="checkbox" class="select-all-checkbox" data-section="other">
+        <label>Select All Cancelled/Rejected</label>
+    </div>
+    {% endif %}
+    <div class="orders-grid">
+        {% for order in other_orders %}
+        <div class="order-card" data-id="{{ order.id }}" data-name="{{ order.product_name }}" data-size="{{ order.product_size|default:'' }}" data-category="{{ order.product_category|default:'N/A' }}" data-description="{{ order.product_description|default:'No description available.' }}" data-image-url="{{ order.product_image_url|default:'...' }}" data-quantity="{{ order.quantity }}" data-total-price="{{ order.total_price|floatformat:2 }}" data-payment-method="{{ order.payment_method|default:'Cash'|title }}" data-created-at="{{ order.created_at|date:'M d, Y' }}" data-status="{{ order.status }}" data-student-name="{{ order.student_name|default:'N/A' }}" data-student-id="{{ order.student_id|default:'N/A' }}">
+            <span class="status-badge status-{{ order.status }}">{{ order.status|title }}</span>
+            <input type="checkbox" class="order-checkbox other-checkbox" value="{{ order.id }}">
+            <img src="{{ order.product_image_url|default:'...' }}" alt="{{ order.product_name }}" class="product-image">
+            <div class="card-body">
+                <h3 class="product-name">{{ order.product_name }}{% if order.product_size %} - {{ order.product_size }}{% endif %}</h3>
+                <div class="details-grid">
+                    <span>Order ID:</span><strong>#{{ order.id }}</strong>
+                    <span>Student:</span><strong>{{ order.student_name|default:'N/A' }} ({{ order.student_id|default:'N/A' }})</strong>
+                    <span>Date:</span><strong>{{ order.created_at|date:"M d, Y" }}</strong>
+                    <span>Status:</span><strong>{{ order.status|title }}</strong>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-data-cell"><p>No cancelled or rejected orders found.</p></div>
+        {% endfor %}
+    </div>
+</section>
+
+
+<!-- ACTION BARS -->
+<div id="batch-status-bar" class="batch-action-bar" style="display: none;">
+    <span id="status-selected-count">0 items selected</span>
+    <div>
+        <label for="batch-status-select" style="margin-right: 0.5rem; font-size: 14px;">Change status to:</label>
+        <select id="batch-status-select" class="status-select">
+            <option value="approved">Approved</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="rejected">Rejected</option>
+        </select>
+        <button type="button" class="btn btn-primary" id="batch-status-update-btn" style="margin-left: 1rem;">Update</button>
+    </div>
 </div>
+
+<div id="batch-delete-bar" class="batch-action-bar" style="display: none;">
+    <span id="delete-selected-count">0 items selected</span>
+    <button type="button" class="btn btn-danger" id="batch-delete-btn">Delete Selected</button>
+</div>
+
+<!-- MODAL -->
+<div id="order-details-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header"><h2>Order Details</h2><span class="close-btn">&times;</span></div>
+        <div class="modal-body">
+            <div class="details-layout">
+                <div class="details-image-container">
+                    <img id="details-image" src="" alt="Product Image" class="details-image">
+                </div>
+                <div class="details-info">
+                    <div class="details-header-with-badge"> 
+<h3 id="details-name" class="details-name"></h3>
+                       <span id="details-status-badge" class="status-badge"></span>
+</div>
+<div class="details-summary-grid">
+                        <span>Order ID:</span><strong id="details-order-id"></strong>
+                        <span>Student:</span><strong id="details-student"></strong>
+                        <span>Date Ordered:</span><strong id="details-created-at"></strong>
+                        <span>Product Category:</span><strong id="details-category"></strong>
+                        <span>Quantity:</span><strong id="details-quantity"></strong>
+                        <span>Total Price:</span><strong id="details-total-price"></strong>
+                        <span>Payment Method:</span><strong id="details-payment-method"></strong>
+                    </div>
+                    <p id="details-description" style="margin-top: 1rem; border-top: 1px solid #f1f5f9; padding-top: 1rem;"></p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <form id="single-status-form" method="POST" action="">
+                {% csrf_token %}
+                <label for="single-status-select">Status:</label>
+                <select name="status" id="single-status-select" class="status-select">
+                    <option value="approved">Approved</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Update Status</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ NEW: Batch Delete Confirmation Modal -->
+<div id="batch-delete-confirm-modal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 450px;">
+        <div class="modal-header"><h2>Confirm Batch Deletion</h2><span class="close-btn">&times;</span></div>
+        <div class="modal-body">
+            <p>Are you sure you want to permanently delete <strong id="batch-delete-count">0</strong> order(s)?</p>
+            <p>This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary cancel-modal-btn">Cancel</button>
+            <button type="button" class="btn btn-danger" id="confirm-batch-delete-btn">Yes, Delete Selected</button>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Get Elements ---
+    const detailsModal = document.getElementById('order-details-modal');
+    const batchStatusForm = document.getElementById('batch-status-form');
+    const batchDeleteForm = document.getElementById('batch-delete-form');
+    const batchStatusBar = document.getElementById('batch-status-bar');
+    const batchDeleteBar = document.getElementById('batch-delete-bar');
+    const batchDeleteConfirmModal = document.getElementById('batch-delete-confirm-modal');
+
+    // 🔑 NEW/UPDATED: Get all cards for filtering
+    const searchInput = document.getElementById('admin-order-search');
+    const orderSections = document.querySelectorAll('.order-section');
+    const allOrderCards = document.querySelectorAll('.order-card');
+    const allCheckboxes = document.querySelectorAll('.order-checkbox');
+    const selectAllCheckboxes = document.querySelectorAll('.select-all-checkbox'); // Moved up for scope
+
+    // --- Modal Logic ---
+    const openModal = (modal) => modal.style.display = 'flex';
+    const closeModal = (modal) => modal.style.display = 'none';
+    document.querySelectorAll('.close-btn, .cancel-modal-btn').forEach(btn => {
+        btn.addEventListener('click', () => closeModal(btn.closest('.modal')));
+    });
+    window.addEventListener('click', (e) => { if (e.target.classList.contains('modal')) closeModal(e.target); });
+
+    // 🔑 MODIFIED: Order Card Click Listener - Handles both checkbox toggle and modal opening
+    document.querySelectorAll('.order-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            const checkbox = card.querySelector('.order-checkbox');
+
+            // Check if the click target is a control (checkbox, select, or button)
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON') {
+                // If it's a control, we do NOT open the modal.
+                // We also ensure the click on the checkbox doesn't propagate to the card itself (optional but safer)
+                if (e.target.classList.contains('order-checkbox')) e.stopPropagation();
+                return;
+            }
+
+            // --- Checkbox Toggling (Action Checkbox Functionality) ---
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked; // Toggle the checkbox state
+                // Manually trigger the change event to update the action bars
+                checkbox.dispatchEvent(new Event('change'));
+            }
+            
+            // --- Modal Opening Logic ---
+            const data = card.dataset;
+            detailsModal.querySelector('#details-image').src = data.imageUrl;
+            detailsModal.querySelector('#details-name').textContent = data.size ? `${data.name} - ${data.size}` : data.name;
+            detailsModal.querySelector('#details-order-id').textContent = `#${data.id}`;
+            detailsModal.querySelector('#details-student').textContent = `${data.studentName} (${data.studentId})`;
+            detailsModal.querySelector('#details-category').textContent = data.category;
+            detailsModal.querySelector('#details-description').textContent = data.description;
+            detailsModal.querySelector('#details-created-at').textContent = data.createdAt;
+            detailsModal.querySelector('#details-quantity').textContent = `${data.quantity} pc(s)`;
+            detailsModal.querySelector('#details-total-price').textContent = `₱${data.totalPrice}`;
+            detailsModal.querySelector('#details-payment-method').textContent = data.paymentMethod;
+            
+            const statusBadge = detailsModal.querySelector('#details-status-badge');
+            const status = data.status;
+            statusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            statusBadge.className = 'status-badge'; 
+            statusBadge.classList.add(`status-${status}`);
+            const singleStatusForm = detailsModal.querySelector('#single-status-form');
+            const singleStatusSelect = detailsModal.querySelector('#single-status-select');
+            singleStatusForm.action = `/dashboard/admin/update-order-status/${data.id}/`;
+            singleStatusSelect.value = data.status;
+            singleStatusForm.style.display = ['completed', 'cancelled', 'rejected'].includes(data.status) ? 'none' : 'flex';
+            
+            openModal(detailsModal);
+        });
+    });
+
+// 🔑 STEP 1 & 2: Implement Live Search Logic
+    function filterOrders() {
+        const query = searchInput.value.toLowerCase().trim();
+        let sectionVisibleCardCount = {};
+        
+        // Initialize counts for sections
+        orderSections.forEach(section => {
+            sectionVisibleCardCount[section.dataset.sectionStatus.split(' ')[0]] = 0;
+        });
+
+        allOrderCards.forEach(card => {
+            // Get all data attributes for searching (Your specified fields)
+            const id = card.dataset.id || '';
+            const name = card.dataset.name.toLowerCase() || '';
+            const category = card.dataset.category.toLowerCase() || '';
+            const status = card.dataset.status.toLowerCase() || '';
+            const studentName = card.dataset.studentName.toLowerCase() || '';
+            const studentId = card.dataset.studentId.toLowerCase() || '';
+            
+            // Combine fields for simple includes check
+            const searchableText = `${id} ${name} ${category} ${status} ${studentName} ${studentId}`;
+
+            let isVisible = true;
+
+            if (query.length > 0) {
+                if (!searchableText.includes(query)) {
+                    isVisible = false;
+                }
+            }
+            
+            // Show or hide the card based on the filter
+            card.style.display = isVisible ? 'flex' : 'none';
+
+            // If visible, increment the counter for its section
+            if (isVisible) {
+                // Find the parent section status to categorize the visible card
+                const section = card.closest('.order-section');
+                if (section) {
+                     // Use the first status word (e.g., 'approved', 'completed', 'cancelled')
+                    const primaryStatus = section.dataset.sectionStatus.split(' ')[0]; 
+                    sectionVisibleCardCount[primaryStatus]++;
+                }
+            }
+        });
+
+        // 🔑 STEP 3: Update section visibility and "no results" messages
+        updateSectionVisibility(query, sectionVisibleCardCount);
+        updateActionBars(); // Ensure action bars reflect the current visible/checked cards
+    }
+
+    // Helper to manage 'no data' cells and section titles
+    function updateSectionVisibility(query, visibleCounts) {
+        orderSections.forEach(section => {
+            const grid = section.querySelector('.orders-grid');
+            const primaryStatus = section.dataset.sectionStatus.split(' ')[0];
+            const originalNoDataCell = section.querySelector('.no-data-cell:not(.temp-no-results)');
+            
+            // Find or create the temporary 'no results' cell
+            let tempNoResults = section.querySelector('.temp-no-results');
+            if (!tempNoResults) {
+                tempNoResults = document.createElement('div');
+                tempNoResults.className = 'no-data-cell temp-no-results';
+                tempNoResults.innerHTML = '<p>No matching orders found.</p>';
+                grid.appendChild(tempNoResults);
+            }
+
+            const isVisible = visibleCounts[primaryStatus] > 0;
+
+            if (query.length > 0) {
+                // Search is active
+                if (!isVisible) {
+                    tempNoResults.style.display = 'block';
+                    if (originalNoDataCell) originalNoDataCell.style.display = 'none';
+                } else {
+                    tempNoResults.style.display = 'none';
+                }
+            } else {
+                // Search is cleared/inactive
+                tempNoResults.style.display = 'none';
+                if (originalNoDataCell) {
+                    const totalCards = section.querySelectorAll('.order-card').length;
+                    originalNoDataCell.style.display = (totalCards === 0) ? 'block' : 'none';
+                }
+            }
+        });
+    }
+
+    // Attach listener to the search input
+    searchInput.addEventListener('input', filterOrders);
+    
+    // Run the filter once on load to initialize visibility state
+    filterOrders();
+
+    // --- Batch Action Logic ---
+    function updateActionBars() {
+        const approvedChecked = document.querySelectorAll('.approved-checkbox:checked').length;
+        const completedChecked = document.querySelectorAll('.completed-checkbox:checked').length;
+        const otherChecked = document.querySelectorAll('.other-checkbox:checked').length;
+        
+        batchStatusBar.style.display = approvedChecked > 0 ? 'flex' : 'none';
+        batchStatusBar.querySelector('#status-selected-count').textContent = `${approvedChecked} item(s) selected`;
+
+        const deleteCount = completedChecked + otherChecked;
+        batchDeleteBar.style.display = deleteCount > 0 ? 'flex' : 'none';
+        batchDeleteBar.querySelector('#delete-selected-count').textContent = `${deleteCount} item(s) selected`;
+
+        // 🔑 FIX 1: Only apply the 'selected' class to the card if it is NOT hidden.
+        allCheckboxes.forEach(cb => {
+            const card = cb.closest('.order-card');
+            if (card) {
+                // Toggle 'selected' class only if the checkbox is checked AND the card is visible
+                card.classList.toggle('selected', cb.checked && card.style.display !== 'none');
+                
+                // Ensure hidden cards lose the 'selected' class just in case
+                if (card.style.display === 'none') card.classList.remove('selected');
+            }
+        });
+    }
+
+    selectAllCheckboxes.forEach(sa => {
+        sa.addEventListener('change', () => {
+            const section = sa.dataset.section;
+            // 🔑 FIX 2: Only check/uncheck the checkbox if its parent card is currently visible.
+            document.querySelectorAll(`.${section}-checkbox`).forEach(cb => {
+                const card = cb.closest('.order-card');
+                if (card && card.style.display !== 'none') {
+                    cb.checked = sa.checked;
+                } else if (sa.checked === false) {
+                    // This ensures hidden cards are UNCHECKED if select all is unchecked
+                    cb.checked = false;
+                }
+            });
+            updateActionBars();
+        });
+    });
+
+    allCheckboxes.forEach(cb => cb.addEventListener('change', updateActionBars));
+
+    // Batch Status Update
+    document.getElementById('batch-status-update-btn').addEventListener('click', () => {
+        const selectedIds = Array.from(document.querySelectorAll('.approved-checkbox:checked')).map(cb => cb.value);
+        if (selectedIds.length > 0) {
+            batchStatusForm.action = `/dashboard/admin/update-order-status/0/`;
+            batchStatusForm.querySelector('#batch-status-order-ids').value = selectedIds.join(',');
+            batchStatusForm.querySelector('#batch-status-action').value = document.getElementById('batch-status-select').value;
+            batchStatusForm.submit();
+        }
+    });
+
+    // ✅ UPDATED: Batch Delete button now opens the confirmation modal
+    document.getElementById('batch-delete-btn').addEventListener('click', () => {
+        const selectedIds = Array.from(document.querySelectorAll('.completed-checkbox:checked, .other-checkbox:checked')).map(cb => cb.value);
+        const count = selectedIds.length;
+        if (count > 0) {
+            // Populate and open the custom modal
+            batchDeleteConfirmModal.querySelector('#batch-delete-count').textContent = count;
+            // Store IDs on the confirm button inside the modal to be used later
+            const confirmBtn = batchDeleteConfirmModal.querySelector('#confirm-batch-delete-btn');
+            if (confirmBtn) {
+                confirmBtn.dataset.ids = selectedIds.join(',');
+            }
+            openModal(batchDeleteConfirmModal);
+        }
+    });
+
+    // ✅ NEW: Event listener for the final confirmation button inside the modal
+    const confirmBatchDeleteBtn = document.getElementById('confirm-batch-delete-btn');
+    if (confirmBatchDeleteBtn) {
+        confirmBatchDeleteBtn.addEventListener('click', function() {
+            const idsToSubmit = this.dataset.ids;
+            if (idsToSubmit) {
+                batchDeleteForm.querySelector('#batch-delete-order-ids').value = idsToSubmit;
+                batchDeleteForm.submit();
+            }
+        });
+    }
+
+    updateActionBars(); // Initial check
+});
+</script>
+{% endblock %}
