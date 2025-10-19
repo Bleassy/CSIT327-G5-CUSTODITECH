@@ -325,7 +325,7 @@ Open your web browser and navigate to the application:
 **Main Application Login:**
 
 ```
-http://127.0.0.1:8000/accounts/login
+http://127.0.0.1:8000/accounts/login/
 ```
 
 **Available Pages:**
