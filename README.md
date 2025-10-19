@@ -9,15 +9,15 @@
 
 ## 📖 Table of Contents
 
-  - [Overview](overview)
-  - [Features](features)
-  - [Tech Stack](tech-stack)
-  - [Prerequisites](prerequisites)
-  - [Setup & Installation](setup--installation)
-  - [Project Structure](project-structure)
-  - [Usage Guide](usage-guide)
-  - [Team Members](team-members)
-  - [Deployment](deployment)
+  - [Overview](#-overview)
+  - [Features](#-features)
+  - [Tech Stack](#-tech-stack)
+  - [Prerequisites](#-prerequisites)
+  - [Setup & Installation](#-setup--installation)
+  - [Project Structure](#-project-structure)
+  - [Usage Guide](#-usage-guide)
+  - [Team Members](#-team-members)
+  - [Deployment](#-deployment)
 
 -----
 
