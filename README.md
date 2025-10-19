@@ -9,15 +9,15 @@
 
 ## 📖 Table of Contents
 
-  - [Overview](https://www.google.com/search?q=%23-overview)
-  - [Features](https://www.google.com/search?q=%23-features)
-  - [Tech Stack](https://www.google.com/search?q=%23%EF%B8%8F-tech-stack)
-  - [Prerequisites](https://www.google.com/search?q=%23-prerequisites)
-  - [Setup & Installation](https://www.google.com/search?q=%23%EF%B8%8F-setup--installation)
-  - [Project Structure](https://www.google.com/search?q=%23-project-structure)
-  - [Usage Guide](https://www.google.com/search?q=%23-usage-guide)
-  - [Team Members](https://www.google.com/search?q=%23-team-members)
-  - [Deployment](https://www.google.com/search?q=%23-deployment)
+  - [Overview](overview)
+  - [Features](features)
+  - [Tech Stack](tech-stack)
+  - [Prerequisites](prerequisites)
+  - [Setup & Installation](setup--installation)
+  - [Project Structure](project-structure)
+  - [Usage Guide](usage-guide)
+  - [Team Members](team-members)
+  - [Deployment](deployment)
 
 -----
 
