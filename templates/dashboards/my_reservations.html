@@ -8,13 +8,6 @@
 {% block content %}
 <h1 class="welcome-title">My Reservations 📅</h1>
 
-{% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-            <li class="{{ message.tags }}">{{ message }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
 
 <h2 class="section-title">Available for Pickup</h2>
 <div class="reservations-grid">
@@ -57,7 +50,7 @@
          data-quantity="{{ item.quantity }}"
          data-total-price="{% widthratio item.product_price 1 item.quantity as total %}{{ total|floatformat:2 }}"
          data-created-at="{{ item.created_at|date:'M d, Y' }}"
-         data-status="{% if item.product_stock_quantity > 0 %}available{% else %}unavailable{% endif %}">
+         data-status="{% if item.product_stock_quantity >= item.quantity %}available{% else %}unavailable{% endif %}">
         
         <img src="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ item.product_name }}" class="product-image">
         <div class="card-body">
@@ -66,7 +59,7 @@
                 <span>Quantity:</span><strong>{{ item.quantity }}</strong>
                 <span>Est. Price:</span><strong>₱{% widthratio item.product_price 1 item.quantity as total %}{{ total|floatformat:2 }}</strong>
                 <span>Status:</span>
-                {% if item.product_stock_quantity > 0 %}
+                {% if item.product_stock_quantity >= item.quantity %}
                     <strong class="status-available">Now Available!</strong>
                 {% else %}
                     <strong class="status-unavailable">Out of Stock</strong>
@@ -300,6 +293,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
         openModal(cancelModal);
     }
+
+// ✅ --- NEW: AJAX Form Handling --- ✅
+
+// Helper function to show dynamic success/error messages
+function showDynamicMessage(message, className = 'success') {
+    const messagesContainer = document.getElementById('messages-container');
+    if (!messagesContainer) {
+        console.error("Message container not found!");
+        return;
+    }
+    const li = document.createElement('li');
+    li.className = className;
+    li.textContent = message;
+    messagesContainer.prepend(li);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => {
+        li.style.opacity = '0';
+        li.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => li.remove(), 500);
+    }, 5000);
+}
+
+// Main function to handle AJAX form submission
+function handleAjaxFormSubmit(form) {
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Stop the page from reloading
+
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.textContent;
+        submitButton.disabled = true;
+        submitButton.textContent = 'Processing...';
+
+        const formData = new FormData(form);
+        const url = form.action;
+        const method = form.method;
+        const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'An unknown error occurred.');
+            }
+
+            // --- Success ---
+            closeModal(form.closest('.modal'));
+            showDynamicMessage(data.message, 'success');
+
+            // Reload the page after 1 second to show the updated list
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000); 
+
+        } catch (error) {
+            // --- Error ---
+            console.error('Form submission error:', error);
+            showDynamicMessage(`Error: ${error.message}`, 'error');
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+        }
+    });
+}
+
+// Attach the AJAX handler to your two confirmation forms
+const checkoutForm = document.getElementById('checkout-form');
+const cancelForm = document.getElementById('cancel-form');
+if (checkoutForm) handleAjaxFormSubmit(checkoutForm);
+if (cancelForm) handleAjaxFormSubmit(cancelForm);
+
 });
 </script>
 {% endblock %}

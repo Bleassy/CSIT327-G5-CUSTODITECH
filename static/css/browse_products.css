@@ -135,24 +135,6 @@
 .checkbox-group input { width: auto; }
 .instructions { font-size: 14px; color: #475569; margin: 0 0 1rem 0; text-align: center; }
 
-/* Messages for success/error */
-.messages { list-style: none; padding: 0; margin-bottom: 1.5rem; }
-.messages li { padding: 1rem; margin-bottom: 1rem; border-radius: 8px; font-weight: 500; }
-
-.messages li.error { background-color: #fee2e2; color: #991b1b; }
-
-.messages li.success {
-    color: #15803d; /* Darker green text */
-    background-color: #dcfce7; /* Light green background */
-    padding: 1rem 1.5rem; /* Padding around text */
-    margin-bottom: 1rem; /* Space if multiple messages appear */
-    border-radius: 8px; /* Rounded corners */
-    border: 1px solid #86efac; /* Slightly darker green border */
-    font-weight: 500;
-    display: flex; /* Use flexbox for alignment */
-    align-items: center; /* Center icon and text vertically */
-    gap: 0.75rem; /* Space between icon and text */
-}
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -252,4 +234,37 @@
 
 #product-details-modal .modal-content {
     max-width: 700px; /* Or any other size you prefer */
+}
+
+/* --- Message Styling --- */
+.messages {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem 0;
+}
+
+.messages li.success {
+    color: #15803d; /* Dark green text */
+    background-color: #dcfce7; /* Light green background */
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    border: 1px solid #86efac; /* Green border */
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.messages li.error {
+    color: #991b1b; /* Dark red text */
+    background-color: #fee2e2; /* Light red background */
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    border: 1px solid #fca5a5; /* Red border */
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }

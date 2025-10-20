@@ -8,13 +8,7 @@
 {% block content %}
 <h1 class="welcome-title">My Orders 📦</h1>
 
-{% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-            <li class="{{ message.tags }}">{{ message }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
+
 
 <div class="search-container">
     <input type="search" id="order-search-input" class="search-input"
@@ -173,7 +167,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary cancel-modal-btn">Close</button>
-            <button type="button" class="btn btn-danger" id="details-delete-btn" style="display: none;">Delete Order</button>
+            <button type="button" class="btn btn-danger" id="details-delete-btn" style="display: none;" data-order-id="">Delete Order</button>
         </div>
     </div>
 </div>
@@ -247,7 +241,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     window.addEventListener('click', (e) => {
-        // Check if the modal exists before trying to close it
         if (e.target.classList.contains('modal') && e.target) { 
              closeModal(e.target);
         }
@@ -279,15 +272,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Order Details Modal Logic ---
     allOrderCards.forEach(card => {
         const checkbox = card.querySelector('.order-checkbox');
-        if (checkbox) checkbox.addEventListener('click', (e) => e.stopPropagation());
+        
+        // This makes the checkbox work when you click it directly
+        if (checkbox) {
+            checkbox.addEventListener('click', (e) => {
+                e.stopPropagation(); // Stop the card click from firing
+                handleExclusiveSelection(checkbox); // Run exclusive logic
+                updateBatchActionBar(); // Update the bar
+            });
+        }
 
-        card.addEventListener('click', () => {
-            // Check if the detailsModal actually exists before proceeding
-            if (!detailsModal) {
-                 console.error("Details modal not found!");
-                 return; 
+        // This makes the whole card clickable
+        card.addEventListener('click', (e) => {
+            // Don't run if we're clicking the checkbox
+            if (e.target.classList.contains('order-checkbox')) return;
+            
+            // Toggle the checkbox if it exists
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                handleExclusiveSelection(checkbox); // Run exclusive logic
+                updateBatchActionBar(); // Update the bar
             }
             
+            // Now, open the modal
+            if (!detailsModal) { console.error("Details modal not found!"); return; }
             const data = card.dataset;
             detailsModal.querySelector('#details-image').src = data.imageUrl;
             const nameEl = detailsModal.querySelector('#details-name');
@@ -307,135 +315,221 @@ document.addEventListener('DOMContentLoaded', () => {
             claimNote.style.display = (data.status === 'approved') ? 'block' : 'none';
 
             const deleteBtn = detailsModal.querySelector('#details-delete-btn');
-             if (deleteBtn) { // Check if delete button exists
-                 if (['completed', 'cancelled', 'rejected'].includes(data.status)) {
-                     deleteBtn.style.display = 'inline-block';
-                     deleteBtn.dataset.id = data.id;
-                     deleteBtn.dataset.name = data.name;
-                     deleteBtn.dataset.size = data.size;
-                 } else {
-                     deleteBtn.style.display = 'none';
-                 }
+            if (deleteBtn) {
+                if (['completed', 'cancelled', 'rejected'].includes(data.status)) {
+                    deleteBtn.style.display = 'inline-block';
+                    deleteBtn.dataset.orderId = data.id;
+                    deleteBtn.dataset.name = data.name;
+                    deleteBtn.dataset.size = data.size;
+                } else {
+                    deleteBtn.style.display = 'none';
+                }
             }
-
             openModal(detailsModal);
         });
     });
 
-    // --- Event Listener for the Delete Button in Details Modal ---
-    const detailsDeleteBtn = document.getElementById('details-delete-btn');
-    if (detailsDeleteBtn) {
-        detailsDeleteBtn.addEventListener('click', function(e) {
-            e.stopPropagation(); 
-            // Check if deleteConfirmModal exists before trying to open
-            if (deleteConfirmModal) {
-                 closeModal(detailsModal);
-                 openDeleteConfirmModal(this.dataset);
-            } else {
-                 console.error("Delete confirmation modal not found!");
-            }
-        });
-    }
-
     // --- Batch Action Logic ---
     function updateBatchActionBar() {
-        const selectedCheckboxes = document.querySelectorAll('.order-checkbox:checked');
-        const count = selectedCheckboxes.length;
-        if (batchActionBar) { // Check if batch bar exists
-             if (count > 0) {
-                 batchActionBar.style.display = 'flex';
-                 selectedCountSpan.textContent = `${count} item${count > 1 ? 's' : ''} selected`;
-             } else {
-                 batchActionBar.style.display = 'none';
-             }
+        const completedChecked = document.querySelectorAll('.completed-checkbox:checked').length;
+        const otherChecked = document.querySelectorAll('.other-checkbox:checked').length;
+        const count = completedChecked + otherChecked;
+
+        if (batchActionBar) {
+            if (count > 0) {
+                batchActionBar.style.display = 'flex';
+                selectedCountSpan.textContent = `${count} item${count > 1 ? 's' : ''} selected`;
+            } else {
+                batchActionBar.style.display = 'none';
+            }
         }
         allOrderCheckboxes.forEach(cb => {
             cb.closest('.order-card').classList.toggle('selected', cb.checked);
         });
     }
+
     if (selectAllCompletedCheckbox) {
         selectAllCompletedCheckbox.addEventListener('change', () => {
             completedCheckboxes.forEach(cb => cb.checked = selectAllCompletedCheckbox.checked);
+            handleExclusiveSelection(selectAllCompletedCheckbox, 'completed-checkbox');
             updateBatchActionBar();
         });
     }
     if (selectAllOtherCheckbox) {
         selectAllOtherCheckbox.addEventListener('change', () => {
             otherCheckboxes.forEach(cb => cb.checked = selectAllOtherCheckbox.checked);
+            handleExclusiveSelection(selectAllOtherCheckbox, 'other-checkbox');
             updateBatchActionBar();
         });
     }
+    
+    // This listener is for when you click an individual checkbox
     allOrderCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', () => {
             if (!checkbox.checked) {
                 if (checkbox.classList.contains('completed-checkbox') && selectAllCompletedCheckbox) selectAllCompletedCheckbox.checked = false;
                 if (checkbox.classList.contains('other-checkbox') && selectAllOtherCheckbox) selectAllOtherCheckbox.checked = false;
             }
+            // handleExclusiveSelection(checkbox) is called by the 'click' listener
             updateBatchActionBar();
         });
     });
+    
+    // Helper function to manage exclusive selection
+    function handleExclusiveSelection(clickedCheckbox, groupClass = null) {
+        if (!clickedCheckbox.checked) return; // Only run on checking a box
+
+        const clickedGroupClass = groupClass || (clickedCheckbox.classList.contains('completed-checkbox') ? 'completed-checkbox' : 'other-checkbox');
+
+        // Uncheck all checkboxes from the OTHER group
+        allOrderCheckboxes.forEach(cb => {
+            if (clickedGroupClass === 'completed-checkbox' && cb.classList.contains('other-checkbox')) {
+                cb.checked = false;
+            } else if (clickedGroupClass === 'other-checkbox' && cb.classList.contains('completed-checkbox')) {
+                cb.checked = false;
+            }
+        });
+
+        // Uncheck the OTHER "Select All" toggle
+        if (clickedGroupClass === 'completed-checkbox' && selectAllOtherCheckbox) {
+            selectAllOtherCheckbox.checked = false;
+        } else if (clickedGroupClass === 'other-checkbox' && selectAllCompletedCheckbox) {
+            selectAllCompletedCheckbox.checked = false;
+        }
+    }
+
+    // --- AJAX Logic ---
+    const csrfToken = batchForm.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    function showDynamicMessage(message, className = 'success') {
+        const messagesContainer = document.getElementById('messages-container');
+        if (!messagesContainer) return;
+        const li = document.createElement('li');
+        li.className = className;
+        li.textContent = message;
+        messagesContainer.prepend(li);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => {
+            li.style.opacity = '0';
+            li.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => li.remove(), 500);
+        }, 5000);
+    }
+    
+    function removeCardsFromUI(orderIds) {
+        orderIds.forEach(id => {
+            const card = document.querySelector(`.order-card[data-id="${id}"]`);
+            if (card) {
+                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.95)';
+                setTimeout(() => card.remove(), 500);
+            }
+        });
+        updateBatchActionBar();
+    }
+
+    // --- AJAX for BATCH Delete ---
+    const batchDeleteConfirmBtn = document.getElementById('confirm-batch-delete-btn');
     if (batchDeleteBtn) {
         batchDeleteBtn.addEventListener('click', () => {
             const selectedIds = Array.from(document.querySelectorAll('.order-checkbox:checked')).map(cb => cb.value);
             const count = selectedIds.length;
-
-            if (count === 0) {
-                alert('Please select at least one order to delete.');
-                return;
-            }
-
-            // Populate the batch delete confirmation modal
+            if (count === 0) { alert('Please select at least one order to delete.'); return; }
             if (batchDeleteConfirmModal) {
                  batchDeleteConfirmModal.querySelector('#batch-delete-count').textContent = count;
-                 // Store IDs on the confirm button inside the modal
-                 const confirmBtn = batchDeleteConfirmModal.querySelector('#confirm-batch-delete-btn');
-                 if(confirmBtn) {
-                    confirmBtn.dataset.ids = selectedIds.join(',');
-                 }
+                 if(batchDeleteConfirmBtn) batchDeleteConfirmBtn.dataset.ids = selectedIds.join(',');
                  openModal(batchDeleteConfirmModal);
-            } else {
-                 console.error("Batch delete confirmation modal not found!");
-                 // Fallback to default confirm if modal is missing (optional)
-                 // if (confirm(`Are you sure...?`)) { submitBatchDelete(selectedIds); }
             }
         });
     }
-
-    // ✅ NEW: Event Listener for the CONFIRM Batch Delete Button (inside the new modal)
-    const confirmBatchDeleteBtn = document.getElementById('confirm-batch-delete-btn');
-    if (confirmBatchDeleteBtn) {
-        confirmBatchDeleteBtn.addEventListener('click', function() {
+    if (batchDeleteConfirmBtn) {
+        batchDeleteConfirmBtn.addEventListener('click', async function() {
             const idsToSubmit = this.dataset.ids;
-            if (idsToSubmit) {
-                submitBatchDelete(idsToSubmit);
-            } else {
-                console.error("No IDs found to submit for batch delete.");
-                closeModal(batchDeleteConfirmModal); // Close modal on error
+            if (!idsToSubmit) return;
+            this.disabled = true;
+            this.textContent = 'Deleting...';
+            const formData = new FormData();
+            formData.append('order_ids', idsToSubmit);
+            try {
+                const response = await fetch("{% url 'batch_delete_orders' %}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+                closeModal(batchDeleteConfirmModal);
+                showDynamicMessage(data.message, 'success');
+                removeCardsFromUI(idsToSubmit.split(','));
+            } catch (error) {
+                closeModal(batchDeleteConfirmModal); // ✅ ADD THIS LINE
+                showDynamicMessage(`Error: ${error.message}`, 'error');
+            } finally {
+                this.disabled = false;
+                this.textContent = 'Yes, Delete Selected';
             }
         });
     }
 
-    // ✅ NEW: Helper function to submit the batch delete form
-    function submitBatchDelete(idsString) {
-        batchOrderIdsInput.value = idsString;
-        batchForm.submit();
-        // No need to close modal here, page will reload on form submission
+    // --- AJAX for SINGLE Delete ---
+    // This is the "Delete Order" button *inside* the details modal
+    const detailsDeleteBtn = document.getElementById('details-delete-btn');
+    if (detailsDeleteBtn) {
+        detailsDeleteBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (deleteConfirmModal) {
+                 closeModal(detailsModal);
+                 openDeleteConfirmModal(this.dataset);
+            }
+        });
     }
-    updateBatchActionBar(); 
 
-    // --- Helper Function to Open Delete Confirmation Modal ---
-    function openDeleteConfirmModal(data) {
-         // Check if modal exists before accessing its elements
-         if (!deleteConfirmModal) {
-              console.error("Cannot open delete confirmation modal - it was not found.");
-              return;
-         }
-        const form = deleteConfirmModal.querySelector('#delete-single-order-form');
-        form.action = `/dashboard/student/delete-order/${data.id}/`; 
-        const confirmNameEl = deleteConfirmModal.querySelector('#delete-confirm-product-name');
-        confirmNameEl.textContent = data.size ? `${data.name} - ${data.size}` : data.name; 
-        openModal(deleteConfirmModal);
+    // This is the form *inside* the single delete confirmation modal
+    const singleDeleteForm = document.getElementById('delete-single-order-form');
+    if (singleDeleteForm) {
+        singleDeleteForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); 
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.textContent;
+            submitButton.disabled = true;
+            submitButton.textContent = 'Deleting...';
+
+            const url = this.action;
+            const orderId = url.split('/').filter(Boolean).pop();
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+                
+                closeModal(deleteConfirmModal);
+                showDynamicMessage(data.message, 'success');
+                removeCardsFromUI([orderId]);
+            } catch (error) {
+                closeModal(deleteConfirmModal); // ✅ ADD THIS LINE
+            showDynamicMessage(`Error: ${error.message}`, 'error');
+            } finally {
+                 submitButton.disabled = false;
+                 submitButton.textContent = originalButtonText;
+            }
+        });
     }
+    
+    // Helper function to populate and open the single delete modal
+    function openDeleteConfirmModal(data) {
+       if (!deleteConfirmModal) { console.error("Cannot open delete confirmation modal - not found."); return; }
+       const form = deleteConfirmModal.querySelector('#delete-single-order-form');
+       form.action = `/dashboard/student/delete-order/${data.orderId}/`; // Use data.orderId
+       const confirmNameEl = deleteConfirmModal.querySelector('#delete-confirm-product-name');
+       confirmNameEl.textContent = data.size ? `${data.name} - ${data.size}` : data.name; 
+       openModal(deleteConfirmModal);
+    }
+
+    updateBatchActionBar(); // Initial check
 });
 </script>
 {% endblock %}

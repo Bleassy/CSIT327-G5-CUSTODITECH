@@ -31,6 +31,15 @@
         </div>
     </header>
     <div class="container">
+
+        <ul class="messages" id="messages-container">
+            {% if messages %}
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            {% endif %}
+        </ul>
+        
         {% block content %}{% endblock %}
     </div>
     {% block extra_js %}{% endblock %}

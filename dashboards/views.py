@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse 
 from django.contrib import messages
 from supabase_client import supabase, supabase_service
 import pytz
@@ -244,72 +245,59 @@ def my_orders_view(request):
 
 @student_required
 def batch_delete_orders_view(request):
-    """ Handles batch deletion of orders by the student. """
-    if request.method == 'POST':
+    """ Handles batch deletion of orders by the student who owns them. """
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         order_ids_str = request.POST.get('order_ids')
-        if not order_ids_str:
-            messages.error(request, "No orders selected for deletion.")
-            return redirect('my_orders')
-
-        # Convert comma-separated string IDs to a list of integers
-        order_ids = [int(oid) for oid in order_ids_str.split(',') if oid.isdigit()]
-
-        if not order_ids:
-            messages.error(request, "Invalid order IDs provided.")
-            return redirect('my_orders')
-
         try:
+            order_ids = [int(oid) for oid in order_ids_str.split(',') if oid.isdigit()]
+            if not order_ids:
+                raise ValueError("No valid order IDs provided.")
+
             user_id = request.user.id
-            
-            # Use supabase_service to bypass RLS, but filter by user_id for security
-            # Delete orders that match the IDs AND belong to the current user
-            response = supabase_service.table('orders') \
+
+            # Use service role but ensure the user owns the orders
+            supabase_service.table('orders') \
                 .delete() \
                 .in_('id', order_ids) \
                 .eq('user_id', user_id) \
                 .execute()
 
-            # The response doesn't directly tell us how many were deleted easily,
-            # but we can assume success if no exception occurred.
-            count = len(order_ids) # Assume all requested were potentially deletable by this user
-            messages.success(request, f"{count} order(s) deleted successfully.")
-            
-            # Optional: Log this activity if needed (using log_activity helper)
+            return JsonResponse({'success': True, 'message': f"✅ {len(order_ids)} order(s) have been deleted."})
 
         except Exception as e:
-            messages.error(request, f"An error occurred during batch deletion: {e}")
+            return JsonResponse({'success': False, 'error': f"An error occurred during batch deletion: {e}"}, status=400)
 
-    # Redirect back to the orders page regardless of method or success/failure
-    return redirect('my_orders')
+    return JsonResponse({'success': False, 'error': 'Invalid request.'}, status=400)
 
 @student_required
 def delete_single_order_view(request, order_id):
     """ Handles deletion of a single order by the student who owns it. """
-    if request.method == 'POST':
+    # Check for AJAX POST request
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
             user_id = request.user.id
-            
+
             # Use service role but ensure the user owns the order
-            response = supabase_service.table('orders') \
+            supabase_service.table('orders') \
                 .delete() \
                 .eq('id', order_id) \
                 .eq('user_id', user_id) \
                 .execute()
 
-            # Check if any row was actually deleted (basic check)
-            # A more robust check might involve querying before deleting,
-            # but this is usually sufficient if the UI prevents deleting others' orders.
-            messages.success(request, f"Order #{order_id} deleted successfully.")
+            # ✅ Return JSON success
+            return JsonResponse({'success': True, 'message': f"🗑️ Order #{order_id} has been permanently deleted."})
 
         except Exception as e:
-            messages.error(request, f"Failed to delete order #{order_id}: {e}")
-            
-    # Redirect back to the orders page regardless of method or outcome
-    return redirect('my_orders')
+            # ✅ Return JSON error
+            return JsonResponse({'success': False, 'error': f"Failed to delete order #{order_id}: {e}"}, status=400)
+
+    # ✅ Return error for invalid requests
+    return JsonResponse({'success': False, 'error': 'Invalid request.'}, status=400)
 
 @student_required
 def create_reservation_view(request):
-    if request.method == 'POST':
+    # We only expect AJAX (fetch) requests now
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
             params = {
                 'p_product_id': int(request.POST.get('product_id')),
@@ -318,20 +306,38 @@ def create_reservation_view(request):
                 'p_deal_method': request.POST.get('deal_method', 'meet-up'),
                 'p_is_urgent': 'is_urgent' in request.POST
             }
-            supabase.rpc('create_reservation', params).execute()
+            
+            # Execute the RPC
+            response = supabase.rpc('create_reservation', params).execute()
+            
+            # Check for Supabase-level errors
+            if hasattr(response, 'error') and response.error:
+                 raise Exception(str(response.error))
+
+            # Check for errors returned in the data (if your function does that)
+            if isinstance(response.data, list) and len(response.data) > 0 and 'error' in response.data[0]:
+                 raise Exception(response.data[0]['error'])
+
+            # ✅ If no errors, send a JSON success response
+            return JsonResponse({'success': True, 'message': '✅ Your item has been reserved successfully!'})
+
         except Exception as e:
             error_str = str(e)
-            if "'success': True" in error_str:
-                messages.success(request, "Your item has been reserved successfully!")
-                return redirect('my_reservations')
+            
+            # ✅ THIS IS THE FIX: Check if the "error" is actually a success message
+            if "'success': True" in error_str or "'message': 'Item reserved successfully!'" in error_str:
+                return JsonResponse({'success': True, 'message': '✅ Your item has been reserved successfully!'})
             else:
-                messages.error(request, f"Could not reserve item: {e}")
-                return redirect('browse_products')
-    return redirect('my_reservations')
+                # This is a real error
+                return JsonResponse({'success': False, 'error': f"Could not reserve item: {e}"}, status=400)
+    
+    # If it's not an AJAX POST request, return an error
+    return JsonResponse({'success': False, 'error': 'Invalid request.'}, status=400)
 
 @student_required
 def create_order_view(request):
-    if request.method == 'POST':
+    # We only expect AJAX (fetch) requests now
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
             params = {
                 'p_product_id': int(request.POST.get('product_id')),
@@ -341,16 +347,33 @@ def create_order_view(request):
                 'p_payment_method': request.POST.get('payment_method'),
                 'p_payment_transaction_id': request.POST.get('payment_transaction_id', None)
             }
-            supabase.rpc('buy_product', params).execute()
+            
+            # Execute the RPC
+            response = supabase.rpc('buy_product', params).execute()
+
+            # Check for Supabase-level errors
+            if hasattr(response, 'error') and response.error:
+                 raise Exception(str(response.error))
+
+            # Check for errors returned in the data
+            if isinstance(response.data, list) and len(response.data) > 0 and 'error' in response.data[0]:
+                 raise Exception(response.data[0]['error'])
+
+            # ✅ If no errors, send a JSON success response
+            return JsonResponse({'success': True, 'message': '🎉 Your order has been placed successfully!'})
+
         except Exception as e:
             error_str = str(e)
+            
+            # ✅ THIS IS THE FIX: Check if the "error" is actually a success message
             if "'success': True" in error_str:
-                messages.success(request, "Your order has been placed successfully!")
-                return redirect('my_orders')
+                return JsonResponse({'success': True, 'message': '🎉 Your order has been placed successfully!'})
             else:
-                messages.error(request, f"Could not place order: {e}")
-                return redirect('browse_products')
-    return redirect('my_orders')
+                # This is a real error
+                return JsonResponse({'success': False, 'error': f"Could not place order: {e}"}, status=400)
+    
+    # If it's not an AJAX POST request, return an error
+    return JsonResponse({'success': False, 'error': 'Invalid request.'}, status=400)
 
 @student_required
 def checkout_reservation_view(request):
@@ -367,18 +390,15 @@ def checkout_reservation_view(request):
             response = supabase.rpc('checkout_reservation', params).execute()
             print(f"--- Supabase RPC Response: {response}")
 
-            messages.success(request, "✅ Checkout successful! Your reservation is now an order.")
-            return redirect('my_orders')
+            return JsonResponse({'success': True, 'message': '✅ Checkout successful! Your reservation is now an order.'})
 
         except Exception as e:
-            messages.error(request, f"Could not process checkout: {e}")
             print(f"--- ERROR in checkout_reservation_view: {e}")
-            # Keep redirecting back to reservations on error
-            return redirect('my_reservations')
+            return JsonResponse({'success': False, 'error': f"Could not process checkout: {e}"}, status=400)
 
     # If not POST, redirect (should ideally not happen with button clicks)
     print("--- CHECKOUT VIEW REACHED --- Not a POST request, redirecting.")
-    return redirect('my_reservations') # Redirect back to reservations if GET
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
 
 @student_required
 def student_profile_view(request):
@@ -451,7 +471,7 @@ def cancel_reservation_view(request, reservation_id):
                 'p_new_status': 'cancelled'
             }).execute()
             
-            messages.success(request, "Your reservation has been successfully cancelled.")
+            return JsonResponse({'success': True, 'message': '🗑️ Your reservation has been successfully cancelled.'})
             
             # Log this activity for the admin (optional but good practice)
             log_activity(
@@ -461,10 +481,10 @@ def cancel_reservation_view(request, reservation_id):
             )
             
         except Exception as e:
-            messages.error(request, f"Could not cancel the reservation: {e}")
+            return JsonResponse({'success': False, 'error': f"Could not cancel the reservation: {e}"}, status=400)
             
     # Redirect back to the reservations page regardless of method (POST or GET)
-    return redirect('my_reservations')
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
 
 # --- Admin Views ---
 @admin_required
@@ -652,43 +672,44 @@ def delete_product(request, product_id):
 def order_management_view(request):
     search_query = request.GET.get('search', '').strip()
     
-    # ✅ RENAMED lists to be clearer
+    # ✅ ADDED: Re-initialize the pending_orders list
+    pending_orders = [] 
     approved_orders = []
     completed_orders = []
     other_orders = [] # This will hold cancelled/rejected
     
     try:
         params = {'p_search_term': search_query}
-        # We assume 'get_all_orders_with_details' is the function you updated
         response = supabase.rpc('get_all_orders_with_details', params).execute()
         
         if response.data:
             for item in response.data:
                 if item.get('created_at'):
-                    # Basic ISO format parsing
                     item['created_at'] = datetime.fromisoformat(item['created_at'])
                 
-                # ✅ UPDATED: Sorting logic
                 status = item.get('status')
-                if status == 'approved':
+                
+                # ✅ ADDED: Logic to sort 'pending' orders into their own list
+                if status == 'pending':
+                    pending_orders.append(item)
+                elif status == 'approved':
                     approved_orders.append(item)
                 elif status == 'completed':
                     completed_orders.append(item)
                 elif status in ['cancelled', 'rejected']:
                     other_orders.append(item)
-                # 'pending' orders are now ignored, as requested
                     
     except Exception as e:
         messages.error(request, f"An error occurred while fetching orders: {e}")
 
-    # ✅ UPDATED: Context dictionary
     context = {
+        'pending_orders': pending_orders, # ✅ ADDED: Pass the new list to the template
         'approved_orders': approved_orders,
         'completed_orders': completed_orders,
         'other_orders': other_orders,
         'search_query': search_query,
         'active_page': 'order_management',
-        'page_title': 'Order Management' # ✅ Added page title
+        'page_title': 'Order Management'
     }
     return render(request, 'dashboards/order_management.html', context)
 
@@ -715,10 +736,11 @@ def admin_batch_delete_orders_view(request):
                 'ORDER_BATCH_DELETED',
                 {'count': len(order_ids), 'order_ids': order_ids}
             )
+            return JsonResponse({'success': True, 'message': f"✅ {len(order_ids)} order(s) have been permanently deleted."})
         except Exception as e:
-            messages.error(request, f"An error occurred during batch deletion: {e}")
+            return JsonResponse({'success': False, 'error': f"An error occurred during batch deletion: {e}"}, status=400)
 
-    return redirect('order_management')
+    return JsonResponse({'success': False, 'error': 'Invalid request.'}, status=400)
 
 @admin_required
 def batch_update_products(request):

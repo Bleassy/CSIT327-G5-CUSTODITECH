@@ -8,13 +8,7 @@
 {% block content %}
 <h1 class="welcome-title">Browse Products 🛒</h1>
              
-{% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-            <li class="{{ message.tags }}">{{ message }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
+
 
 <div class="search-container">
     <input type="search" id="product-search-input" class="search-input" placeholder="Search for a product..." value="{{ search_query }}">
@@ -98,7 +92,7 @@
 <div id="buy-now-modal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header"><h2>Confirm Purchase</h2><span class="close-btn">&times;</span></div>
-        <form action="{% url 'create_order' %}" method="post" class="modal-form">
+        <form action="{% url 'create_order' %}" method="post" class="modal-form" id="buy-now-form">
             {% csrf_token %}
             <div class="modal-body">
                 <input type="hidden" name="product_id" id="buy-product-id">
@@ -118,7 +112,7 @@
 <div id="reservation-modal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header"><h2>Confirm Reservation</h2><span class="close-btn">&times;</span></div>
-        <form action="{% url 'create_reservation' %}" method="post" class="modal-form">
+        <form action="{% url 'create_reservation' %}" method="post" class="modal-form" id="reservation-form">
             {% csrf_token %}
             <div class="modal-body">
                 <input type="hidden" name="product_id" id="reserve-product-id">
@@ -138,7 +132,7 @@
 <div id="backorder-modal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header"><h2>Reserve Out-of-Stock Item</h2><span class="close-btn">&times;</span></div>
-        <form action="{% url 'create_reservation' %}" method="post" class="modal-form">
+        <form action="{% url 'create_reservation' %}" method="post" class="modal-form" id="backorder-form">
             {% csrf_token %}
             <div class="modal-body">
                 <input type="hidden" name="product_id" id="backorder-product-id">
@@ -179,24 +173,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     searchInput.addEventListener('input', () => {
         const searchTerm = searchInput.value.toLowerCase().trim();
-
-        // Loop through all product cards and hide/show them
         productCards.forEach(card => {
             const productName = card.dataset.name.toLowerCase();
             const categoryName = card.dataset.category.toLowerCase();
-            
-            // Check if the search term is in the name OR the category
             const cardShouldBeVisible = productName.includes(searchTerm) || categoryName.includes(searchTerm);
-            
             card.style.display = cardShouldBeVisible ? 'flex' : 'none';
         });
-
-        // Loop through all category sections to hide them if they are empty
         categorySections.forEach(section => {
-            // Check for any visible cards within this section
             const visibleCards = section.querySelectorAll('.product-card[style*="display: flex"]');
-            
-            // If there are no visible cards, hide the whole section title
             section.style.display = visibleCards.length > 0 ? 'block' : 'none';
         });
     });
@@ -245,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- HELPER FUNCTIONS ---
+    // --- HELPER FUNCTIONS (Your original code) ---
     function openBuyNowModal(data) {
         buyModal.querySelector('#buy-product-id').value = data.id;
         buyModal.querySelector('.modal-product-image').src = data.imageUrl;
@@ -305,6 +289,91 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTotal();
         openModal(backorderModal);
     }
+
+    // ✅ --- NEW: AJAX Form Handling --- ✅
+
+    // Helper function to show dynamic success/error messages
+    function showDynamicMessage(message, className = 'success') {
+        const messagesContainer = document.getElementById('messages-container');
+        if (!messagesContainer) return;
+
+        // Create the new message element
+        const li = document.createElement('li');
+        li.className = className; // 'success' or 'error'
+        li.textContent = message;
+
+        // Add it to the container
+        messagesContainer.prepend(li);
+
+        // Scroll to the top to see the message
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Remove the message after 5 seconds
+        setTimeout(() => {
+            li.style.opacity = '0';
+            li.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => li.remove(), 500);
+        }, 5000);
+    }
+
+    // Main function to handle AJAX form submission
+    function handleAjaxFormSubmit(form) {
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Stop the page from reloading
+            
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.textContent;
+            submitButton.disabled = true;
+            submitButton.textContent = 'Processing...';
+
+            const formData = new FormData(form);
+            const url = form.action;
+            const method = form.method;
+            const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest', // Tells Django it's an AJAX request
+                    },
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    // If server returns an error (status 400, 500, etc.)
+                    throw new Error(data.error || 'An unknown error occurred.');
+                }
+
+                // --- Success ---
+                closeModal(form.closest('.modal')); // Close the modal
+                showDynamicMessage(data.message, 'success'); // Show success toast
+                // We don't redirect, the user stays on the browse page
+                setTimeout(() => { window.location.reload(); }, 1500);
+
+            } catch (error) {
+                // --- Error ---
+                console.error('Form submission error:', error);
+                showDynamicMessage(`Error: ${error.message}`, 'error'); // Show error toast
+            } finally {
+                // Re-enable the button
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            }
+        });
+    }
+
+    // Attach the AJAX handler to all three forms
+    const buyNowForm = document.getElementById('buy-now-form');
+    const reservationForm = document.getElementById('reservation-form');
+    const backorderForm = document.getElementById('backorder-form');
+
+    if (buyNowForm) handleAjaxFormSubmit(buyNowForm);
+    if (reservationForm) handleAjaxFormSubmit(reservationForm);
+    if (backorderForm) handleAjaxFormSubmit(backorderForm);
 });
 </script>
 {% endblock %}
