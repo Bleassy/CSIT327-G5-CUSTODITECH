@@ -322,92 +322,206 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Get Elements ---
+
+    // ==================================================================
+    // == 1. GET ALL ELEMENTS (No changes here)
+    // ==================================================================
     const addModal = document.getElementById('add-product-modal');
     const editModal = document.getElementById('edit-product-modal');
     const deleteModal = document.getElementById('delete-confirm-modal');
     const detailsModal = document.getElementById('product-details-modal');
     const batchDeleteConfirmModal = document.getElementById('batch-delete-confirm-modal');
-
+    const addProductForm = addModal?.querySelector('form');
+    const editProductForm = document.getElementById('edit-product-form');
+    const deleteProductForm = document.getElementById('delete-product-form');
+    const batchActionForm = document.getElementById('batch-action-form');
     const selectAllCheckbox = document.getElementById('select-all-checkbox');
-    const productCheckboxes = document.querySelectorAll('.product-checkbox');
     const batchActionBar = document.getElementById('batch-action-bar');
     const selectedCountSpan = document.getElementById('selected-count');
-    const batchActionForm = document.getElementById('batch-action-form');
     const batchActionInput = document.getElementById('batch-action-input');
     const batchProductIdsInput = document.getElementById('batch-product-ids-input');
     const batchEditBtn = document.getElementById('batch-edit-btn');
-
-    // ✅ Get Search and Table Elements
+    const confirmBatchDeleteBtn = document.getElementById('confirm-batch-delete-btn');
     const searchInput = document.getElementById('product-search-input');
     const tableBody = document.getElementById('product-table-body');
-    const productRows = tableBody?.querySelectorAll('tr.product-row');
     const noResultsRow = document.getElementById('no-results-row');
     const initialEmptyRow = document.getElementById('initial-empty-row');
+    const addProductBtn = document.getElementById('add-product-btn');
+    const detailsEditBtn = document.getElementById('details-edit-btn');
+    const detailsDeleteBtn = document.getElementById('details-delete-btn');
 
-    // --- Helper Functions ---
-    const openModal = (modal) => { if(modal) modal.style.display = 'block'; };
-    const closeModal = (modal) => { if(modal) modal.style.display = 'none'; };
 
-    function updateBatchActionBar() {
-        const selectedCheckboxes = document.querySelectorAll('.product-checkbox:checked');
-        const count = selectedCheckboxes.length;
-        if (batchActionBar) {
-            batchActionBar.style.display = count > 0 ? 'flex' : 'none';
-            if(selectedCountSpan) selectedCountSpan.textContent = `${count} item${count > 1 ? 's' : ''} selected`;
+    // ==================================================================
+    // == 2. DEFINE ALL HELPER FUNCTIONS
+    // ==================================================================
+
+    /**
+     * ✅ REPLACED: This now uses your .messages list
+     * Displays a temporary message in the message container.
+     * @param {string} message - The message to display.
+     * @param {string} type - 'success' or 'error'.
+     */
+    function showMessage(message, type = 'success') {
+        const container = document.getElementById('message-container');
+        if (!container) {
+            console.error("Message container not found!");
+            return;
         }
-        if (batchEditBtn) batchEditBtn.disabled = (count !== 1);
-        productCheckboxes.forEach(checkbox => {
-            checkbox.closest('tr')?.classList.toggle('row-selected', checkbox.checked);
-        });
+
+        const li = document.createElement('li');
+        li.className = type; // 'success' or 'error'
+        
+        // Add an icon based on type to use the 'gap' in your CSS
+        const icon = (type === 'success') ? '✅' : '❌';
+        li.textContent = ` ${message}`; // Add a space for the icon
+        
+        const iconSpan = document.createElement('span');
+        iconSpan.textContent = icon;
+        li.prepend(iconSpan); // Add the icon at the beginning
+
+        container.appendChild(li);
+
+        // Auto-remove the message after 4 seconds
+        setTimeout(() => {
+            li.style.opacity = '0';
+            setTimeout(() => {
+                li.remove();
+            }, 500); // Wait for fade out to complete
+        }, 4000);
     }
 
-    function submitBatchDelete(idsString, action) {
-        if (batchActionInput && batchProductIdsInput && batchActionForm) {
-            batchActionInput.value = action;
-            batchProductIdsInput.value = idsString;
-            batchActionForm.submit();
-        } else { console.error("Batch form elements not found!"); }
+    /**
+     * Gets the CSRF token from the main batch form.
+     * @returns {string} The CSRF token value.
+     */
+    function getCsrfToken() {
+        return document.querySelector('#batch-action-form [name=csrfmiddlewaretoken]').value;
     }
 
-    // ✅ NEW: Live Product Filter Function
-    function filterProducts() {
-        if (!searchInput || !productRows || !noResultsRow) {
-             console.warn("Search elements not found, skipping filter.");
-             return;
+    // ... (All other helper functions: createProductRow, updateProductRow, addListenersToRow, openModal, closeModal, updateBatchActionBar, filterProducts) ...
+    // [These functions are unchanged]
+
+    function createProductRow(product) {
+        if (!tableBody) return;
+        initialEmptyRow?.remove();
+        noResultsRow?.remove();
+        const name = product.name || '';
+        const description = product.description || '';
+        const category = product.category || 'N/A';
+        const size = product.size || '';
+        const price = parseFloat(product.price || 0).toFixed(2);
+        const stock = parseInt(product.stock_quantity || 0);
+        const isAvailable = product.is_available === true;
+        const imageUrl = product.image_url || 'https://placehold.co/100x100/e0e7ff/3730a3?text=Item';
+        let stockDisplay, statusDisplay, statusClass, dataStatus;
+        if (!isAvailable) {
+            stockDisplay = `${stock} pcs`;
+            statusDisplay = `<span class="badge badge-unavailable">Unavailable</span>`;
+            statusClass = 'unavailable-row';
+            dataStatus = 'unavailable';
+        } else if (stock < 10 && stock > 0) {
+            stockDisplay = `⚠️ ${stock} pcs`;
+            statusDisplay = `<span class="badge badge-low-stock">Low Stock</span>`;
+            statusClass = 'low-stock-row';
+            dataStatus = 'low stock';
+        } else {
+            stockDisplay = `${stock} pcs`;
+            statusDisplay = `<span class="badge badge-available">Available</span>`;
+            statusClass = 'available-row';
+            dataStatus = 'available';
         }
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        let visibleRowCount = 0;
-        productRows.forEach(row => {
-            const productName = row.dataset.name || '';
-            const category = row.dataset.category || '';
-            const status = row.dataset.status || '';
+        const row = document.createElement('tr');
+        row.className = `product-row ${statusClass}`;
+        row.dataset.name = name.toLowerCase();
+        row.dataset.category = category.toLowerCase();
+        row.dataset.status = dataStatus;
+        row.innerHTML = `
+            <td><input type="checkbox" class="product-checkbox" value="${product.id}"></td>
+            <td><img src="${imageUrl}" alt="${name}" class="product-thumbnail"></td>
+            <td>
+                <div class="product-details">
+                    <strong class="product-table-name">${name} ${size ? '- ' + size : ''}</strong>
+                    <span class="product-table-desc">${description.substring(0, 50)}...</span>
+                </div>
+            </td>
+            <td>${category}</td>
+            <td>₱${price}</td>
+            <td>${stockDisplay}</td>
+            <td>${statusDisplay}</td>
+            <td>
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-edit"
+                        data-id="${product.id}" data-name="${name}" data-description="${description}"
+                        data-price="${price}" data-stock="${stock}" data-category="${category}"
+                        data-size="${size}" data-is-available="${isAvailable ? 'true' : 'false'}"
+                        data-image-url="${product.image_url || ''}">
+                        Edit
+                    </button>
+                    <button type="button" class="btn btn-delete" data-id="${product.id}" data-name="${name}">
+                        Delete
+                    </button>
+                </div>
+            </td>
+        `;
+        tableBody.prepend(row);
+        addListenersToRow(row);
+    }
 
-            const rowMatches = productName.includes(searchTerm) || 
-                               category.includes(searchTerm) || 
-                               status.includes(searchTerm);
-
-            row.style.display = rowMatches ? '' : 'none';
-            if (rowMatches) visibleRowCount++;
-        });
-        if (noResultsRow) noResultsRow.style.display = (visibleRowCount === 0 && productRows.length > 0) ? '' : 'none';
-        if (initialEmptyRow) {
-            initialEmptyRow.style.display = (searchTerm.length > 0 || productRows.length > 0) ? 'none' : '';
+    function updateProductRow(product) {
+        const editBtn = document.querySelector(`.btn-edit[data-id="${product.id}"]`);
+        if (!editBtn) return;
+        const row = editBtn.closest('tr.product-row');
+        if (!row) return;
+        const name = product.name || '';
+        const description = product.description || '';
+        const category = product.category || 'N/A';
+        const size = product.size || '';
+        const price = parseFloat(product.price || 0).toFixed(2);
+        const stock = parseInt(product.stock_quantity || 0);
+        const isAvailable = product.is_available === true;
+        const imageUrl = product.image_url || 'https://placehold.co/100x100/e0e7ff/3730a3?text=Item';
+        let stockDisplay, statusDisplay, statusClass, dataStatus;
+        if (!isAvailable) {
+            stockDisplay = `${stock} pcs`;
+            statusDisplay = `<span class="badge badge-unavailable">Unavailable</span>`;
+            statusClass = 'unavailable-row';
+            dataStatus = 'unavailable';
+        } else if (stock < 10 && stock > 0) {
+            stockDisplay = `⚠️ ${stock} pcs`;
+            statusDisplay = `<span class="badge badge-low-stock">Low Stock</span>`;
+            statusClass = 'low-stock-row';
+            dataStatus = 'low stock';
+        } else {
+            stockDisplay = `${stock} pcs`;
+            statusDisplay = `<span class="badge badge-available">Available</span>`;
+            statusClass = 'available-row';
+            dataStatus = 'available';
         }
+        row.dataset.name = name.toLowerCase();
+        row.dataset.category = category.toLowerCase();
+        row.dataset.status = dataStatus;
+        row.className = `product-row ${statusClass}`;
+        row.querySelector('.product-thumbnail').src = imageUrl;
+        row.querySelector('.product-thumbnail').alt = name;
+        row.querySelector('.product-table-name').textContent = `${name} ${size ? '- ' + size : ''}`;
+        row.querySelector('.product-table-desc').textContent = `${description.substring(0, 50)}...`;
+        row.querySelector('td:nth-child(4)').textContent = category;
+        row.querySelector('td:nth-child(5)').textContent = `₱${price}`;
+        row.querySelector('td:nth-child(6)').innerHTML = stockDisplay;
+        row.querySelector('td:nth-child(7)').innerHTML = statusDisplay;
+        const newEditBtn = row.querySelector('.btn-edit');
+        newEditBtn.dataset.name = name;
+        newEditBtn.dataset.description = description;
+        newEditBtn.dataset.price = price;
+        newEditBtn.dataset.stock = stock;
+        newEditBtn.dataset.category = category;
+        newEditBtn.dataset.size = size;
+        newEditBtn.dataset.isAvailable = isAvailable ? 'true' : 'false';
+        newEditBtn.dataset.imageUrl = product.image_url || '';
+        row.querySelector('.btn-delete').dataset.name = name;
     }
-
-    // --- Event Listeners ---
-
-    // ✅ NEW: Attach listener to the search input
-    if (searchInput) {
-        searchInput.addEventListener('input', filterProducts);
-        filterProducts(); // Run once on load
-    } else {
-         console.warn("Search input not found.");
-    }
-
-    // ✅ RESTORED: All original, working event listeners
-    document.querySelectorAll('.data-table tbody tr.product-row').forEach(row => {
+    
+    function addListenersToRow(row) {
         row.addEventListener('click', (event) => {
             if (event.target.tagName === 'INPUT' || event.target.closest('button')) { return; }
             const editButton = row.querySelector('.btn-edit');
@@ -432,67 +546,136 @@ document.addEventListener('DOMContentLoaded', () => {
                 openModal(detailsModal);
             }
         });
+        const editBtn = row.querySelector('.btn-edit');
+        if (editBtn) {
+            editBtn.addEventListener('click', () => {
+                const data = editBtn.dataset;
+                if (!editModal || !editProductForm) return;
+                editProductForm.action = `/dashboard/admin/edit-product/${data.id}/`;
+                editProductForm.querySelector('#edit-product-name').value = data.name || '';
+                editProductForm.querySelector('#edit-product-category').value = data.category || '';
+                editProductForm.querySelector('#edit-product-description').value = data.description || '';
+                editProductForm.querySelector('#edit-product-price').value = data.price || '0.00';
+                editProductForm.querySelector('#edit-stock-quantity').value = data.stock || '0';
+                const imagePreview = editProductForm.querySelector('.image-preview');
+                const currentImageUrlInput = editProductForm.querySelector('#edit-current-image-url');
+                const imageFileInput = editProductForm.querySelector('.image-upload-input');
+                if (imageFileInput) imageFileInput.value = '';
+                if (currentImageUrlInput) currentImageUrlInput.value = data.imageUrl || '';
+                if (imagePreview) {
+                    imagePreview.src = data.imageUrl || 'https://placehold.co/400x200/f1f5f9/64748b?text=No+Current+Image';
+                    imagePreview.style.display = 'block';
+                }
+                const sizeSelect = editProductForm.querySelector('#edit-product-size');
+                const sizeContainer = sizeSelect?.closest('.size-selection');
+                if (sizeContainer && sizeSelect) {
+                    if (data.category === 'Uniforms') {
+                        sizeContainer.style.display = 'block';
+                        sizeSelect.value = data.size || 'XS';
+                    } else {
+                        sizeContainer.style.display = 'none';
+                    }
+                }
+                const isAvailableCheckbox = editProductForm.querySelector('#edit-is-available');
+                if (isAvailableCheckbox) isAvailableCheckbox.checked = data.isAvailable === 'true';
+                openModal(editModal);
+            });
+        }
+        const deleteBtn = row.querySelector('.btn-delete');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => {
+                const productId = deleteBtn.dataset.id;
+                const productName = deleteBtn.dataset.name;
+                if (productId && deleteModal) {
+                    deleteModal.querySelector('#delete-product-name').textContent = productName || 'this product';
+                    if (deleteProductForm) deleteProductForm.action = `/dashboard/admin/delete-product/${productId}/`;
+                    openModal(deleteModal);
+                }
+            });
+        }
+        const checkbox = row.querySelector('.product-checkbox');
+        if (checkbox) {
+            checkbox.addEventListener('change', (event) => {
+                event.stopPropagation();
+                if (!checkbox.checked && selectAllCheckbox) selectAllCheckbox.checked = false;
+                updateBatchActionBar();
+            });
+        }
+    }
+
+    const openModal = (modal) => { if(modal) modal.style.display = 'block'; };
+    const closeModal = (modal) => { if(modal) modal.style.display = 'none'; };
+
+    function updateBatchActionBar() {
+        const selectedCheckboxes = Array.from(
+            document.querySelectorAll('.product-checkbox:checked')
+        ).filter(cb => {
+            const row = cb.closest('tr');
+            // Check if the row exists and its display style is not 'none'
+            return row && row.style.display !== 'none';
+        });
+        const count = selectedCheckboxes.length;
+        if (batchActionBar) {
+            batchActionBar.style.display = count > 0 ? 'flex' : 'none';
+            if(selectedCountSpan) selectedCountSpan.textContent = `${count} item${count > 1 ? 's' : ''} selected`;
+        }
+        if (batchEditBtn) batchEditBtn.disabled = (count !== 1);
+        document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+            checkbox.closest('tr')?.classList.toggle('row-selected', checkbox.checked);
+        });
+    }
+
+    function filterProducts() {
+        if (!searchInput || !noResultsRow) { return; }
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        let visibleRowCount = 0;
+        const currentProductRows = document.querySelectorAll('#product-table-body tr.product-row');
+        currentProductRows.forEach(row => {
+            const productName = row.dataset.name || '';
+            const category = row.dataset.category || '';
+            const status = row.dataset.status || '';
+            const rowMatches = productName.includes(searchTerm) || 
+                               category.includes(searchTerm) || 
+                               status.includes(searchTerm);
+            row.style.display = rowMatches ? '' : 'none';
+            if (rowMatches) visibleRowCount++;
+        });
+        if (noResultsRow) noResultsRow.style.display = (visibleRowCount === 0 && currentProductRows.length > 0) ? '' : 'none';
+        if (initialEmptyRow) {
+            initialEmptyRow.style.display = (searchTerm.length > 0 || currentProductRows.length > 0) ? 'none' : '';
+        }
+    }
+
+
+    // ==================================================================
+    // == 3. ATTACH EVENT LISTENERS (No changes here)
+    // ==================================================================
+
+    if (searchInput) {
+        searchInput.addEventListener('input', filterProducts);
+        filterProducts();
+    }
+
+    document.querySelectorAll('.data-table tbody tr.product-row').forEach(row => {
+        addListenersToRow(row);
     });
 
-    const detailsEditBtn = document.getElementById('details-edit-btn');
     if (detailsEditBtn) { detailsEditBtn.addEventListener('click', () => { if (detailsModal?.sourceEditBtn) { closeModal(detailsModal); detailsModal.sourceEditBtn.click(); } }); }
-    
-    const detailsDeleteBtn = document.getElementById('details-delete-btn');
     if (detailsDeleteBtn) { detailsDeleteBtn.addEventListener('click', () => { if (detailsModal?.sourceDeleteBtn) { closeModal(detailsModal); detailsModal.sourceDeleteBtn.click(); } }); }
 
-    const addProductBtn = document.getElementById('add-product-btn');
-    if (addProductBtn) addProductBtn.addEventListener('click', () => openModal(addModal));
-
-    document.querySelectorAll('.product-table .btn-edit').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const data = btn.dataset;
-            const form = document.getElementById('edit-product-form');
-            if (!editModal || !form) return;
-            form.action = `/dashboard/admin/edit-product/${data.id}/`;
-            form.querySelector('#edit-product-name').value = data.name || '';
-            form.querySelector('#edit-product-category').value = data.category || '';
-            form.querySelector('#edit-product-description').value = data.description || '';
-            form.querySelector('#edit-product-price').value = data.price || '0.00';
-            form.querySelector('#edit-stock-quantity').value = data.stock || '0';
-            const imagePreview = form.querySelector('.image-preview');
-            const currentImageUrlInput = form.querySelector('#edit-current-image-url');
-            const imageFileInput = form.querySelector('.image-upload-input');
-            if (imageFileInput) imageFileInput.value = '';
-            if (currentImageUrlInput) currentImageUrlInput.value = data.imageUrl || '';
-            if (imagePreview) {
-                imagePreview.src = data.imageUrl || 'https://placehold.co/400x200/f1f5f9/64748b?text=No+Current+Image';
-                imagePreview.style.display = 'block';
-            }
-            const sizeSelect = form.querySelector('#edit-product-size');
-            const sizeContainer = sizeSelect?.closest('.size-selection');
-            if (sizeContainer && sizeSelect) {
-                if (data.category === 'Uniforms') {
-                    sizeContainer.style.display = 'block';
-                    sizeSelect.value = data.size || 'XS';
-                } else {
-                    sizeContainer.style.display = 'none';
-                }
-            }
-            const isAvailableCheckbox = form.querySelector('#edit-is-available');
-            if (isAvailableCheckbox) isAvailableCheckbox.checked = data.isAvailable === 'true';
-            openModal(editModal);
+    if (addProductBtn) {
+        addProductBtn.addEventListener('click', () => {
+            if (!addProductForm) return;
+            addProductForm.reset();
+            const preview = addProductForm.querySelector('.image-preview');
+            if(preview) preview.src = 'https://placehold.co/400x200/f1f5f9/64748b?text=Image+Preview';
+            const sizeField = addProductForm.querySelector('.size-selection');
+            if (sizeField) sizeField.style.display = 'none';
+            openModal(addModal);
         });
-    });
+    }
 
     if (batchEditBtn) { batchEditBtn.addEventListener('click', () => { document.querySelector('.product-checkbox:checked')?.closest('tr')?.querySelector('.btn-edit')?.click(); }); }
-
-    document.querySelectorAll('.product-table .btn-delete').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const productId = btn.dataset.id;
-            const productName = btn.dataset.name;
-            if (productId && deleteModal) {
-                deleteModal.querySelector('#delete-product-name').textContent = productName || 'this product';
-                const form = deleteModal.querySelector('#delete-product-form');
-                if (form) form.action = `/dashboard/admin/delete-product/${productId}/`;
-                openModal(deleteModal);
-            }
-        });
-    });
 
     document.querySelectorAll('.close-btn, .cancel-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -500,6 +683,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(modal) closeModal(modal);
         });
     });
+    
     window.addEventListener('click', (event) => {
         if (event.target.classList.contains('modal') && event.target.style.display !== 'none') {
             closeModal(event.target);
@@ -530,23 +714,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (selectAllCheckbox) {
         selectAllCheckbox.addEventListener('change', () => {
-            productCheckboxes.forEach(checkbox => { checkbox.checked = selectAllCheckbox.checked; });
+            document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked; 
+            });
             updateBatchActionBar();
         });
     }
-    productCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', (event) => {
-            event.stopPropagation();
-            if (!checkbox.checked && selectAllCheckbox) selectAllCheckbox.checked = false;
-            updateBatchActionBar();
-        });
-    });
 
     document.querySelectorAll('.btn-batch[data-action="delete-selected"]').forEach(button => {
         button.addEventListener('click', () => {
             const selectedIds = Array.from(document.querySelectorAll('.product-checkbox:checked')).map(cb => cb.value);
             const count = selectedIds.length;
-            if (count === 0) { alert('Please select at least one product.'); return; }
+            // ✅ CHANGED: Use showMessage
+            if (count === 0) { showMessage('Please select at least one product.', 'error'); return; }
             if (batchDeleteConfirmModal) {
                 batchDeleteConfirmModal.querySelector('#batch-delete-count').textContent = count;
                 const confirmBtn = batchDeleteConfirmModal.querySelector('#confirm-batch-delete-btn');
@@ -556,16 +736,214 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    const confirmBatchDeleteBtn = document.getElementById('confirm-batch-delete-btn');
-    if (confirmBatchDeleteBtn) {
-        confirmBatchDeleteBtn.addEventListener('click', function() {
-            const idsToSubmit = this.dataset.ids;
-            if (idsToSubmit) submitBatchDelete(idsToSubmit, 'delete-selected');
-            else { console.error("No IDs found for batch delete."); closeModal(batchDeleteConfirmModal); }
+    // ==================================================================
+    // == 4. AJAX FORM SUBMISSION HANDLERS
+    // ==================================================================
+
+    if (addProductForm) {
+        addProductForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const url = form.action;
+            const modal = form.closest('.modal');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const btnOriginalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Adding...';
+            
+            fetch(url, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'X-CSRFToken': getCsrfToken(), 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // ✅ CHANGED: Use showMessage
+                    showMessage(data.message, 'success');
+                    closeModal(modal);
+                    form.reset();
+                    createProductRow(data.product);
+                    filterProducts();
+                    updateBatchActionBar();
+                } else {
+                    // ✅ CHANGED: Use showMessage
+                    showMessage(data.error || 'An unknown error occurred.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error during fetch or .then() processing:', error);
+                // ✅ CHANGED: Use showMessage
+                showMessage(`An error occurred: ${error.message}`, 'error');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = btnOriginalText;
+            });
+        });
+    }
+    
+    if (editProductForm) {
+        editProductForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const url = form.action;
+            const modal = form.closest('.modal');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const btnOriginalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Updating...';
+            
+            fetch(url, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'X-CSRFToken': getCsrfToken(), 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // ✅ CHANGED: Use showMessage
+                    showMessage(data.message, 'success');
+                    closeModal(modal);
+                    updateProductRow(data.product);
+                    filterProducts();
+                    // ✅ ADD THIS: Find and uncheck the specific checkbox
+                        const updatedCheckbox = document.querySelector(`.product-checkbox[value="${data.product.id}"]`);
+                        if (updatedCheckbox) {
+                            updatedCheckbox.checked = false;
+                        }
+                    updateBatchActionBar();
+                } else {
+                    // ✅ CHANGED: Use showMessage
+                    showMessage(data.error || 'An unknown error occurred.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error during fetch or .then() processing:', error);
+                // ✅ CHANGED: Use showMessage
+                showMessage(`An error occurred: ${error.message}`, 'error');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = btnOriginalText;
+            });
         });
     }
 
-    updateBatchActionBar();
-});
+    if (deleteProductForm) {
+        deleteProductForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const url = form.action;
+            const modal = form.closest('.modal');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const btnOriginalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Deleting...';
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json' 
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // ✅ CHANGED: Use showMessage
+                    showMessage(data.message, 'success');
+                    closeModal(modal);
+                    const rowToRemove = document.querySelector(`.btn-delete[data-id="${data.product_id}"]`)?.closest('tr');
+                    if (rowToRemove) {
+                        rowToRemove.remove();
+                    }
+                    filterProducts();
+                    updateBatchActionBar();
+                } else {
+                    // ✅ CHANGED: Use showMessage
+                    showMessage(data.error || 'An unknown error occurred.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error during fetch or .then() processing:', error);
+                // ✅ CHANGED: Use showMessage
+                showMessage(`An error occurred: ${error.message}`, 'error');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = btnOriginalText;
+            });
+        });
+    }
+    
+    if (confirmBatchDeleteBtn) {
+        confirmBatchDeleteBtn.addEventListener('click', function() {
+            const button = this;
+            const idsToSubmit = button.dataset.ids;
+            if (!idsToSubmit) {
+                console.error("No IDs found for batch delete.");
+                closeModal(batchDeleteConfirmModal);
+                return;
+            }
+
+            const originalText = button.textContent;
+            button.disabled = true;
+            button.textContent = 'Deleting...';
+            
+            const url = batchActionForm.getAttribute('action'); 
+            const formData = new FormData();
+            formData.append('action', 'delete-selected');
+            formData.append('product_ids', idsToSubmit);
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRFToken': getCsrfToken(), 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => {
+                if (!response.ok) { throw new Error(`HTTP error! Status: ${response.status}`); }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // ✅ CHANGED: Use showMessage
+                    showMessage(data.message, 'success');
+                    closeModal(batchDeleteConfirmModal);
+                    
+                    data.product_ids.forEach(id => {
+                        const rowToRemove = document.querySelector(`.btn-delete[data-id="${id}"]`)?.closest('tr');
+                        if (rowToRemove) {
+                            rowToRemove.remove();
+                        }
+                    });
+                    
+                    filterProducts();
+                    //updateBatchActionBar();
+                    //batchActionBar.style.display = 'none';
+                    if(selectAllCheckbox) selectAllCheckbox.checked = false; 
+                        updateBatchActionBar();
+                } else {
+                    // ✅ CHANGED: Use showMessage
+                    showMessage(data.error || 'An unknown error occurred.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Batch Delete Fetch Error:', error);
+                // ✅ CHANGED: Use showMessage
+                showMessage(`An error occurred: ${error.message}`, 'error');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.textContent = originalText;
+               
+            });
+        });
+    }
+    
+    updateBatchActionBar(); // Run on load
+
+}); // <-- Closes the DOMContentLoaded listener
 </script>
 {% endblock %}

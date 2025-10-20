@@ -27,6 +27,8 @@
     gap: 8px;
     font-weight: bold;
     color: #800000;
+    font-size: 16px;
+    text-decoration: none;
 }
 
 .logo-icon {

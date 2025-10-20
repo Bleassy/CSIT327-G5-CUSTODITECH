@@ -1,49 +1,95 @@
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page_title|default:'Admin Dashboard' }} - CIT Shop</title>
-    <link rel="stylesheet" href="{% static 'css/admin_base.css' %}?v=1.1">
-    {% block extra_css %}{% endblock %}
-</head>
-<body class="admin-dashboard-body">
-    <div class="main-content">
-        <header class="admin-header">
-            <div class="header-left">
-                <a href="{% url 'admin_dashboard' %}" class="logo">
-                    <span class="logo-icon">🐱</span>
-                    <span class="logo-text">CIT Wildcats Admin</span>
-                </a>
-            </div>
-            <nav class="admin-nav">
-                <a href="{% url 'admin_dashboard' %}" class="nav-btn {% if active_page == 'dashboard' %}active{% endif %}">🏠 Dashboard</a>
-                <a href="{% url 'manage_products' %}" class="nav-btn {% if active_page == 'manage_products' %}active{% endif %}">📦 Manage Products</a>
-                <a href="{% url 'order_management' %}" class="nav-btn {% if active_page == 'order_management' %}active{% endif %}">📅 Order Management</a>
-                <a href="{% url 'reports' %}" class="nav-btn {% if active_page == 'reports' %}active{% endif %}">📊 Reports</a>
-            </nav>
-            <div class="header-right">
-                <!-- ✅ UPDATED: The admin name is now a link to the profile page -->
-                <a href="{% url 'admin_profile' %}" class="admin-name-link {% if active_page == 'profile' %}active{% endif %}">
-                    <span class="admin-name">{{ request.user.get_full_name|first|upper }}</span>
-                </a>
-                <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
-            </div>
-        </header>
-        <main class="page-container">
-            {% if messages %}
-                <ul class="messages">
-                    {% for message in messages %}
-                        <li class="{{ message.tags }}">{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-            
-            {% block content %}{% endblock %}
-        </main>
-    </div>
-    {% block extra_js %}{% endblock %}
-</body>
-</html>
 
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ page_title|default:'Admin Dashboard' }} - CIT Shop</title>
+
+    <link rel="stylesheet" href="{% static 'css/admin_base.css' %}?v=1.1">
+
+    {% block extra_css %}{% endblock %}
+
+</head>
+
+<body class="admin-dashboard-body">
+
+    <div class="main-content">
+
+        <header class="admin-header">
+
+            <div class="header-left">
+
+                <a href="{% url 'admin_dashboard' %}" class="logo">
+
+                    <span class="logo-icon">🐱</span>
+
+                    <span class="logo-text">CIT Wildcats Admin</span>
+
+                </a>
+
+            </div>
+
+            <nav class="admin-nav">
+
+                <a href="{% url 'admin_dashboard' %}" class="nav-btn {% if active_page == 'dashboard' %}active{% endif %}">🏠 Dashboard</a>
+
+                <a href="{% url 'manage_products' %}" class="nav-btn {% if active_page == 'manage_products' %}active{% endif %}">📦 Manage Products</a>
+
+                <a href="{% url 'order_management' %}" class="nav-btn {% if active_page == 'order_management' %}active{% endif %}">📅 Order Management</a>
+
+                <a href="{% url 'reports' %}" class="nav-btn {% if active_page == 'reports' %}active{% endif %}">📊 Reports</a>
+
+            </nav>
+
+            <div class="header-right">
+
+                <!-- ✅ UPDATED: The admin name is now a link to the profile page -->
+
+                <a href="{% url 'admin_profile' %}" class="admin-name-link {% if active_page == 'profile' %}active{% endif %}">
+
+                    <span class="admin-name">{{ request.user.get_full_name|first|upper }}</span>
+
+                </a>
+
+                <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+
+            </div>
+
+        </header>
+
+        <main class="page-container">
+
+                        <ul class="messages" id="message-container">
+
+                {% if messages %}
+
+                    {% for message in messages %}
+
+                        <li class="{{ message.tags }}">{{ message }}</li>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            </ul>
+
+           
+
+            {% block content %}{% endblock %}
+
+        </main>
+
+    </div>
+
+    {% block extra_js %}{% endblock %}
+
+</body>
+
+</html>

@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 closeModal(form.closest('.modal')); // Close the modal
                 showDynamicMessage(data.message, 'success'); // Show success toast
                 // We don't redirect, the user stays on the browse page
-                setTimeout(() => { window.location.reload(); }, 1500);
+                setTimeout(() => { window.location.reload(); }, 100);
 
             } catch (error) {
                 // --- Error ---

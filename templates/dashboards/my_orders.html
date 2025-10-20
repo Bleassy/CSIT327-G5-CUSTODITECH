@@ -296,6 +296,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Now, open the modal
             if (!detailsModal) { console.error("Details modal not found!"); return; }
+            
+            if (!card.classList.contains('history')) {
             const data = card.dataset;
             detailsModal.querySelector('#details-image').src = data.imageUrl;
             const nameEl = detailsModal.querySelector('#details-name');
@@ -321,11 +323,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     deleteBtn.dataset.orderId = data.id;
                     deleteBtn.dataset.name = data.name;
                     deleteBtn.dataset.size = data.size;
-                } else {
-                    deleteBtn.style.display = 'none';
-                }
-            }
-            openModal(detailsModal);
+
+                    
+                if (['completed', 'cancelled', 'rejected'].includes(data.status)) { // This condition will likely never be true now inside this block
+                    deleteBtn.style.display = 'inline-block';
+                    deleteBtn.dataset.orderId = data.id;
+                    deleteBtn.dataset.name = data.name;
+                    deleteBtn.dataset.size = data.size;
+                } else {
+                    deleteBtn.style.display = 'none';
+                }
+            }
+            openModal(detailsModal);
+        } // ✅ END of the added if condition
+    }
         });
     });
 
@@ -426,8 +437,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => card.remove(), 500);
             }
         });
-        updateBatchActionBar();
-    }
+
+          updateBatchActionBar();
+}
 
     // --- AJAX for BATCH Delete ---
     const batchDeleteConfirmBtn = document.getElementById('confirm-batch-delete-btn');
@@ -462,9 +474,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 closeModal(batchDeleteConfirmModal);
                 showDynamicMessage(data.message, 'success');
                 removeCardsFromUI(idsToSubmit.split(','));
+                batchActionBar.style.display = 'none';
+                
             } catch (error) {
                 closeModal(batchDeleteConfirmModal); // ✅ ADD THIS LINE
-                showDynamicMessage(`Error: ${error.message}`, 'error');
+                updateBatchActionBar();
             } finally {
                 this.disabled = false;
                 this.textContent = 'Yes, Delete Selected';
@@ -509,9 +523,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 closeModal(deleteConfirmModal);
                 showDynamicMessage(data.message, 'success');
                 removeCardsFromUI([orderId]);
+                batchActionBar.style.display = 'none';
             } catch (error) {
                 closeModal(deleteConfirmModal); // ✅ ADD THIS LINE
-            showDynamicMessage(`Error: ${error.message}`, 'error');
+                showDynamicMessage(`Error: ${error.message}`, 'error');
             } finally {
                  submitButton.disabled = false;
                  submitButton.textContent = originalButtonText;

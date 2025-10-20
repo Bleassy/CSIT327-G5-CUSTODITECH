@@ -254,6 +254,7 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    transition: opacity 0.5s ease;
 }
 
 .messages li.error {
@@ -267,4 +268,5 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    transition: opacity 0.5s ease;
 }

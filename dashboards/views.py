@@ -543,14 +543,11 @@ def add_product(request):
                 file_ext = image_file.name.split('.')[-1]
                 file_name = f'product_{uuid.uuid4()}.{file_ext}'
                 
-                # ✅ FIX: Use the service client for storage uploads
                 supabase_service.storage.from_('product_images').upload(
                     file=image_file.read(), 
                     path=file_name, 
                     file_options={"content-type": image_file.content_type}
                 )
-                
-                # ✅ FIX: Use the service client to get the public URL
                 image_url = supabase_service.storage.from_('product_images').get_public_url(file_name)
             
             stock = int(request.POST.get('stock-quantity', 0))
@@ -566,107 +563,129 @@ def add_product(request):
             }
 
             if request.POST.get('product-category') == 'Uniforms':
-                 product_data['size'] = request.POST.get('product-size')
+                product_data['size'] = request.POST.get('product-size')
 
-            # This part is already correct
+            # ✅ CHANGED: We execute and get the data
             response = supabase_service.table('products').insert(product_data).execute()
             
-            messages.success(request, f"Product '{product_data['name']}' added successfully!")
+            if not response.data or len(response.data) == 0:
+                 raise Exception("Failed to create product, no data returned.")
+
+            new_product = response.data[0]
             
-            if response.data:
-                log_activity(
-                    request.user,
-                    'PRODUCT_ADDED',
-                    {'product_name': product_data['name'], 'product_id': response.data[0]['id']}
-                )
+            log_activity(
+                request.user,
+                'PRODUCT_ADDED',
+                {'product_name': new_product['name'], 'product_id': new_product['id']}
+            )
+            
+            # ✅ CHANGED: Return JSON instead of redirecting
+            return JsonResponse({'success': True, 'message': 'Product added successfully!', 'product': new_product})
+
         except Exception as e:
-            messages.error(request, f"Failed to add product: {e}")
+            # ✅ CHANGED: Return JSON error
+            return JsonResponse({'success': False, 'error': f"Failed to add product: {e}"}, status=400)
             
-    return redirect('manage_products')
+    # ✅ CHANGED: Handle non-POST requests (e.g., direct URL access)
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
+
 
 @admin_required
 def edit_product(request, product_id):
     if request.method == 'POST':
         try:
-            # 1. Get the category from the form and store it in a variable
             category = request.POST.get('product-category')
             stock = int(request.POST.get('stock-quantity'))
 
-            # 2. Start building your update_data dictionary
             update_data = {
                 'name': request.POST.get('product-name'),
                 'description': request.POST.get('product-description'),
                 'price': float(request.POST.get('product-price')),
                 'stock_quantity': stock,
-                'category': category, # Use the variable here
+                'category': category, 
                 'is_available': stock > 0 and 'is_available' in request.POST
             }
 
-            # 3. Add the 'size' key to the dictionary ONLY if the category is 'Uniforms'
             if category == 'Uniforms':
                 update_data['size'] = request.POST.get('product-size')
             else:
-                # This is good practice: clear the size if the category is changed from Uniforms
                 update_data['size'] = None 
             
-            # ✅ START: NEW IMAGE UPLOAD LOGIC
             new_image_file = request.FILES.get('product-image')
             if new_image_file:
-                # 1. Generate a unique file name
                 file_ext = new_image_file.name.split('.')[-1]
                 file_name = f'product_{uuid.uuid4()}.{file_ext}'
                 
-                # 2. Upload the new file to Supabase Storage
                 supabase_service.storage.from_('product_images').upload(
                     file=new_image_file.read(), 
                     path=file_name, 
                     file_options={"content-type": new_image_file.content_type}
                 )
                 
-                # 3. Get the public URL and add it to the update data
                 new_image_url = supabase_service.storage.from_('product_images').get_public_url(file_name)
                 update_data['image_url'] = new_image_url
 
-                # 4. (Recommended) Delete the old image to save space
                 old_image_url = request.POST.get('current-image-url')
                 if old_image_url and old_image_url.strip():
                     try:
-                        # Extract just the file name from the full URL
                         old_file_name = old_image_url.split('/')[-1]
                         supabase_service.storage.from_('product_images').remove([old_file_name])
                     except Exception as e:
-                        # If deletion fails, just print a message and continue
                         print(f"Could not remove old image '{old_file_name}': {e}")
             
-            # 4. Now, execute the update with the completed dictionary
-            supabase_service.table('products').update(update_data).eq('id', product_id).execute()
+            # ✅ CHANGED: Execute the update
+            update_response = supabase_service.table('products').update(update_data).eq('id', product_id).execute()
+
+            if not update_response.data or len(update_response.data) == 0:
+                raise Exception("Failed to update product, no data returned from update.")
             
-            messages.success(request, "Product updated successfully!")
+            updated_product = update_response.data[0]
             
             log_activity(
                 request.user,
                 'PRODUCT_EDITED',
-                {'product_name': update_data['name'], 'product_id': product_id}
+                {'product_name': updated_product['name'], 'product_id': product_id}
             )
-        except Exception as e:
-            messages.error(request, f"Failed to update product: {e}")
             
-    return redirect('manage_products')
+            # ✅ CHANGED: Return JSON with the updated product
+            return JsonResponse({'success': True, 'message': 'Product updated successfully!', 'product': updated_product})
+
+        except Exception as e:
+            # ✅ CHANGED: Return JSON error
+            return JsonResponse({'success': False, 'error': f"Failed to update product: {e}"}, status=400)
+            
+    # ✅ CHANGED: Handle non-POST requests
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
+
+# [views.py]
 
 @admin_required
 def delete_product(request, product_id):
     if request.method == 'POST':
         try:
             product_name = 'Unknown'
-            response = supabase.table('products').select('name').eq('id', product_id).execute()
+            # We must use the service client to delete
+            response = supabase_service.table('products').select('name').eq('id', product_id).execute()
             if response.data:
                 product_name = response.data[0]['name']
-            supabase.table('products').delete().eq('id', product_id).execute()
-            messages.success(request, "Product deleted successfully!")
+                
+            # ✅ Use service client here
+            supabase_service.table('products').delete().eq('id', product_id).execute()
+            
             log_activity(request.user, 'PRODUCT_DELETED', {'product_id': product_id, 'product_name': product_name})
+            
+            # ✅ CHANGED: Return JSON
+            return JsonResponse({
+                'success': True, 
+                'message': '🗑️ Product deleted successfully!', 
+                'product_id': product_id # Send the ID back to the JS
+            })
         except Exception as e:
-            messages.error(request, f"Failed to delete product: {e}")
-    return redirect('manage_products')
+            # ✅ CHANGED: Return JSON error
+            return JsonResponse({'success': False, 'error': f"Failed to delete product: {e}"}, status=400)
+            
+    # ✅ CHANGED: Handle non-POST requests
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
 
 @admin_required
 def order_management_view(request):
@@ -746,58 +765,68 @@ def admin_batch_delete_orders_view(request):
 def batch_update_products(request):
     """
     Handles batch actions for products (e.g., mark as available, delete).
+    NOW HANDLES AJAX REQUESTS for 'delete-selected'.
     """
     if request.method == 'POST':
         action = request.POST.get('action')
         product_ids_str = request.POST.get('product_ids')
         
         if not all([action, product_ids_str]):
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'error': 'Invalid batch action request.'}, status=400)
             messages.error(request, "Invalid batch action request.")
             return redirect('manage_products')
 
         try:
-            # Convert the string of IDs into a list of integers
             product_ids = [int(pid) for pid in product_ids_str.split(',') if pid.isdigit()]
             if not product_ids:
-                 raise ValueError("No valid product IDs provided.") # Handle empty list after conversion
+                raise ValueError("No valid product IDs provided.")
+            count = len(product_ids)
 
         except ValueError as e:
-             messages.error(request, f"Invalid product IDs: {e}")
-             return redirect('manage_products')
-
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'error': f"Invalid product IDs: {e}"}, status=400)
+            messages.error(request, f"Invalid product IDs: {e}")
+            return redirect('manage_products')
 
         try:
             if action == 'mark-available':
-                # Use service client for updates too, for consistency and bypassing RLS
+                # This action still uses the redirect, which is fine for now
                 supabase_service.table('products').update({'is_available': True}).in_('id', product_ids).execute()
-                messages.success(request, f"{len(product_ids)} product(s) marked as available.")
+                messages.success(request, f"{count} product(s) marked as available.")
                 log_activity(
-                   request.user, 
-                   f'PRODUCT_BATCH_{action.upper().replace("-", "_")}',
-                   {'count': len(product_ids), 'product_ids': product_ids}
+                    request.user, 
+                    f'PRODUCT_BATCH_{action.upper().replace("-", "_")}',
+                    {'count': count, 'product_ids': product_ids}
                 )
+                return redirect('manage_products')
 
-            # ✅ ADD THIS BLOCK TO HANDLE DELETION
             elif action == 'delete-selected':
-                # Use the service client to bypass RLS for deletion
-                response = supabase_service.table('products').delete().in_('id', product_ids).execute()
+                # ✅ AJAX ACTION: This will now return JSON
+                supabase_service.table('products').delete().in_('id', product_ids).execute()
                 
-                # Note: Supabase delete response doesn't easily tell you how many were deleted.
-                # We'll just report the number requested for deletion.
-                messages.success(request, f"{len(product_ids)} product(s) selected for deletion processed.")
                 log_activity(
-                   request.user, 
-                   'PRODUCT_BATCH_DELETE', # Specific action log
-                   {'count': len(product_ids), 'product_ids': product_ids}
+                    request.user, 
+                    'PRODUCT_BATCH_DELETE',
+                    {'count': count, 'product_ids': product_ids}
                 )
                 
-            # Keep the else for truly unsupported actions
+                # ✅ Return JSON success
+                return JsonResponse({
+                    'success': True, 
+                    'message': '🗑️ Product deleted successfully!',
+                    'product_ids': product_ids # Send back the IDs
+                })
+                
             else:
                 messages.warning(request, f"The batch action '{action}' is not supported.")
 
         except Exception as e:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                 return JsonResponse({'success': False, 'error': f"An error occurred: {e}"}, status=400)
             messages.error(request, f"An error occurred during the batch {action}: {e}")
-            
+    
+    # Fallback for non-POST or other issues
     return redirect('manage_products')
 
 @admin_required
