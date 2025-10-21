@@ -10,67 +10,81 @@
 
 
 <h2 class="section-title">Available for Pickup</h2>
-<div class="reservations-grid">
-    {% for item in reservations %}
-    <div class="reservation-card" 
-         data-id="{{ item.id }}" 
-         data-name="{{ item.product_name }}"
-         data-size="{{ item.product_size|default:'' }}"
-         data-description="{{ item.product_description|default:'No description available.' }}"
-         data-image-url="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}"
-         data-quantity="{{ item.quantity }}"
-         data-total-price="{% widthratio item.product_price 1 item.quantity as total %}{{ total|floatformat:2 }}"
-         data-created-at="{{ item.created_at|date:'M d, Y' }}"
-         data-expires-at="{{ item.expires_at|date:'M d, Y' }}">
-        
-        <img src="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ item.product_name }}" class="product-image">
-        <div class="card-body">
-            <h3 class="product-name">{{ item.product_name }}{% if item.product_size %} - {{ item.product_size }}{% endif %}</h3>
-            <div class="details-grid">
-                <span>Quantity:</span><strong>{{ item.quantity }}</strong>
-                <span>Total Price:</span><strong>₱{% widthratio item.product_price 1 item.quantity as total %}{{ total|floatformat:2 }}</strong>
-                <span>Expires On:</span><strong>{{ item.expires_at|date:"M d, Y" }}</strong>
+{# Check if the list is NOT empty to show the grid #}
+{% if reservations %}
+    <div class="reservations-grid" id="pickup-grid"> {# ✅ Added ID #}
+        {% for item in reservations %}
+            <div class="reservation-card"
+                 data-id="{{ item.id }}"
+                 data-name="{{ item.product_name }}"
+                 data-size="{{ item.product_size|default:'' }}"
+                 data-description="{{ item.product_description|default:'No description available.' }}"
+                 data-image-url="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}"
+                 data-quantity="{{ item.quantity }}"
+                 data-total-price="{% widthratio item.product_price 1 item.quantity as total %}{{ total|floatformat:2 }}"
+                 data-created-at="{{ item.created_at|date:'M d, Y' }}"
+                 data-expires-at="{{ item.expires_at|date:'M d, Y' }}">
+
+                <img src="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ item.product_name }}" class="product-image">
+                <div class="card-body">
+                    <h3 class="product-name">{{ item.product_name }}{% if item.product_size %} - {{ item.product_size }}{% endif %}</h3>
+                    <div class="details-grid">
+                        <span>Quantity:</span><strong>{{ item.quantity }}</strong>
+                        <span>Total Price:</span><strong>₱{% widthratio item.product_price 1 item.quantity as total %}{{ total|floatformat:2 }}</strong>
+                        <span>Expires On:</span><strong>{{ item.expires_at|date:"M d, Y" }}</strong>
+                    </div>
+                </div>
             </div>
-        </div>
+        {% endfor %}
     </div>
-    {% empty %}
-        <p class="no-items-message">You have no items reserved for pickup.</p>
-    {% endfor %}
-</div>
+    {# ✅ Message is outside grid, hidden initially #}
+    <p class="no-items-message" id="no-pickup-message" style="display: none;">You have no items reserved for pickup.</p>
+{% else %}
+    {# ✅ List is empty on load, render empty grid and show message #}
+    <div class="reservations-grid" id="pickup-grid"></div> {# Empty grid for JS target #}
+    <p class="no-items-message" id="no-pickup-message">You have no items reserved for pickup.</p>
+{% endif %}
 
 <h2 class="section-title">Pending Backorders</h2>
-<div class="reservations-grid">
-    {% for item in backorders %}
-    <div class="reservation-card backorder"
-         data-id="{{ item.id }}"
-         data-name="{{ item.product_name }}"
-         data-size="{{ item.product_size|default:'' }}"
-         data-description="{{ item.product_description|default:'No description available.' }}"
-         data-image-url="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}"
-         data-quantity="{{ item.quantity }}"
-         data-total-price="{% widthratio item.product_price 1 item.quantity as total %}{{ total|floatformat:2 }}"
-         data-created-at="{{ item.created_at|date:'M d, Y' }}"
-         data-status="{% if item.product_stock_quantity >= item.quantity %}available{% else %}unavailable{% endif %}">
-        
-        <img src="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ item.product_name }}" class="product-image">
-        <div class="card-body">
-            <h3 class="product-name">{{ item.product_name }}{% if item.product_size %} - {{ item.product_size }}{% endif %}</h3>
-            <div class="details-grid">
-                <span>Quantity:</span><strong>{{ item.quantity }}</strong>
-                <span>Est. Price:</span><strong>₱{% widthratio item.product_price 1 item.quantity as total %}{{ total|floatformat:2 }}</strong>
-                <span>Status:</span>
-                {% if item.product_stock_quantity >= item.quantity %}
-                    <strong class="status-available">Now Available!</strong>
-                {% else %}
-                    <strong class="status-unavailable">Out of Stock</strong>
-                {% endif %}
+{# Check if the list is NOT empty to show the grid #}
+{% if backorders %}
+    <div class="reservations-grid" id="backorder-grid"> {# ✅ Added ID #}
+         {% for item in backorders %}
+            <div class="reservation-card backorder"
+                 data-id="{{ item.id }}"
+                 data-name="{{ item.product_name }}"
+                 data-size="{{ item.product_size|default:'' }}"
+                 data-description="{{ item.product_description|default:'No description available.' }}"
+                 data-image-url="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}"
+                 data-quantity="{{ item.quantity }}"
+                 data-total-price="{% widthratio item.product_price 1 item.quantity as total %}{{ total|floatformat:2 }}"
+                 data-created-at="{{ item.created_at|date:'M d, Y' }}"
+                 data-status="{% if item.product_stock_quantity >= item.quantity %}available{% else %}unavailable{% endif %}">
+
+                <img src="{{ item.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" alt="{{ item.product_name }}" class="product-image">
+                <div class="card-body">
+                    <h3 class="product-name">{{ item.product_name }}{% if item.product_size %} - {{ item.product_size }}{% endif %}</h3>
+                    <div class="details-grid">
+                        <span>Quantity:</span><strong>{{ item.quantity }}</strong>
+                        <span>Est. Price:</span><strong>₱{% widthratio item.product_price 1 item.quantity as total %}{{ total|floatformat:2 }}</strong>
+                        <span>Status:</span>
+                        {% if item.product_stock_quantity >= item.quantity %}
+                            <strong class="status-available">Now Available!</strong>
+                        {% else %}
+                            <strong class="status-unavailable">Out of Stock</strong>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-        </div>
+         {% endfor %}
     </div>
-    {% empty %}
-        <p class="no-items-message">You have no pending backorders.</p>
-    {% endfor %}
-</div>
+     {# ✅ Message is outside grid, hidden initially #}
+    <p class="no-items-message" id="no-backorder-message" style="display: none;">You have no pending backorders.</p>
+{% else %}
+    {# ✅ List is empty on load, render empty grid and show message #}
+    <div class="reservations-grid" id="backorder-grid"></div> {# Empty grid for JS target #}
+    <p class="no-items-message" id="no-backorder-message">You have no pending backorders.</p>
+{% endif %}
 
 <div id="reservation-details-modal" class="modal" style="display: none;">
     <div class="modal-content">
@@ -321,6 +335,7 @@ function handleAjaxFormSubmit(form) {
         event.preventDefault(); // Stop the page from reloading
 
         const submitButton = form.querySelector('button[type="submit"]');
+        // ✅ Store original text OUTSIDE try/catch/finally
         const originalButtonText = submitButton.textContent;
         submitButton.disabled = true;
         submitButton.textContent = 'Processing...';
@@ -348,15 +363,52 @@ function handleAjaxFormSubmit(form) {
             closeModal(form.closest('.modal'));
             showDynamicMessage(data.message, 'success');
 
-            // Reload the page after 1 second to show the updated list
-            setTimeout(() => {
-                window.location.reload();
-            }, 300); 
+            // --- Card Removal Logic ---
+            let reservationId = null;
+            if (form.id === 'checkout-form') {
+                reservationId = form.querySelector('#checkout-reservation-id')?.value;
+            } else if (form.id === 'cancel-form') {
+                const match = form.action.match(/cancel-reservation\/(\d+)\/?$/);
+                if (match && match[1]) {
+                    reservationId = match[1];
+                }
+            }
+            console.log("Attempting to remove card with ID:", reservationId);
+            if (reservationId) {
+                const cardToRemove = document.querySelector(`.reservation-card[data-id="${reservationId}"]`);
+                if (cardToRemove) {
+                    cardToRemove.classList.add('removing');
+                    setTimeout(() => {
+                        const parentGrid = cardToRemove.parentElement;
+                        cardToRemove.remove();
+                        if (parentGrid && parentGrid.querySelectorAll('.reservation-card').length === 0) {
+                             const noItemsMsg = parentGrid.nextElementSibling;
+                             if (noItemsMsg && noItemsMsg.classList.contains('no-items-message')) {
+                                 noItemsMsg.style.display = 'block';
+                             } else {
+                                 const p = document.createElement('p');
+                                 p.className = 'no-items-message';
+                                 p.textContent = parentGrid.previousElementSibling?.textContent.includes('Backorders')
+                                     ? 'You have no pending backorders.'
+                                     : 'You have no items reserved for pickup.';
+                                 parentGrid.after(p);
+                             }
+                        }
+                    }, 400);
+                } else { console.warn("Card to remove not found in DOM for ID:", reservationId); }
+            } else { console.error("Could not determine reservation ID to remove card."); }
+            // --- End Card Removal ---
 
         } catch (error) {
             // --- Error ---
             console.error('Form submission error:', error);
             showDynamicMessage(`Error: ${error.message}`, 'error');
+            // ❌ REMOVE button reset from here
+            // submitButton.disabled = false;
+            // submitButton.textContent = originalButtonText;
+        } finally {
+            // ✅ ADD FINALLY BLOCK: This ALWAYS runs after try or catch
+            console.log("Resetting button state."); // Debug log
             submitButton.disabled = false;
             submitButton.textContent = originalButtonText;
         }

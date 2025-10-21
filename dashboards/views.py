@@ -296,83 +296,175 @@ def delete_single_order_view(request, order_id):
 
 @student_required
 def create_reservation_view(request):
-    # We only expect AJAX (fetch) requests now
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
+            # --- Get product_id early ---
+            product_id = int(request.POST.get('product_id'))
+            quantity_reserved = int(request.POST.get('quantity')) # Needed if reservation affects stock
+
             params = {
-                'p_product_id': int(request.POST.get('product_id')),
+                'p_product_id': product_id,
                 'p_user_id': request.user.id,
-                'p_quantity': int(request.POST.get('quantity')),
+                'p_quantity': quantity_reserved,
                 'p_deal_method': request.POST.get('deal_method', 'meet-up'),
                 'p_is_urgent': 'is_urgent' in request.POST
             }
-            
-            # Execute the RPC
+
+            # --- Execute the RPC ---
             response = supabase.rpc('create_reservation', params).execute()
-            
-            # Check for Supabase-level errors
+
+            # --- Check for errors ---
             if hasattr(response, 'error') and response.error:
                  raise Exception(str(response.error))
-
-            # Check for errors returned in the data (if your function does that)
             if isinstance(response.data, list) and len(response.data) > 0 and 'error' in response.data[0]:
                  raise Exception(response.data[0]['error'])
 
-            # ✅ If no errors, send a JSON success response
-            return JsonResponse({'success': True, 'message': '✅ Your item has been reserved successfully!'})
+            # --- ✅ Get New Stock Quantity (Important if reservation DECREASES stock) ---
+            # If your 'create_reservation' RPC DOES NOT change stock_quantity,
+            # you might fetch the *current* stock instead of assuming it changed.
+            new_stock_quantity = None
+            # OPTION A: If RPC returns new stock (less likely for reservation)
+            if isinstance(response.data, list) and len(response.data) > 0 and 'new_stock_quantity' in response.data[0]:
+                 new_stock_quantity = response.data[0]['new_stock_quantity']
+
+            # OPTION B: Fetch current stock after RPC succeeds
+            if new_stock_quantity is None:
+                 print(f"--- Fetching stock after reservation for product {product_id} ---") # Debug
+                 stock_response = supabase.table('products').select('stock_quantity').eq('id', product_id).single().execute()
+                 if stock_response.data:
+                      new_stock_quantity = stock_response.data.get('stock_quantity')
+                      print(f"--- Fetched stock: {new_stock_quantity} ---") # Debug
+                 else:
+                      print(f"--- Failed to fetch stock for product {product_id} ---") # Debug
+
+            # Handle case where stock couldn't be determined
+            if new_stock_quantity is None:
+                 print(f"--- WARNING: Could not determine stock for product {product_id} after reservation ---") # Debug
+                 # Decide what to send back - current stock might be 0 if backordering
+                 # Let's send 0 as a safe default if fetch failed after a supposed success
+                 new_stock_quantity = 0
+
+            # Determine appropriate success message
+            success_message = '✅ Your reservation has been placed successfully!'
+            # Add logic here if backorder message should be different based on RPC response
+
+            # --- Return Success JSON ---
+            return JsonResponse({
+                'success': True,
+                'message': success_message,
+                # ✅ ADD these fields
+                'product_id': product_id,
+                'new_stock_quantity': new_stock_quantity
+            })
 
         except Exception as e:
             error_str = str(e)
-            
-            # ✅ THIS IS THE FIX: Check if the "error" is actually a success message
+            # Handle potential success message disguised as error
             if "'success': True" in error_str or "'message': 'Item reserved successfully!'" in error_str:
-                return JsonResponse({'success': True, 'message': '✅ Your item has been reserved successfully!'})
+                 print("--- WARNING: Caught potential success message in reservation error block ---") # Debug
+                 _product_id = int(request.POST.get('product_id', 0))
+                 _new_stock = 0 # Default if we hit this edge case
+                 try: # Attempt to fetch current stock as fallback
+                      stock_response = supabase.table('products').select('stock_quantity').eq('id', _product_id).single().execute()
+                      if stock_response.data: _new_stock = stock_response.data.get('stock_quantity', 0)
+                 except: pass
+                 return JsonResponse({
+                     'success': True,
+                     'message': '✅ Your reservation has been placed successfully! (Stock may be outdated)',
+                     'product_id': _product_id,
+                     'new_stock_quantity': _new_stock
+                 })
             else:
-                # This is a real error
+                # Genuine error
+                print(f"--- ERROR in create_reservation_view: {e} ---") # Log real errors
                 return JsonResponse({'success': False, 'error': f"Could not reserve item: {e}"}, status=400)
-    
-    # If it's not an AJAX POST request, return an error
+
+    # Not AJAX POST
     return JsonResponse({'success': False, 'error': 'Invalid request.'}, status=400)
 
 @student_required
 def create_order_view(request):
-    # We only expect AJAX (fetch) requests now
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
+            # --- Get product_id and quantity early ---
+            product_id = int(request.POST.get('product_id'))
+            quantity_ordered = int(request.POST.get('quantity'))
+            
             params = {
-                'p_product_id': int(request.POST.get('product_id')),
+                'p_product_id': product_id,
                 'p_user_id': request.user.id,
-                'p_quantity': int(request.POST.get('quantity')),
+                'p_quantity': quantity_ordered,
                 'p_deal_method': request.POST.get('deal_method'),
                 'p_payment_method': request.POST.get('payment_method'),
                 'p_payment_transaction_id': request.POST.get('payment_transaction_id', None)
             }
-            
-            # Execute the RPC
+
+            # --- Execute the RPC ---
             response = supabase.rpc('buy_product', params).execute()
 
-            # Check for Supabase-level errors
+            # --- Check for errors ---
             if hasattr(response, 'error') and response.error:
-                 raise Exception(str(response.error))
-
-            # Check for errors returned in the data
+                raise Exception(str(response.error))
             if isinstance(response.data, list) and len(response.data) > 0 and 'error' in response.data[0]:
                  raise Exception(response.data[0]['error'])
 
-            # ✅ If no errors, send a JSON success response
-            return JsonResponse({'success': True, 'message': '🎉 Your order has been placed successfully!'})
+            # --- ✅ Get New Stock Quantity ---
+            new_stock_quantity = None
+            # OPTION A: If your 'buy_product' RPC returns the new stock directly (Ideal)
+            # Example: Assuming RPC returns [{'new_stock_quantity': 5}]
+            if isinstance(response.data, list) and len(response.data) > 0 and 'new_stock_quantity' in response.data[0]:
+                 new_stock_quantity = response.data[0]['new_stock_quantity']
+
+            # OPTION B: If RPC doesn't return stock, fetch it manually afterwards
+            if new_stock_quantity is None:
+                 print(f"--- Fetching stock manually for product {product_id} ---") # Debug log
+                 stock_response = supabase.table('products').select('stock_quantity').eq('id', product_id).single().execute()
+                 if stock_response.data:
+                      new_stock_quantity = stock_response.data.get('stock_quantity')
+                      print(f"--- Fetched new stock: {new_stock_quantity} ---") # Debug log
+                 else:
+                      print(f"--- Failed to fetch stock for product {product_id} ---") # Debug log
+
+
+            # Handle case where stock couldn't be determined
+            if new_stock_quantity is None:
+                 print(f"--- WARNING: Could not determine new stock for product {product_id} ---") # Debug log
+                 new_stock_quantity = 0 # Default to 0 if fetch failed
+
+            # --- Return Success JSON with new data ---
+            return JsonResponse({
+                'success': True,
+                'message': '🎉 Your order has been placed successfully!',
+                # ✅ ADD these fields to the response
+                'product_id': product_id,
+                'new_stock_quantity': new_stock_quantity
+            })
 
         except Exception as e:
             error_str = str(e)
-            
-            # ✅ THIS IS THE FIX: Check if the "error" is actually a success message
+            # Handle potential success message disguised as error
+            # This part needs careful testing; ideally the RPC shouldn't error on success
             if "'success': True" in error_str:
-                return JsonResponse({'success': True, 'message': '🎉 Your order has been placed successfully!'})
+                 print("--- WARNING: Caught potential success message in error block ---") # Debug log
+                 # Try to get stock, but default to 0 as it's an edge case
+                 _product_id = int(request.POST.get('product_id', 0)) # Get ID safely
+                 _new_stock = 0
+                 try:
+                      stock_response = supabase.table('products').select('stock_quantity').eq('id', _product_id).single().execute()
+                      if stock_response.data: _new_stock = stock_response.data.get('stock_quantity', 0)
+                 except: pass # Ignore errors during this fallback
+                 return JsonResponse({
+                     'success': True,
+                     'message': '🎉 Your order has been placed successfully! (Stock may be outdated)',
+                     'product_id': _product_id,
+                     'new_stock_quantity': _new_stock
+                 })
             else:
-                # This is a real error
+                # Genuine error
+                print(f"--- ERROR in create_order_view: {e} ---") # Log real errors
                 return JsonResponse({'success': False, 'error': f"Could not place order: {e}"}, status=400)
-    
-    # If it's not an AJAX POST request, return an error
+
+    # Not an AJAX POST request
     return JsonResponse({'success': False, 'error': 'Invalid request.'}, status=400)
 
 @student_required

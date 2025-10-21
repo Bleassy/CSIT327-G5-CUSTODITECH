@@ -351,8 +351,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 // --- Success ---
                 closeModal(form.closest('.modal')); // Close the modal
                 showDynamicMessage(data.message, 'success'); // Show success toast
-                // We don't redirect, the user stays on the browse page
-                setTimeout(() => { window.location.reload(); }, 100);
+                // ✅ --- ADD THIS BLOCK TO UPDATE CARD ---
+            if (data.product_id !== undefined && data.new_stock_quantity !== undefined) {
+                const productId = data.product_id;
+                const newStock = parseInt(data.new_stock_quantity);
+                console.log(`Updating card ${productId} to new stock: ${newStock}`); // Debug log
+
+                const card = document.querySelector(`.product-card[data-id="${productId}"]`);
+
+                if (card) {
+                    // Update displayed stock number
+                    const stockSpan = card.querySelector('.product-stock');
+                    if (stockSpan) {
+                        stockSpan.textContent = `${newStock} pcs available`;
+                    }
+
+                    // Update data-stock attribute
+                    card.dataset.stock = newStock;
+
+                    // Update stock overlay
+                    const overlayContainer = card.querySelector('.product-image-container');
+                    let overlay = overlayContainer.querySelector('.stock-overlay');
+                    if (overlay) overlay.remove(); // Remove old overlay
+
+                    if (newStock === 0) {
+                        overlay = document.createElement('div');
+                        overlay.className = 'stock-overlay out-of-stock';
+                        overlay.textContent = 'Out of Stock';
+                        overlayContainer.appendChild(overlay);
+                    } else if (newStock < 10) {
+                        overlay = document.createElement('div');
+                        overlay.className = 'stock-overlay low-stock';
+                        overlay.textContent = 'Low Stock';
+                        overlayContainer.appendChild(overlay);
+                    }
+                } else {
+                    console.warn(`Could not find product card with ID ${productId} to update.`);
+                }
+            } else {
+                 console.warn("Response missing product_id or new_stock_quantity.");
+            }
 
             } catch (error) {
                 // --- Error ---

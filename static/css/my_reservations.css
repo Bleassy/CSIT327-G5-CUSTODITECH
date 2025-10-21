@@ -267,3 +267,28 @@
     gap: 0.75rem; /* Space between icon and text */
     transition: opacity 0.5s ease;
 }
+
+
+.reservation-card.removing {
+  /* Animate these properties over 0.4 seconds */
+  transition:
+      opacity 0.4s ease-out,
+      max-height 0.4s ease-out,
+      margin-top 0.4s ease-out,
+      margin-bottom 0.4s ease-out,
+      padding-top 0.4s ease-out,
+      padding-bottom 0.4s ease-out,
+      border-width 0.4s ease-out; /* Smoothly collapse border */
+
+  /* Target state */
+  opacity: 0;
+  max-height: 0;        /* Collapse the height */
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-top-width: 0;  /* Collapse borders */
+  border-bottom-width: 0;
+  overflow: hidden;     /* Crucial: Prevent content spill during collapse */
+}
+
