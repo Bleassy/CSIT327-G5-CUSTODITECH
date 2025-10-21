@@ -22,7 +22,7 @@
 .stat-content h3 { font-size: 14px; color: #64748b; margin: 0 0 8px 0; font-weight: 500; }
 .stat-number { font-size: 32px; font-weight: 700; color: #1e293b; margin: 0; }
 
-.chart-container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); height: 400px; }
+.chart-container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); height: 500px; }
 .chart-container h2 { margin: 0 0 1.5rem 0; font-size: 18px; font-weight: 600; }
 
 /* ✅ NEW: Activity Log Section */
@@ -35,12 +35,38 @@
     font-size: 24px;
     font-weight: 600;
 }
-.page-controls { margin-bottom: 2rem; }
-.search-form { display: flex; max-width: 500px; }
-.search-input { flex-grow: 1; padding: 10px 15px; font-size: 16px; border: 1px solid #cbd5e1; border-radius: 8px 0 0 8px; outline: none; }
-.search-input:focus { border-color: #1e40af; box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2); }
-.search-btn { border-radius: 0 8px 8px 0; background-color: #1e40af; color: white; border: 1px solid #1e40af; cursor: pointer; }
+/* --- New Search Bar Styles (from student side, adapted) --- */
+.page-controls {
+    margin-bottom: 2.5rem; /* Increased margin */
+}
 
+.search-form {
+    display: flex;
+    
+    
+    
+}
+
+.search-input {
+    flex-grow: 1;
+    padding: 14px 20px;
+    font-size: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px; /* Fully rounded corners */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    outline: none;
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #1e40af; /* Admin primary color for focus */
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    z-index: 2;
+    position: relative;
+}
 .table-container { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); overflow-x: auto; }
 .data-table { width: 100%; border-collapse: collapse; text-align: left; }
 .data-table th, .data-table td { padding: 16px 20px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
@@ -54,13 +80,17 @@
 }
 
 .report-section, .low-stock-section {
-    margin-bottom: 3rem;
+    margin-bottom: 1rem;
+}
+
+.report-section {
+    margin-bottom: 4rem; /* Adjust this value as needed */
 }
 
 .report-section h2, .low-stock-section h2 {
     font-size: 24px;
     font-weight: 600;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .stock-highlight {
@@ -81,4 +111,344 @@
     font-weight: 600;
     font-size: 13px;
     border: 1px solid #fecaca;
+}
+
+/* [reports.css] - ADD THESE STYLES */
+
+.batch-action-bar {
+    position: fixed; /* Sticks to the bottom */
+    bottom: 0;
+    left: 0; /* Align to the left edge of the viewport */
+    right: 0; /* Stretch to the right edge of the viewport */
+    width: auto; /* Let left/right determine width */
+    background-color: #1e293b; /* Dark background */
+    color: white;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #334155;
+    display: flex; /* Use flexbox for layout */
+    justify-content: space-between; /* Space out count and buttons */
+    align-items: center;
+    z-index: 100; /* Ensure it's above other content */
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out; /* Smooth slide-in (optional) */
+    transform: translateY(100%); /* Start hidden below screen */
+}
+
+/* Make it visible when display: flex is set by JS */
+.batch-action-bar[style*="display: flex"] {
+    transform: translateY(0); /* Slide into view */
+}
+
+.batch-action-bar span {
+    font-weight: 500;
+}
+
+.batch-action-bar .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem; /* 14px */
+}
+
+/* Style selected table rows */
+.log-table tr.row-selected td {
+    background-color: #f0f9ff; /* Light blue background for selected rows */
+}
+
+/* Adjust checkbox column width if needed */
+.log-table th.checkbox-col,
+.log-table td:first-child {
+    width: 40px; /* Adjust as needed */
+    text-align: center;
+}
+
+.chart-container canvas + ul.chartjs-legend li { /* Adjust selector as needed */
+    margin-bottom: 5px !important; /* Add vertical space between items */
+    /* You could also adjust font-size here */
+    font-size: 8px !important;
+}
+
+
+/* --- Log Deletion Modal Button Styles --- */
+
+#log-delete-confirm-modal .modal-footer {
+    display: flex;
+    justify-content: flex-end; /* Align buttons to the right */
+    gap: 0.75rem; /* Space between buttons */
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+    border-bottom-left-radius: 8px; /* Match modal content radius */
+    border-bottom-right-radius: 8px;
+}
+
+/* Base button styles if not already defined globally */
+#log-delete-confirm-modal .btn {
+    display: inline-block;
+    font-weight: 500;
+    line-height: 1.5;
+    color: #212529; /* Default text color */
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: 0.6rem 1.2rem; /* Adjusted padding */
+    font-size: 0.9rem;    /* Adjusted font size */
+    border-radius: 6px;   /* Consistent radius */
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+/* "Cancel" button in the modal */
+#log-delete-confirm-modal .cancel-modal-btn {
+    color: #fff;
+    background-color: #6c757d; /* Bootstrap secondary grey */
+    border-color: #6c757d;
+}
+
+#log-delete-confirm-modal .cancel-modal-btn:hover {
+    color: #fff;
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+/* "Yes, Delete Selected" button in the modal */
+#log-delete-confirm-modal #confirm-log-delete-btn {
+    color: #fff;
+    background-color: #dc3545; /* Bootstrap danger red */
+    border-color: #dc3545;
+}
+
+#log-delete-confirm-modal #confirm-log-delete-btn:hover {
+    color: #fff;
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/* Disabled state for the confirm button during fetch */
+#log-delete-confirm-modal #confirm-log-delete-btn:disabled {
+    color: #fff;
+    background-color: #f8d7da; /* Lighter red */
+    border-color: #f5c6cb;
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+/* Target the specific "Delete Selected" button in the log action bar */
+#log-delete-bar #batch-log-delete-btn {
+    /* Use base .btn styles if defined globally, or add them here */
+    display: inline-block;
+    font-weight: 500;
+    line-height: 1.5;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid transparent;
+    padding: 0.5rem 1rem;    /* Adjust padding as needed */
+    font-size: 0.875rem; /* 14px */
+    border-radius: 6px;   /* Consistent radius */
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+
+    /* Apply danger (red) theme */
+    color: #fff;
+    background-color: #dc3545; /* Bootstrap danger red */
+    border-color: #dc3545;
+}
+
+/* Hover effect for the action bar button */
+#log-delete-bar #batch-log-delete-btn:hover {
+    color: #fff;
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/* Disabled state (optional, though less common for this button) */
+#log-delete-bar #batch-log-delete-btn:disabled {
+    color: #fff;
+    background-color: #f8d7da; /* Lighter red */
+    border-color: #f5c6cb;
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+
+/* --- KPI Grid Styles --- */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive columns */
+    gap: 1.5rem; /* Space between cards */
+    margin-bottom: 3rem; /* Space below KPIs */
+}
+
+.kpi-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem; /* Slightly less padding than stats */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.kpi-icon {
+    width: 48px; /* Slightly smaller icon */
+    height: 48px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 20px; /* Smaller icon font size */
+}
+
+/* Icon specific styles (add more as needed) */
+.kpi-icon.sales { background: #dcfce7; color: #16a34a; } /* Green */
+.kpi-icon.inventory { background: #e0e7ff; color: #4f46e5; } /* Indigo */
+.kpi-icon.today { background: #ffedd5; color: #f97316; } /* Orange */
+.kpi-icon.pending-res { background: #fef9c3; color: #ca8a04; } /* Yellow */
+
+.kpi-content h3 {
+    font-size: 13px; /* Slightly smaller title */
+    color: #64748b;
+    margin: 0 0 4px 0;
+    font-weight: 500;
+    white-space: nowrap; /* Prevent wrapping */
+}
+
+.kpi-number {
+    font-size: 24px; /* Smaller number */
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    line-height: 1.2;
+}
+
+/* --- Placeholder Section Styles --- */
+.placeholder-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    margin-bottom: 2rem; /* Consistent spacing */
+}
+
+.placeholder-section h2 {
+    font-size: 20px; /* Slightly smaller heading */
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    color: #334155;
+}
+
+.placeholder-content {
+    border: 2px dashed #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    color: #94a3b8;
+}
+
+.placeholder-content p {
+    margin: 0;
+    font-style: italic;
+}
+
+/* Adjustments for grid on smaller screens */
+@media (max-width: 576px) {
+    .kpi-grid {
+        grid-template-columns: 1fr; /* Stack KPIs on very small screens */
+    }
+}
+
+/* --- Overview Section Layout --- */
+.overview-grid {
+    display: grid;
+    /* Create 3 columns by default */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem; /* Space between table containers */
+}
+
+/* Modifier for sections with fewer columns */
+.overview-grid.single-col {
+    grid-template-columns: minmax(0, 1.5fr); /* Allow single column to take reasonable width */
+    justify-content: start; /* Align single column to the left */
+}
+
+
+.overview-grid .table-container {
+    /* Styles for the individual boxes within the grid */
+    background: white;
+    border-radius: 8px; /* Slightly smaller radius */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    padding: 1rem; /* Padding inside the box */
+    height: 100%; /* Make boxes in a row the same height */
+}
+
+.overview-grid .table-container h3 {
+    margin: 0 0 1rem 0;
+    font-size: 0.9rem; /* Smaller heading for tables */
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+
+/* Make table text slightly smaller */
+.data-table.small-text th,
+.data-table.small-text td {
+    padding: 8px 12px; /* Reduce padding */
+    font-size: 0.8rem; /* Reduce font size */
+}
+.data-table.small-text th {
+    font-size: 0.7rem; /* Even smaller header text */
+}
+
+/* Responsive adjustments for overview grids */
+@media (max-width: 1200px) {
+    .overview-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
+    }
+    .overview-grid.single-col {
+        grid-template-columns: minmax(0, 1fr); /* Full width single column */
+    }
+}
+
+@media (max-width: 768px) {
+    .overview-grid {
+        grid-template-columns: 1fr; /* Stack columns on small screens */
+    }
+}
+
+/* Style for the container of the top search bar */
+.global-search-controls {
+    margin-bottom: 2rem;
+}
+
+/* Style for the top search form itself */
+.global-search-form {
+    max-width: 100%; /* Allow it to span wider */
+}
+
+/* Style specifically for the log search form container (if needed) */
+.activity-log-section .page-controls {
+    margin-bottom: 1.5rem; /* Adjust spacing if needed */
+}
+
+/* Ensure log search form takes appropriate width */
+.log-search-form {
+     max-width: 600px; /* Or adjust as needed */
+     /* If you removed max-width from .search-form, add it back here */
+}
+
+/* General styles (you likely have these) */
+.search-form { display: flex; }
+.search-input { flex-grow: 1; /* ... other input styles ... */ }
+
+/* Add styles for showing/hiding sections based on global search */
+.report-section.hidden-by-global-search {
+    display: none;
 }

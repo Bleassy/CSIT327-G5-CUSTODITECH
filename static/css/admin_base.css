@@ -287,3 +287,112 @@ body {
     .admin-nav { margin: 1rem 0 0 0; width: 100%; justify-content: flex-start; overflow-x: auto; }
 
 }
+
+
+/* [admin_base.css] - ADD THESE MODAL STYLES */
+
+/* --- Base Modal Styles --- */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1050; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity (dim background) */
+    /* Use flexbox to center the modal content */
+    justify-content: center;
+    align-items: center;
+}
+
+/* Modal Content Box */
+.modal-content {
+    background-color: #ffffff;
+    margin: auto; /* Centered */
+    padding: 0; /* Padding will be in header/body/footer */
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 80%; /* Default width */
+    max-width: 500px; /* Default max width */
+    position: relative; /* For positioning the close button */
+    animation: fadeIn 0.3s ease-out; /* Optional: Fade in */
+}
+
+/* Specific sizing classes (you might have these from manage_products.css) */
+.modal-content.modal-sm { max-width: 450px; }
+.modal-content.modal-lg { max-width: 800px; }
+
+/* Modal Header */
+.modal-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.25rem; /* 20px */
+    font-weight: 600;
+}
+
+/* Modal Body */
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-body p {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #475569;
+}
+.modal-body p:last-child {
+    margin-bottom: 0;
+}
+
+/* Modal Footer */
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end; /* Align buttons to the right */
+    gap: 0.75rem; /* Space between buttons */
+    background-color: #f8fafc; /* Slightly different background */
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* Close Button ('x') */
+.close-btn {
+    color: #94a3b8;
+    font-size: 1.75rem;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: #1e293b;
+    text-decoration: none;
+    outline: none;
+}
+
+/* Button styles (assuming you have .btn, .btn-danger, .btn-secondary defined elsewhere) */
+.modal-footer .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem; /* 14px */
+}
+
+/* Optional Fade-in Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

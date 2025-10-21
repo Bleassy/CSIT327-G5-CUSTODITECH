@@ -262,7 +262,7 @@ def batch_delete_orders_view(request):
                 .eq('user_id', user_id) \
                 .execute()
 
-            return JsonResponse({'success': True, 'message': f"✅ {len(order_ids)} order(s) have been deleted."})
+            return JsonResponse({'success': True, 'message': f"{len(order_ids)} order(s) have been deleted."})
 
         except Exception as e:
             return JsonResponse({'success': False, 'error': f"An error occurred during batch deletion: {e}"}, status=400)
@@ -732,30 +732,40 @@ def order_management_view(request):
     }
     return render(request, 'dashboards/order_management.html', context)
 
+# [views.py]
+
 @admin_required
 def admin_batch_delete_orders_view(request):
     """ Handles batch deletion of orders by an admin. """
     if request.method == 'POST':
         order_ids_str = request.POST.get('order_ids')
+        
         if not order_ids_str:
-            messages.error(request, "No orders selected for deletion.")
-            return redirect('order_management')
+            # ✅ CHANGED: Return JSON error instead of redirect
+            return JsonResponse({'success': False, 'error': "No orders selected for deletion."}, status=400)
 
         order_ids = [int(oid) for oid in order_ids_str.split(',') if oid.isdigit()]
+        
         if not order_ids:
-            messages.error(request, "Invalid order IDs provided.")
-            return redirect('order_management')
+            # ✅ CHANGED: Return JSON error instead of redirect
+            return JsonResponse({'success': False, 'error': "Invalid order IDs provided."}, status=400)
 
         try:
-            # Use supabase_service to bypass RLS for admin actions
+            # This part is correct
             supabase_service.table('orders').delete().in_('id', order_ids).execute()
-            messages.success(request, f"{len(order_ids)} order(s) have been permanently deleted.")
             log_activity(
                 request.user,
                 'ORDER_BATCH_DELETED',
                 {'count': len(order_ids), 'order_ids': order_ids}
             )
-            return JsonResponse({'success': True, 'message': f"✅ {len(order_ids)} order(s) have been permanently deleted."})
+            
+            # ✅ THE FIX: Add 'order_ids': order_ids to the response
+            return JsonResponse({
+                'success': True, 
+                'message': f"🗑️ {len(order_ids)} has been permanently deleted.",
+                'order_ids': order_ids  # This is the line your JavaScript needs
+            })
+            
         except Exception as e:
             return JsonResponse({'success': False, 'error': f"An error occurred during batch deletion: {e}"}, status=400)
 
@@ -829,85 +839,154 @@ def batch_update_products(request):
     # Fallback for non-POST or other issues
     return redirect('manage_products')
 
+# [views.py]
+
 @admin_required
 def update_order_status(request, order_id):
     if request.method == 'POST':
         try:
-            # For batch updates, the order IDs come from a hidden input and order_id is 0
+            order_ids = []
+            new_status = request.POST.get('status')
+
             if order_id == 0:
                 order_ids_str = request.POST.get('order_ids')
+                if not order_ids_str:
+                    raise ValueError("No order IDs provided for batch update.")
                 order_ids = [int(oid) for oid in order_ids_str.split(',') if oid.isdigit()]
-                new_status = request.POST.get('status')
-                count = len(order_ids)
-                success_message = f"{count} order(s) updated to '{new_status}'."
-
-            # For single updates, the ID comes from the URL
             else:
                 order_ids = [order_id]
-                new_status = request.POST.get('status')
-                success_message = f"Order #{order_id} updated to '{new_status}'."
 
             if not order_ids or not new_status:
                 raise ValueError("Missing order IDs or new status.")
 
-            # If the status is cancelled or rejected, it's good practice to call
-            # the function that also handles stock restoration for reservations.
+            # --- Start of the fix ---
+
+            # 1. Run the correct update logic (RPC or simple update)
             if new_status in ['cancelled', 'rejected']:
                 for oid in order_ids:
-                    # Using supabase_service to ensure permissions
+                    # Run the RPC, but we don't need its return value
                     supabase_service.rpc('cancel_or_reject_order', {
                         'p_order_id': oid,
                         'p_new_status': new_status
                     }).execute()
-            
-            # For other status updates (like to 'completed' or 'approved'), just update the status field
             else:
-                # Use supabase_service for all admin database modifications
-                supabase_service.table('orders').update({'status': new_status}).in_('id', order_ids).execute()
+                # Run the simple status update
+                supabase_service.table('orders').update({
+                    'status': new_status
+                }).in_('id', order_ids).execute()
 
-            messages.success(request, success_message)
+            # 2. ✅ THE FIX: After updating, ALWAYS re-fetch the orders
+            # to get their fresh, updated data.
+            updated_orders_response = supabase_service.table('orders') \
+                                            .select('*') \
+                                            .in_('id', order_ids) \
+                                            .execute()
+            
+            updated_orders_data = updated_orders_response.data if updated_orders_response.data else []
+            
+            # --- End of the fix ---
+
+            # Log the activity
             log_activity(
                 request.user,
                 'ORDER_STATUS_BATCH_UPDATED' if order_id == 0 else 'ORDER_STATUS_UPDATED',
                 {'order_ids': order_ids, 'new_status': new_status}
             )
 
-        except Exception as e:
-            messages.error(request, f"Failed to update order status: {e}")
+            # 3. Return the fresh data
+            return JsonResponse({
+                'success': True,
+                'message': f"{len(updated_orders_data)} order(s) updated to '{new_status}'.",
+                'orders': updated_orders_data # This list will now be correct for all statuses
+            })
 
-    return redirect('order_management')
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': f"Failed to update order status: {e}"}, status=400)
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
 
 @admin_required
 def delete_order_view(request, order_id):
     if request.method == 'POST':
         try:
-            supabase.rpc('delete_order_by_admin', {'p_order_id': order_id}).execute()
-            messages.success(request, f"Order #{order_id} has been permanently deleted.")
+            # You can use the RPC or a direct delete with service_role
+            # Using the RPC is safer if it has other logic (like stock restore)
+            # supabase.rpc('delete_order_by_admin', {'p_order_id': order_id}).execute()
+            
+            # Using direct service_role delete (as seen in your other view)
+            supabase_service.table('orders').delete().eq('id', order_id).execute()
+            
             log_activity(request.user, 'ORDER_DELETED', {'order_id': order_id})
+            
+            # ✅ CHANGED: Return JSON instead of redirecting
+            return JsonResponse({
+                'success': True, 
+                'message': f'🗑️ Order #{order_id} has been permanently deleted.',
+                'order_id': order_id
+            })
+            
         except Exception as e:
-            messages.error(request, f"Failed to delete order: {e}")
-    return redirect('order_management')
+            # ✅ CHANGED: Return JSON error
+            return JsonResponse({'success': False, 'error': f"Failed to delete order: {e}"}, status=400)
+            
+    # ✅ CHANGED: Handle non-POST requests
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
+
 
 @admin_required
 def reports_view(request):
     search_query = request.GET.get('search', '').strip()
     report_data = {}
+    kpi_data = {}
+    inventory_overview = {} # <-- New dict for inventory details
+    reservation_stats = {}  # <-- New dict for reservation details
+    sales_performance = {}  # <-- New dict for sales details
     log_entries = []
     low_stock_products = []
     unavailable_products = []
-    
+    status_counts_dict = {
+        'pending': 0, 'approved': 0, 'completed': 0, 'rejected': 0, 'cancelled': 0
+    }
+
     try:
-        report_data = supabase.rpc('get_report_stats').execute().data
-        log_response = supabase.rpc('get_activity_log', {'p_search_term': search_query}).execute()
-        low_stock_response = supabase.table('products').select('*').gt('stock_quantity', 0).lt('stock_quantity', 10).order('stock_quantity', desc=False).execute()
+        # ✅ Call the NEW RPC function using service role
+        report_data_response = supabase_service.rpc('get_advanced_report_stats').execute()
+        print("--- DEBUG: Raw Advanced RPC Response Data:", report_data_response.data) # Keep for checking
+
+        if report_data_response.data:
+            # The RPC returns a single JSON object
+            report_data = report_data_response.data
+
+            # Extract status counts
+            retrieved_status_counts = report_data.get('status_counts', {})
+            status_counts_dict.update(retrieved_status_counts)
+
+            # Extract KPIs
+            kpi_data = report_data.get('kpi', {})
+
+            # ✅ Extract NEW overview data (use .get() with default empty dicts)
+            inventory_overview = report_data.get('inventory_overview', {})
+            reservation_stats = report_data.get('reservation_stats', {})
+            sales_performance = report_data.get('sales_performance', {})
+
+        else:
+            # Set defaults if RPC fails or returns no data
+            report_data = {'total_products': 0, 'total_orders_reservations': 0}
+            kpi_data = {'total_sales': 0, 'inventory_value': 0, 'orders_today': 0, 'pending_reservations': 0}
+            # Keep overview dicts empty
+
+
+        # --- Fetch Logs (Stock/Unavailable are now less critical as RPC provides totals) ---
+        # You might still want these lists for the specific tables, so keep fetching them
+        log_response = supabase_service.rpc('get_activity_log', {'p_search_term': search_query}).execute()
+        low_stock_response = supabase_service.table('products').select('*').gt('stock_quantity', 0).lt('stock_quantity', 10).order('stock_quantity', desc=False).execute()
         if low_stock_response.data:
             low_stock_products = low_stock_response.data
-        
-        unavailable_response = supabase.table('products').select('*').eq('is_available', False).order('name').execute()
+
+        unavailable_response = supabase_service.table('products').select('*').eq('is_available', False).order('name').execute()
         if unavailable_response.data:
             unavailable_products = unavailable_response.data
-        
-        
+
         if log_response.data:
             for entry in log_response.data:
                 if entry.get('created_at'):
@@ -915,13 +994,32 @@ def reports_view(request):
                 if entry.get('action'):
                     entry['action_display'] = entry['action'].replace('_', ' ').title()
                 log_entries.append(entry)
+
     except Exception as e:
         messages.error(request, f"Error fetching report data: {e}")
-        report_data = {'total_products': 0, 'total_orders': 0, 'status_counts': {}}
+        # Ensure defaults are set on error
+        report_data = {'total_products': 0, 'total_orders_reservations': 0}
+        kpi_data = {'total_sales': 0, 'inventory_value': 0, 'orders_today': 0, 'pending_reservations': 0}
+        # Keep overview dicts empty on error
+
+    print("--- DEBUG: Final status_counts_dict:", status_counts_dict)
+    print("--- DEBUG: Final kpi_data:", kpi_data)
+    # ✅ Add debug prints for new data
+    print("--- DEBUG: Final inventory_overview:", inventory_overview)
+    print("--- DEBUG: Final reservation_stats:", reservation_stats)
+    print("--- DEBUG: Final sales_performance:", sales_performance)
+
     context = {
         'total_products': report_data.get('total_products', 0),
-        'total_orders': report_data.get('total_orders', 0),
-        'status_counts': report_data.get('status_counts', {}),
+        'total_orders_reservations': report_data.get('total_orders_reservations', 0),
+        'status_counts': status_counts_dict,
+        'kpi': kpi_data,
+
+        # ✅ Pass NEW overview data to the template
+        'inventory_overview': inventory_overview,
+        'reservation_stats': reservation_stats,
+        'sales_performance': sales_performance,
+
         'log_entries': log_entries,
         'low_stock_products': low_stock_products,
         'unavailable_products': unavailable_products,
@@ -929,6 +1027,36 @@ def reports_view(request):
         'active_page': 'reports'
     }
     return render(request, 'dashboards/reports.html', context)
+
+@admin_required
+def batch_delete_logs_view(request):
+    """
+    Handles AJAX batch deletion of activity log entries.
+    """
+    if request.method == 'POST':
+        log_ids_str = request.POST.get('log_ids')
+        if not log_ids_str:
+            return JsonResponse({'success': False, 'error': 'No log IDs provided.'}, status=400)
+            
+        try:
+            log_ids = [int(lid) for lid in log_ids_str.split(',') if lid.isdigit()]
+            if not log_ids:
+                raise ValueError("No valid log IDs provided.")
+            
+            # Use service role to delete from the log table
+            supabase_service.table('activity_log').delete().in_('id', log_ids).execute()
+            
+            # Return the IDs of the deleted logs
+            return JsonResponse({
+                'success': True,
+                'message': f'{len(log_ids)} log entries have been deleted.',
+                'deleted_ids': log_ids
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': f'An error occurred: {e}'}, status=500)
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
 
 
 @admin_required

@@ -305,402 +305,541 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Get Elements ---
-    const detailsModal = document.getElementById('order-details-modal');
-    const batchStatusForm = document.getElementById('batch-status-form');
-    const batchDeleteForm = document.getElementById('batch-delete-form');
+    
+    // ==================================================================
+    // == 1. GET ALL ELEMENTS
+    // ==================================================================
+    const detailsModal = document.getElementById('order-details-modal');
+    const batchDeleteConfirmModal = document.getElementById('batch-delete-confirm-modal');
     const singleDeleteConfirmModal = document.getElementById('single-delete-confirm-modal');
-    const batchStatusBar = document.getElementById('batch-status-bar');
-    const batchDeleteBar = document.getElementById('batch-delete-bar');
-    const batchDeleteConfirmModal = document.getElementById('batch-delete-confirm-modal');
-    const batchPendingStatusBar = document.getElementById('batch-pending-status-bar');
+
+    // --- Forms ---
+    const batchStatusForm = document.getElementById('batch-status-form');
     const batchPendingStatusForm = document.getElementById('batch-pending-status-form');
+    const batchDeleteForm = document.getElementById('batch-delete-form');
+    const singleStatusForm = document.getElementById('single-status-form');
+    const singlePendingStatusForm = document.getElementById('single-pending-status-form');
+    const singleDeleteForm = document.getElementById('single-delete-form');
 
-    // 🔑 NEW/UPDATED: Get all cards for filtering
-    const searchInput = document.getElementById('admin-order-search');
-    const orderSections = document.querySelectorAll('.order-section');
-    const allOrderCards = document.querySelectorAll('.order-card');
-    const allCheckboxes = document.querySelectorAll('.order-checkbox');
-    const selectAllCheckboxes = document.querySelectorAll('.select-all-checkbox'); // Moved up for scope
+    // --- Action Bars ---
+    const batchStatusBar = document.getElementById('batch-status-bar');
+    const batchPendingStatusBar = document.getElementById('batch-pending-status-bar');
+    const batchDeleteBar = document.getElementById('batch-delete-bar');
+    
+    // --- Buttons ---
+    const batchStatusUpdateBtn = document.getElementById('batch-status-update-btn');
+    const batchPendingStatusUpdateBtn = document.getElementById('batch-pending-status-update-btn');
+    const batchDeleteBtn = document.getElementById('batch-delete-btn');
+    const confirmBatchDeleteBtn = document.getElementById('confirm-batch-delete-btn');
+    const openSingleDeleteModalBtn = document.getElementById('open-single-delete-modal-btn');
+    const confirmSingleDeleteBtn = document.getElementById('confirm-single-delete-btn');
+    
+    // --- Search & Content ---
+    const searchInput = document.getElementById('admin-order-search');
+    const orderSections = document.querySelectorAll('.order-section');
+    const allCheckboxes = document.querySelectorAll('.order-checkbox');
+    const selectAllCheckboxes = document.querySelectorAll('.select-all-checkbox');
 
-    // --- Modal Logic ---
-    const openModal = (modal) => modal.style.display = 'flex';
-    const closeModal = (modal) => modal.style.display = 'none';
-    document.querySelectorAll('.close-btn, .cancel-modal-btn').forEach(btn => {
-        btn.addEventListener('click', () => closeModal(btn.closest('.modal')));
-    });
-    window.addEventListener('click', (e) => { if (e.target.classList.contains('modal')) closeModal(e.target); });
+    // ==================================================================
+    // == 2. DEFINE ALL HELPER FUNCTIONS
+    // ==================================================================
 
-    // 🔑 MODIFIED: Order Card Click Listener - Handles both checkbox toggle and modal opening
-    document.querySelectorAll('.order-card').forEach(card => {
-        card.addEventListener('click', (e) => {
-            const checkbox = card.querySelector('.order-checkbox');
+    /**
+     * Displays a temporary message in the message container.
+     */
+    function showMessage(message, type = 'success') {
+        const container = document.getElementById('message-container');
+        if (!container) return;
+        const li = document.createElement('li');
+        li.className = type;
+        li.textContent = ` ${message}`;
+        const iconSpan = document.createElement('span');
+        iconSpan.textContent = (type === 'success') ? '✅' : '❌';
+        li.prepend(iconSpan);
+        container.appendChild(li);
+        setTimeout(() => {
+            li.style.opacity = '0';
+            setTimeout(() => { li.remove(); }, 500);
+        }, 4000);
+    }
 
-            // Check if the click target is a control (checkbox, select, or button)
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON') {
-                // If it's a control, we do NOT open the modal.
-                // We also ensure the click on the checkbox doesn't propagate to the card itself (optional but safer)
-                if (e.target.classList.contains('order-checkbox')) e.stopPropagation();
-                return;
-            }
+    /**
+     * Gets the CSRF token from any of the forms.
+     */
+    function getCsrfToken() {
+        return document.querySelector('form [name=csrfmiddlewaretoken]').value;
+    }
 
-            // --- Checkbox Toggling (Action Checkbox Functionality) ---
-            if (checkbox) {
-                checkbox.checked = !checkbox.checked; // Toggle the checkbox state
-                // Manually trigger the change event to update the action bars
-                checkbox.dispatchEvent(new Event('change'));
-            }
-            
-            // --- Modal Opening Logic ---
-            const data = card.dataset;
-            detailsModal.querySelector('#details-image').src = data.imageUrl;
-            detailsModal.querySelector('#details-name').textContent = data.size ? `${data.name} - ${data.size}` : data.name;
-            detailsModal.querySelector('#details-order-id').textContent = `#${data.id}`;
-            detailsModal.querySelector('#details-student').textContent = `${data.studentName} (${data.studentId})`;
-            detailsModal.querySelector('#details-category').textContent = data.category;
-            detailsModal.querySelector('#details-description').textContent = data.description;
-            detailsModal.querySelector('#details-created-at').textContent = data.createdAt;
-            detailsModal.querySelector('#details-quantity').textContent = `${data.quantity} pc(s)`;
-            detailsModal.querySelector('#details-total-price').textContent = `₱${data.totalPrice}`;
-            detailsModal.querySelector('#details-payment-method').textContent = data.paymentMethod;
+    /**
+     * Finds and removes an order card from the DOM.
+     */
+    function removeOrderCard(orderId) {
+        const card = document.querySelector(`.order-card[data-id="${orderId}"]`);
+        if (card) {
+            card.classList.add('moving'); // Add fade-out animation
+            setTimeout(() => {
+                card.remove();
+                filterOrders(); // Re-check "no data" messages
+                updateActionBars();
+            }, 300); // Wait for animation
+        }
+    }
+
+    /**
+     * Moves an order card to the correct section based on its new status.
+     */
+    function moveOrderCard(orderId, newStatus) {
+        const card = document.querySelector(`.order-card[data-id="${orderId}"]`);
+        if (!card) return;
+
+        let targetGrid, newCheckboxClass;
+
+        // Determine target grid and new checkbox class
+        if (newStatus === 'approved') {
+            targetGrid = document.querySelector('.order-section[data-section-status="approved"] .orders-grid');
+            newCheckboxClass = 'order-checkbox approved-checkbox';
+        } else if (newStatus === 'pending') {
+            targetGrid = document.querySelector('.order-section[data-section-status="pending"] .orders-grid');
+            newCheckboxClass = 'order-checkbox pending-checkbox';
+        } else if (newStatus === 'completed') {
+            targetGrid = document.querySelector('.order-section[data-section-status="completed"] .orders-grid');
+            newCheckboxClass = 'order-checkbox completed-checkbox';
+        } else if (newStatus === 'cancelled' || newStatus === 'rejected') {
+            targetGrid = document.querySelector('.order-section[data-section-status*="cancelled"] .orders-grid');
+            newCheckboxClass = 'order-checkbox other-checkbox';
+        }
+
+        if (targetGrid) {
+            // Animate card out
+            card.classList.add('moving');
+            
+            setTimeout(() => {
+                // Update card data
+                card.dataset.status = newStatus;
+                
+                // Update status badge
+                const statusBadge = card.querySelector('.status-badge');
+                if (statusBadge) {
+                    statusBadge.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+                    statusBadge.className = `status-badge status-${newStatus}`;
+                }
+                
+                // Update checkbox
+                const checkbox = card.querySelector('.order-checkbox');
+                if (checkbox) {
+                    checkbox.className = newCheckboxClass;
+                    checkbox.checked = false; // Always uncheck on move
+                }
+
+                // Move card
+                targetGrid.prepend(card);
+                
+                // Animate card in
+                card.classList.remove('moving'); 
+                
+                // Update UI
+                filterOrders(); // Re-check "no data" messages
+                updateActionBars();
+            }, 300); // Wait for fade-out
+        }
+    }
+
+    // --- Modal Logic (Unchanged) ---
+    const openModal = (modal) => modal.style.display = 'flex';
+    const closeModal = (modal) => modal.style.display = 'none';
+    document.querySelectorAll('.close-btn, .cancel-modal-btn').forEach(btn => {
+        btn.addEventListener('click', () => closeModal(btn.closest('.modal')));
+    });
+    window.addEventListener('click', (e) => { if (e.target.classList.contains('modal')) closeModal(e.target); });
+
+    // --- Card Click Logic (Unchanged) ---
+    document.querySelectorAll('.order-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            const checkbox = card.querySelector('.order-checkbox');
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON') {
+                if (e.target.classList.contains('order-checkbox')) e.stopPropagation();
+                return;
+            }
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                checkbox.dispatchEvent(new Event('change'));
+            }
+            const data = card.dataset;
+            detailsModal.querySelector('#details-image').src = data.imageUrl;
+            detailsModal.querySelector('#details-name').textContent = data.size ? `${data.name} - ${data.size}` : data.name;
+            detailsModal.querySelector('#details-order-id').textContent = `#${data.id}`;
+            detailsModal.querySelector('#details-student').textContent = `${data.studentName} (${data.studentId})`;
+            detailsModal.querySelector('#details-category').textContent = data.category;
+            detailsModal.querySelector('#details-description').textContent = data.description;
+            detailsModal.querySelector('#details-created-at').textContent = data.createdAt;
+            detailsModal.querySelector('#details-quantity').textContent = `${data.quantity} pc(s)`;
+            detailsModal.querySelector('#details-total-price').textContent = `₱${data.totalPrice}`;
+            detailsModal.querySelector('#details-payment-method').textContent = data.paymentMethod;
             detailsModal.querySelector('#details-order-type').textContent = data.orderType; 
-            
-            const statusBadge = detailsModal.querySelector('#details-status-badge');
-            const status = data.status;
-            statusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-            statusBadge.className = 'status-badge'; 
-            statusBadge.classList.add(`status-${status}`);
-
-            // --- ✅ NEW Modal Footer Logic ---
-            const singleStatusForm = detailsModal.querySelector('#single-status-form');
-            const singlePendingStatusForm = detailsModal.querySelector('#single-pending-status-form');
-            const singleDeleteForm = detailsModal.querySelector('#single-delete-form');
-
-            // 1. Hide all forms by default
+            const statusBadge = detailsModal.querySelector('#details-status-badge');
+            const status = data.status;
+            statusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            statusBadge.className = 'status-badge'; 
+            statusBadge.classList.add(`status-${status}`);
+            
+            // Set action URLs for all forms
+            singleStatusForm.action = `/dashboard/admin/update-order-status/${data.id}/`;
+            singlePendingStatusForm.action = `/dashboard/admin/update-order-status/${data.id}/`;
+            singleDeleteForm.action = `/dashboard/admin/delete-order/${data.id}/`;
+            
+            // Show the correct form based on status
             singleStatusForm.style.display = 'none';
             singlePendingStatusForm.style.display = 'none';
             singleDeleteForm.style.display = 'none';
 
-            // 2. Set action URLs for all forms
-            singleStatusForm.action = `/dashboard/admin/update-order-status/${data.id}/`;
-            singlePendingStatusForm.action = `/dashboard/admin/update-order-status/${data.id}/`;
-            singleDeleteForm.action = `/dashboard/admin/delete-order/${data.id}/`;
-            
-            // 3. Show the correct form based on status
             if (data.status === 'approved') {
-                // Show the full status form for 'approved'
                 singleStatusForm.style.display = 'flex';
                 singleStatusForm.querySelector('#single-status-select').value = data.status;
             } else if (data.status === 'pending') {
-                // Show the limited 'Cancelled/Rejected' form for 'pending'
                 singlePendingStatusForm.style.display = 'flex';
             } else {
-                // Show the 'Delete' button for 'completed', 'cancelled', 'rejected'
                 singleDeleteForm.style.display = 'block';
             }
             openModal(detailsModal);
-        });
-    });
+        });
+    });
 
-// 🔑 STEP 1 & 2: Implement Live Search Logic
-    function filterOrders() {
-        const query = searchInput.value.toLowerCase().trim();
-        let sectionVisibleCardCount = {};
-        
-        // Initialize counts for sections
-        orderSections.forEach(section => {
-            sectionVisibleCardCount[section.dataset.sectionStatus.split(' ')[0]] = 0;
-        });
+    // --- Filter/Search Logic (Unchanged) ---
+    function filterOrders() {
+        const query = searchInput.value.toLowerCase().trim();
+        let sectionVisibleCardCount = {};
+        orderSections.forEach(section => {
+            sectionVisibleCardCount[section.dataset.sectionStatus.split(' ')[0]] = 0;
+        });
+        document.querySelectorAll('.order-card').forEach(card => {
+            const id = card.dataset.id || '';
+            const name = card.dataset.name.toLowerCase() || '';
+            const category = card.dataset.category.toLowerCase() || '';
+            const status = card.dataset.status.toLowerCase() || '';
+            const studentName = card.dataset.studentName.toLowerCase() || '';
+            const studentId = card.dataset.studentId.toLowerCase() || '';
+            const searchableText = `${id} ${name} ${category} ${status} ${studentName} ${studentId}`;
+            let isVisible = true;
+            if (query.length > 0) {
+                if (!searchableText.includes(query)) {
+                    isVisible = false;
+                }
+            }
+            card.style.display = isVisible ? 'flex' : 'none';
+            if (isVisible) {
+                const section = card.closest('.order-section');
+                if (section) {
+                    const primaryStatus = section.dataset.sectionStatus.split(' ')[0]; 
+                    sectionVisibleCardCount[primaryStatus]++;
+                }
+            }
+        });
+        updateSectionVisibility(query, sectionVisibleCardCount);
+        updateActionBars();
+    }
+    function updateSectionVisibility(query, visibleCounts) {
+        orderSections.forEach(section => {
+            const grid = section.querySelector('.orders-grid');
+            const primaryStatus = section.dataset.sectionStatus.split(' ')[0];
+            const originalNoDataCell = section.querySelector('.no-data-cell:not(.temp-no-results)');
+            let tempNoResults = section.querySelector('.temp-no-results');
+            if (!tempNoResults) {
+                tempNoResults = document.createElement('div');
+                tempNoResults.className = 'no-data-cell temp-no-results';
+                tempNoResults.innerHTML = '<p>No matching orders found.</p>';
+                grid.appendChild(tempNoResults);
+            }
+            const isVisible = visibleCounts[primaryStatus] > 0;
+            if (query.length > 0) {
+                if (!isVisible) {
+                    tempNoResults.style.display = 'block';
+                    if (originalNoDataCell) originalNoDataCell.style.display = 'none';
+                } else {
+                    tempNoResults.style.display = 'none';
+                }
+            } else {
+                tempNoResults.style.display = 'none';
+                if (originalNoDataCell) {
+                    const totalCards = section.querySelectorAll('.order-card').length;
+                    originalNoDataCell.style.display = (totalCards === 0) ? 'block' : 'none';
+                }
+            }
+        });
+    }
+    searchInput.addEventListener('input', filterOrders);
+    filterOrders();
 
-        allOrderCards.forEach(card => {
-            // Get all data attributes for searching (Your specified fields)
-            const id = card.dataset.id || '';
-            const name = card.dataset.name.toLowerCase() || '';
-            const category = card.dataset.category.toLowerCase() || '';
-            const status = card.dataset.status.toLowerCase() || '';
-            const studentName = card.dataset.studentName.toLowerCase() || '';
-            const studentId = card.dataset.studentId.toLowerCase() || '';
-            
-            // Combine fields for simple includes check
-            const searchableText = `${id} ${name} ${category} ${status} ${studentName} ${studentId}`;
-
-            let isVisible = true;
-
-            if (query.length > 0) {
-                if (!searchableText.includes(query)) {
-                    isVisible = false;
-                }
-            }
-            
-            // Show or hide the card based on the filter
-            card.style.display = isVisible ? 'flex' : 'none';
-
-            // If visible, increment the counter for its section
-            if (isVisible) {
-                // Find the parent section status to categorize the visible card
-                const section = card.closest('.order-section');
-                if (section) {
-                     // Use the first status word (e.g., 'approved', 'completed', 'cancelled')
-                    const primaryStatus = section.dataset.sectionStatus.split(' ')[0]; 
-                    sectionVisibleCardCount[primaryStatus]++;
-                }
-            }
-        });
-
-        // 🔑 STEP 3: Update section visibility and "no results" messages
-        updateSectionVisibility(query, sectionVisibleCardCount);
-        updateActionBars(); // Ensure action bars reflect the current visible/checked cards
-    }
-
-    // Helper to manage 'no data' cells and section titles
-    function updateSectionVisibility(query, visibleCounts) {
-        orderSections.forEach(section => {
-            const grid = section.querySelector('.orders-grid');
-            const primaryStatus = section.dataset.sectionStatus.split(' ')[0];
-            const originalNoDataCell = section.querySelector('.no-data-cell:not(.temp-no-results)');
-            
-            // Find or create the temporary 'no results' cell
-            let tempNoResults = section.querySelector('.temp-no-results');
-            if (!tempNoResults) {
-                tempNoResults = document.createElement('div');
-                tempNoResults.className = 'no-data-cell temp-no-results';
-                tempNoResults.innerHTML = '<p>No matching orders found.</p>';
-                grid.appendChild(tempNoResults);
-            }
-
-            const isVisible = visibleCounts[primaryStatus] > 0;
-
-            if (query.length > 0) {
-                // Search is active
-                if (!isVisible) {
-                    tempNoResults.style.display = 'block';
-                    if (originalNoDataCell) originalNoDataCell.style.display = 'none';
-                } else {
-                    tempNoResults.style.display = 'none';
-                }
-            } else {
-                // Search is cleared/inactive
-                tempNoResults.style.display = 'none';
-                if (originalNoDataCell) {
-                    const totalCards = section.querySelectorAll('.order-card').length;
-                    originalNoDataCell.style.display = (totalCards === 0) ? 'block' : 'none';
-                }
-            }
-        });
-    }
-
-    // Attach listener to the search input
-    searchInput.addEventListener('input', filterOrders);
-    
-    // Run the filter once on load to initialize visibility state
-    filterOrders();
-
-    // --- Batch Action Logic ---
-    function updateActionBars() {
-        const approvedChecked = document.querySelectorAll('.approved-checkbox:checked').length;
-        const completedChecked = document.querySelectorAll('.completed-checkbox:checked').length;
-        const otherChecked = document.querySelectorAll('.other-checkbox:checked').length;
+    // --- Batch Action/Checkbox Logic (Unchanged) ---
+    function updateActionBars() {
+        const approvedChecked = document.querySelectorAll('.approved-checkbox:checked').length;
+        const completedChecked = document.querySelectorAll('.completed-checkbox:checked').length;
+        const otherChecked = document.querySelectorAll('.other-checkbox:checked').length;
         const pendingChecked = document.querySelectorAll('.pending-checkbox:checked').length;
-        
-        // ✅ Control 'Approved' bar
         batchStatusBar.style.display = approvedChecked > 0 ? 'flex' : 'none';
-        batchStatusBar.querySelector('#status-selected-count').textContent = `${approvedChecked} item(s) selected`;
-
-       // ✅ Control new 'Pending' bar
+        batchStatusBar.querySelector('#status-selected-count').textContent = `${approvedChecked} item(s) selected`;
         batchPendingStatusBar.style.display = pendingChecked > 0 ? 'flex' : 'none';
-        batchPendingStatusBar.querySelector('#pending-status-selected-count').textContent = `${pendingChecked} item(s) selected`;
+        batchPendingStatusBar.querySelector('#pending-status-selected-count').textContent = `${pendingChecked} item(s) selected`;
+        const deleteCount = completedChecked + otherChecked;
+        batchDeleteBar.style.display = deleteCount > 0 ? 'flex' : 'none';
+        batchDeleteBar.querySelector('#delete-selected-count').textContent = `${deleteCount} item(s) selected`;
+        allCheckboxes.forEach(cb => {
+            const card = cb.closest('.order-card');
+            if (card) {
+                card.classList.toggle('selected', cb.checked && card.style.display !== 'none');
+                if (card.style.display === 'none') card.classList.remove('selected');
+            }
+        });
+    }
+    selectAllCheckboxes.forEach(sa => {
+        sa.addEventListener('change', () => {
+            const clickedSection = sa.dataset.section;
+            const clickedGroupClass = `${clickedSection}-checkbox`;
+            document.querySelectorAll(`.${clickedGroupClass}`).forEach(cb => {
+                const card = cb.closest('.order-card');
+                if (card && card.style.display !== 'none') {
+                    cb.checked = sa.checked;
+                } else if (sa.checked === false) {
+                    cb.checked = false;
+                }
+            });
+            if (sa.checked) {
+                allCheckboxes.forEach(cb => {
+                    if (!cb.classList.contains(clickedGroupClass)) {
+                        cb.checked = false;
+                    }
+                });
+                selectAllCheckboxes.forEach(otherSA => {
+                    if (otherSA !== sa) {
+                        otherSA.checked = false;
+                    }
+                });
+            }
+            updateActionBars();
+        });
+    });
+    function handleExclusiveSelection(e) {
+        const clickedCheckbox = e.currentTarget;
+        let clickedGroup = null;
+        if (clickedCheckbox.classList.contains('approved-checkbox')) clickedGroup = 'approved-checkbox';
+        else if (clickedCheckbox.classList.contains('pending-checkbox')) clickedGroup = 'pending-checkbox';
+        else if (clickedCheckbox.classList.contains('completed-checkbox')) clickedGroup = 'completed-checkbox';
+        else if (clickedCheckbox.classList.contains('other-checkbox')) clickedGroup = 'other-checkbox';
+        if (!clickedCheckbox.checked || !clickedGroup) {
+            updateActionBars();
+            return; 
+        }
+        allCheckboxes.forEach(cb => {
+            if (cb === clickedCheckbox) return;
+            let cbGroup = null;
+            if (cb.classList.contains('approved-checkbox')) cbGroup = 'approved-checkbox';
+            else if (cb.classList.contains('pending-checkbox')) cbGroup = 'pending-checkbox';
+            else if (cb.classList.contains('completed-checkbox')) cbGroup = 'completed-checkbox';
+            else if (cb.classList.contains('other-checkbox')) cbGroup = 'other-checkbox';
+            if (cbGroup && cbGroup !== clickedGroup) {
+                cb.checked = false;
+            }
+        });
+        selectAllCheckboxes.forEach(sa => {
+            const sectionGroup = `${sa.dataset.section}-checkbox`;
+            if (sectionGroup !== clickedGroup) {
+                sa.checked = false;
+            }
+        });
+        updateActionBars();
+    }
+    allCheckboxes.forEach(cb => cb.addEventListener('change', handleExclusiveSelection));
+    updateActionBars(); // Initial check
+
+    // ==================================================================
+    // == 3. ATTACH AJAX SUBMIT LISTENERS
+    // ==================================================================
+
+    /**
+     * Helper for all fetch requests
+     */
+    function handleFetch(url, formData, button) {
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.textContent = 'Processing...';
+
+        return fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            return response.json();
+        })
+        .catch(error => {
+            // This catch handles network errors *and* non-JSON responses (like a 500 error page)
+            console.error('Fetch error:', error);
+            showMessage(`A network or server error occurred: ${error.message}`, 'error');
+            return null; // Return null to stop the .then() chain
+        })
+        .finally(() => {
+            button.disabled = false;
+            button.textContent = originalText;
+        });
+    }
+    
+    // --- BATCH STATUS UPDATE (Approved Section) ---
+    batchStatusUpdateBtn.addEventListener('click', () => {
+        const selectedIds = Array.from(document.querySelectorAll('.approved-checkbox:checked')).map(cb => cb.value);
+        if (selectedIds.length === 0) return;
+
+        const formData = new FormData(batchStatusForm);
+        formData.set('order_ids', selectedIds.join(','));
+        formData.set('status', document.getElementById('batch-status-select').value);
         
-        // ✅ Control 'Delete' bar 
-        const deleteCount = completedChecked + otherChecked;
-        batchDeleteBar.style.display = deleteCount > 0 ? 'flex' : 'none';
-        batchDeleteBar.querySelector('#delete-selected-count').textContent = `${deleteCount} item(s) selected`;
+        const url = batchStatusForm.getAttribute('action');
 
-        // 🔑 FIX 1: Only apply the 'selected' class to the card if it is NOT hidden.
-        allCheckboxes.forEach(cb => {
-            const card = cb.closest('.order-card');
-            if (card) {
-                // Toggle 'selected' class only if the checkbox is checked AND the card is visible
-                card.classList.toggle('selected', cb.checked && card.style.display !== 'none');
-                
-                // Ensure hidden cards lose the 'selected' class just in case
-                if (card.style.display === 'none') card.classList.remove('selected');
-            }
-        });
-    }
-
-    selectAllCheckboxes.forEach(sa => {
-        sa.addEventListener('change', () => {
-            const clickedSection = sa.dataset.section;
-            const clickedGroupClass = `${clickedSection}-checkbox`;
-
-            // --- Original Logic: Check all in this section ---
-            document.querySelectorAll(`.${clickedGroupClass}`).forEach(cb => {
-                const card = cb.closest('.order-card');
-                if (card && card.style.display !== 'none') {
-                    cb.checked = sa.checked;
-                } else if (sa.checked === false) {
-                    cb.checked = false;
-              _}
-            });
-
-            // --- ✅ NEW: Clear all other sections if this one is being checked ---
-            if (sa.checked) {
-                // Uncheck all individual checkboxes in other groups
-                allCheckboxes.forEach(cb => {
-                    if (!cb.classList.contains(clickedGroupClass)) {
-                        cb.checked = false;
-                    }
-                });
-
-                // Uncheck all *other* "Select All" toggles
-                selectAllCheckboxes.forEach(otherSA => {
-                    if (otherSA !== sa) {
-                        otherSA.checked = false;
-                    }
-                });
-            }
-            
-            // --- Original Logic: Update bars ---
-            updateActionBars();
-        });
-    });
-
-    // ✅ NEW: Function to handle exclusive section selection
-    function handleExclusiveSelection(e) {
-        const clickedCheckbox = e.currentTarget;
-        let clickedGroup = null;
-
-        // 1. Identify the group of the clicked checkbox
-        if (clickedCheckbox.classList.contains('approved-checkbox')) {
-            clickedGroup = 'approved-checkbox';
-        } else if (clickedCheckbox.classList.contains('pending-checkbox')) {
-            clickedGroup = 'pending-checkbox';
-        } else if (clickedCheckbox.classList.contains('completed-checkbox')) {
-            clickedGroup = 'completed-checkbox';
-        } else if (clickedCheckbox.classList.contains('other-checkbox')) {
-            clickedGroup = 'other-checkbox';
-        }
-
-        // If the click was to UNCHECK, or if it's not part of a group,
-        // just update the bars and exit.
-        if (!clickedCheckbox.checked || !clickedGroup) {
-            updateActionBars();
-            return; 
-        }
-
-        // 2. Uncheck all checkboxes in OTHER groups
-        allCheckboxes.forEach(cb => {
-            if (cb === clickedCheckbox) return; // Don't uncheck the one we just clicked
-
-            let cbGroup = null;
-            if (cb.classList.contains('approved-checkbox')) cbGroup = 'approved-checkbox';
-         else if (cb.classList.contains('pending-checkbox')) cbGroup = 'pending-checkbox';
-            else if (cb.classList.contains('completed-checkbox')) cbGroup = 'completed-checkbox';
-            else if (cb.classList.contains('other-checkbox')) cbGroup = 'other-checkbox';
-
-            if (cbGroup && cbGroup !== clickedGroup) {
-                cb.checked = false;
-           }
-        });
-
-        // 3. Uncheck all "Select All" toggles for OTHER groups
-        selectAllCheckboxes.forEach(sa => {
-            const sectionGroup = `${sa.dataset.section}-checkbox`;
-            if (sectionGroup !== clickedGroup) {
-                sa.checked = false;
-            }
-        });
-
-        // 4. Update the action bars based on the new state
-       updateActionBars();
-    }
-
-    // ✅ MODIFIED: Apply the new exclusive handler to all checkboxes
-    allCheckboxes.forEach(cb => cb.addEventListener('change', handleExclusiveSelection));
-
-    // Batch Status Update
-    document.getElementById('batch-status-update-btn').addEventListener('click', () => {
-        const selectedIds = Array.from(document.querySelectorAll('.approved-checkbox:checked')).map(cb => cb.value);
-        if (selectedIds.length > 0) {
-            batchStatusForm.action = `/dashboard/admin/update-order-status/0/`;
-            batchStatusForm.querySelector('#batch-status-order-ids').value = selectedIds.join(',');
-            batchStatusForm.querySelector('#batch-status-action').value = document.getElementById('batch-status-select').value;
-            batchStatusForm.submit();
-        }
-    });
-
-// ✅ NEW: Add this listener for the 'Pending' section
-    document.getElementById('batch-pending-status-update-btn').addEventListener('click', () => {
+        handleFetch(url, formData, batchStatusUpdateBtn).then(data => {
+            if (data && data.success) {
+                showMessage(data.message, 'success');
+                data.orders.forEach(order => {
+                    moveOrderCard(order.id, order.status);
+                });
+                updateActionBars(); // This will uncheck and hide the bar
+            } else if (data) {
+                showMessage(data.error || 'An unknown error occurred.', 'error');
+            }
+        });
+    });
+    
+    // --- BATCH STATUS UPDATE (Pending Section) ---
+    batchPendingStatusUpdateBtn.addEventListener('click', () => {
         const selectedIds = Array.from(document.querySelectorAll('.pending-checkbox:checked')).map(cb => cb.value);
-        if (selectedIds.length > 0) {
-            batchPendingStatusForm.action = `/dashboard/admin/update-order-status/0/`;
-            batchPendingStatusForm.querySelector('#batch-pending-status-order-ids').value = selectedIds.join(',');
-            batchPendingStatusForm.querySelector('#batch-pending-status-action').value = document.getElementById('batch-pending-status-select').value;
-            batchPendingStatusForm.submit();
+        if (selectedIds.length === 0) return;
+
+        const formData = new FormData(batchPendingStatusForm);
+        formData.set('order_ids', selectedIds.join(','));
+        formData.set('status', document.getElementById('batch-pending-status-select').value);
+        
+        const url = batchPendingStatusForm.getAttribute('action');
+
+        handleFetch(url, formData, batchPendingStatusUpdateBtn).then(data => {
+            if (data && data.success) {
+                showMessage(data.message, 'success');
+                data.orders.forEach(order => {
+                    moveOrderCard(order.id, order.status);
+                });
+                updateActionBars();
+            } else if (data) {
+                showMessage(data.error || 'An unknown error occurred.', 'error');
+            }
+        });
+    });
+
+    // --- BATCH DELETE (Trigger Modal) ---
+    batchDeleteBtn.addEventListener('click', () => {
+        const selectedIds = Array.from(document.querySelectorAll('.completed-checkbox:checked, .other-checkbox:checked')).map(cb => cb.value);
+        const count = selectedIds.length;
+        if (count > 0) {
+            batchDeleteConfirmModal.querySelector('#batch-delete-count').textContent = count;
+            confirmBatchDeleteBtn.dataset.ids = selectedIds.join(',');
+            openModal(batchDeleteConfirmModal);
         }
     });
 
-    // ✅ UPDATED: Batch Delete button now opens the confirmation modal
-    document.getElementById('batch-delete-btn').addEventListener('click', () => {
-            const selectedIds = Array.from(document.querySelectorAll('.completed-checkbox:checked, .other-checkbox:checked')).map(cb => cb.value);
-            // ✅ FIX: Calculate count here
-            const count = selectedIds.length;
-            
-            if (count > 0) {
-                // Populate and open the custom modal
-                batchDeleteConfirmModal.querySelector('#batch-delete-count').textContent = count;
-                // Store IDs on the confirm button inside the modal to be used later
-                const confirmBtn = batchDeleteConfirmModal.querySelector('#confirm-batch-delete-btn');
-                if (confirmBtn) {
-                    confirmBtn.dataset.ids = selectedIds.join(',');
-                }
-                openModal(batchDeleteConfirmModal);
-            }
-    });
+    // --- BATCH DELETE (Confirm & Fetch) ---
+    confirmBatchDeleteBtn.addEventListener('click', function() {
+        const idsToSubmit = this.dataset.ids;
+        if (!idsToSubmit) return;
 
-    // ✅ NEW: Event listener for the final confirmation button inside the modal
-    const confirmBatchDeleteBtn = document.getElementById('confirm-batch-delete-btn');
-    if (confirmBatchDeleteBtn) {
-        confirmBatchDeleteBtn.addEventListener('click', function() {
-            const idsToSubmit = this.dataset.ids;
-            if (idsToSubmit) {
-                batchDeleteForm.querySelector('#batch-delete-order-ids').value = idsToSubmit;
-                batchDeleteForm.submit();
-            }
-        });
-    }
-// --- ✅ NEW: Single Delete Modal Logic ---
-    const openSingleDeleteModalBtn = document.getElementById('open-single-delete-modal-btn');
-    const confirmSingleDeleteBtn = document.getElementById('confirm-single-delete-btn');
-    const singleDeleteForm = document.getElementById('single-delete-form');
-    
-    // 1. Listen for click on the "Delete Order" button (in main modal)
-    if (openSingleDeleteModalBtn && singleDeleteForm) {
-        openSingleDeleteModalBtn.addEventListener('click', (e) => {
-            e.preventDefault(); // Stop any default form action
-            
-            // Get the order ID from the form's action URL
-            const actionUrl = singleDeleteForm.action; 
-            const orderId = actionUrl.split('/delete-order/')[1].replace('/', '');
+        const formData = new FormData(batchDeleteForm);
+        formData.set('order_ids', idsToSubmit);
+        
+        const url = batchDeleteForm.getAttribute('action');
 
-            // Populate the new modal's text
-            const orderIdSpan = document.getElementById('single-delete-order-id');
-            if (orderIdSpan) orderIdSpan.textContent = `#${orderId}`;
+        handleFetch(url, formData, this).then(data => {
+            if (data && data.success) {
+                showMessage(data.message, 'success');
+                closeModal(batchDeleteConfirmModal);
+                data.order_ids.forEach(id => {
+                    removeOrderCard(id);
+                });
+                updateActionBars(); // This will hide the bar
+            } else if (data) {
+                showMessage(data.error || 'An unknown error occurred.', 'error');
+            }
+        });
+    });
+    
+    // --- SINGLE STATUS UPDATE (Full Form) ---
+    singleStatusForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const url = this.action;
+        const button = this.querySelector('button[type="submit"]');
 
-            // Open the new confirmation modal
-            openModal(singleDeleteConfirmModal);
-        });
-    }
+        handleFetch(url, formData, button).then(data => {
+            if (data && data.success) {
+                showMessage(data.message, 'success');
+                closeModal(detailsModal);
+                data.orders.forEach(order => { // Will only be one
+                    moveOrderCard(order.id, order.status);
+                });
+            } else if (data) {
+                showMessage(data.error || 'An unknown error occurred.', 'error');
+            }
+        });
+    });
+    
+    // --- SINGLE STATUS UPDATE (Pending Form) ---
+    singlePendingStatusForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const url = this.action;
+        const button = this.querySelector('button[type="submit"]');
 
-    // 2. Listen for click on the FINAL confirmation button (in the new modal)
-    if (confirmSingleDeleteBtn && singleDeleteForm) {
-        confirmSingleDeleteBtn.addEventListener('click', () => {
-            // Now, we submit the form
-            singleDeleteForm.submit();
-        });
-    }
+        handleFetch(url, formData, button).then(data => {
+            if (data && data.success) {
+                showMessage(data.message, 'success');
+                closeModal(detailsModal);
+                data.orders.forEach(order => { // Will only be one
+                    moveOrderCard(order.id, order.status);
+                });
+            } else if (data) {
+                showMessage(data.error || 'An unknown error occurred.', 'error');
+            }
+        });
+    });
 
-    updateActionBars(); // Initial check
+    // --- SINGLE DELETE (Trigger Modal) ---
+    openSingleDeleteModalBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const actionUrl = singleDeleteForm.action; 
+        const orderId = actionUrl.split('/delete-order/')[1].replace('/', '');
+        singleDeleteConfirmModal.querySelector('#single-delete-order-id').textContent = `#${orderId}`;
+        // Pass the URL to the final confirm button
+        confirmSingleDeleteBtn.dataset.url = actionUrl;
+        openModal(singleDeleteConfirmModal);
+    });
+
+    // --- SINGLE DELETE (Confirm & Fetch) ---
+    confirmSingleDeleteBtn.addEventListener('click', function() {
+        const url = this.dataset.url;
+        if (!url) return;
+
+        // Create empty FormData just to work with our handleFetch helper
+        const formData = new FormData(); 
+
+        handleFetch(url, formData, this).then(data => {
+            if (data && data.success) {
+                showMessage(data.message, 'success');
+                closeModal(singleDeleteConfirmModal);
+                closeModal(detailsModal);
+                removeOrderCard(data.order_id);
+            } else if (data) {
+                showMessage(data.error || 'An unknown error occurred.', 'error');
+            }
+        });
+    });
+
 });
 </script>
 {% endblock %}

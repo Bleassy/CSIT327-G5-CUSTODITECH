@@ -30,6 +30,7 @@ urlpatterns = [
     path('admin/update-order-status/<int:order_id>/', views.update_order_status, name='update_order_status'),
     path('admin/delete-order/<int:order_id>/', views.delete_order_view, name='delete_order'),
     path('admin/reports/', views.reports_view, name='reports'),
+    path('dashboard/admin/batch-delete-logs/', views.batch_delete_logs_view, name='batch_delete_logs'),
     path('admin/batch-delete-orders/', views.admin_batch_delete_orders_view, name='admin_batch_delete_orders'),
 ]
 
