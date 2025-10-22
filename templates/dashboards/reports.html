@@ -3,7 +3,7 @@
 {% load humanize %} {# Load humanize template tags for formatting numbers #}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/reports.css' %}?v=1.7"> {# Version Bump #}
+    <link rel="stylesheet" href="{% static 'css/reports.css' %}?v=1.8"> {# Version Bump #}
 {% endblock %}
 
 {% block content %}
@@ -11,60 +11,59 @@
     <h1>System Reports & KPIs</h1> {# Updated Title #}
 </div>
 
-
-
-<div class="kpi-grid">
-    <div class="kpi-card">
-        <div class="kpi-icon sales">💰</div>
-        <div class="kpi-content">
-            <h3>Total Sales (Completed)</h3>
-            {# Format as currency using intcomma #}
-            <div class="kpi-number">₱{{ kpi.total_sales|default:0|floatformat:2|intcomma }}</div>
-        </div>
-    </div>
-    <div class="kpi-card">
-        <div class="kpi-icon inventory"> V </div>
-        <div class="kpi-content">
-            <h3>Current Inventory Value</h3>
-            <div class="kpi-number">₱{{ kpi.inventory_value|default:0|floatformat:2|intcomma }}</div>
-        </div>
-    </div>
-    <div class="kpi-card">
-        <div class="kpi-icon today">📅</div>
-        <div class="kpi-content">
-            <h3>Total Orders (Today)</h3>
-            <div class="kpi-number">{{ kpi.orders_today|default:0 }}</div>
-        </div>
-    </div>
-    <div class="kpi-card">
-        <div class="kpi-icon pending-res">⏳</div>
-        <div class="kpi-content">
-            <h3>Pending Reservations</h3>
-            <div class="kpi-number">{{ kpi.pending_reservations|default:0 }}</div>
-        </div>
-    </div>
+<div class="global-search-container search-container">
+    <input type="search" id="global-report-search" class="search-input"
+           placeholder="Search all reports (KPIs, categories, products, logs...).">
 </div>
-<div class="reports-grid">
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon products">📦</div>
-            {# Use total_products from context #}
-            <div class="stat-content"><h3>Total Products</h3><div class="stat-number">{{ total_products }}</div></div>
+<div class="searchable-section">
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-icon sales">💰</div>
+            <div class="kpi-content">
+                <h3>Total Sales (Completed)</h3>
+                <div class="kpi-number">₱{{ kpi.total_sales|default:0|floatformat:2|intcomma }}</div>
+            </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon orders">🛍️</div>
-             {# Use total_orders_reservations from context #}
-            <div class="stat-content"><h3>Total Orders & Reservations</h3><div class="stat-number">{{ total_orders_reservations }}</div></div>
+        <div class="kpi-card">
+            <div class="kpi-icon inventory"> V </div>
+            <div class="kpi-content">
+                <h3>Current Inventory Value</h3>
+                <div class="kpi-number">₱{{ kpi.inventory_value|default:0|floatformat:2|intcomma }}</div>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon today">📅</div>
+            <div class="kpi-content">
+                <h3>Total Orders (Today)</h3>
+                <div class="kpi-number">{{ kpi.orders_today|default:0 }}</div>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon pending-res">⏳</div>
+            <div class="kpi-content">
+                <h3>Pending Reservations</h3>
+                <div class="kpi-number">{{ kpi.pending_reservations|default:0 }}</div>
+            </div>
         </div>
     </div>
-    <div class="chart-container">
-        <h2>Order Status Overview</h2>
-        <canvas id="orderStatusChart"></canvas>
+</div> <div class="searchable-section">
+    <div class="reports-grid">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon products">📦</div>
+                <div class="stat-content"><h3>Total Products</h3><div class="stat-number">{{ total_products }}</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orders">🛍️</div>
+                <div class="stat-content"><h3>Total Orders & Reservations</h3><div class="stat-number">{{ total_orders_reservations }}</div></div>
+            </div>
+        </div>
+        <div class="chart-container">
+            <h2>Order Status Overview</h2>
+            <canvas id="orderStatusChart"></canvas>
+        </div>
     </div>
-</div>
-
-
-<div class="report-section ">
+</div> <div class="report-section searchable-section">
     <h2>Inventory Overview</h2>
     <div class="overview-grid"> {# Use a grid for multiple tables #}
         <div class="table-container">
@@ -125,7 +124,7 @@
     </div>
 </div>
 
-<div class="report-section">
+<div class="report-section searchable-section">
     <h2>Reservation Statistics</h2>
      <div class="overview-grid single-col"> {# Single column grid for now #}
          <div class="table-container">
@@ -151,7 +150,7 @@
     </div>
 </div>
 
-<div class="report-section">
+<div class="report-section searchable-section">
     <h2>Sales Performance</h2>
     <div class="overview-grid"> {# Use grid again #}
         <div class="table-container">
@@ -211,7 +210,7 @@
     </div>
 </div>
 
-<div class="report-section">
+<div class="report-section searchable-section">
 <h2>Unavailable Products</h2>
     <div class="table-container">
         <table class="data-table">
@@ -227,7 +226,7 @@
     </div>
 </div>
 
-<div class="report-section">
+<div class="report-section searchable-section">
     <h2>Low-Stock Items (Needs Reordering)</h2>
     <div class="table-container">
         <table class="data-table">
@@ -242,10 +241,12 @@
         </table>
     </div>
 </div>
-<div class="report-section">
+
+<div id="log-section-content">
+<div class="report-section searchable-section activity-log-section"> {# Also added activity-log-section class #}
     <div class="page-header"><h2>System Activity Log</h2></div>
     <div class="page-controls">
-        <form class="search-form" onsubmit="return false;">
+        <form class="search-form log-search-form" onsubmit="return false;"> {# Added log-search-form class #}
             <input type="search" id="log-search-input" name="search" class="search-input" placeholder="Search logs by action or user..." value="">
         </form>
     </div>
@@ -271,6 +272,61 @@
             </tbody>
         </table>
     </div>
+    <div class="pagination-container">
+        {% if log_pagination.total_pages > 1 %}
+            <nav aria-label="Log page navigation">
+                <ul class="pagination">
+                    {# Previous Button #}
+                    {% if log_pagination.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{{ log_pagination.param_name }}={{ log_pagination.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">&laquo;</span>
+                        </li>
+                    {% endif %}
+
+                    {# Page Numbers #}
+                    {% for page_num in log_pagination.page_range %}
+                        {% if page_num == log_pagination.current_page %}
+                            <li class="page-item active" aria-current="page"><span class="page-link">{{ page_num }}</span></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="?{{ log_pagination.param_name }}={{ page_num }}">{{ page_num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {# Next Button #}
+                    {% if log_pagination.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{{ log_pagination.param_name }}={{ log_pagination.next_page_number }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">&raquo;</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            <div class="pagination-info">
+                Page {{ log_pagination.current_page }} of {{ log_pagination.total_pages }} ({{ total_log_count }} total logs)
+            </div>
+        {% elif total_log_count > 0 %}
+             <div class="pagination-info">
+                 {{ total_log_count }} log entr{{ total_log_count|pluralize:"y,ies" }} found.
+             </div>
+        {% endif %}
+    </div>
+</div> 
+</div>
+<div id="log-section-content">
+
+<div id="global-no-results" class="no-data-message" style="display: none; margin-top: 2rem;">
+    <p>No report sections found matching your search.</p>
 </div>
 <div id="log-delete-bar" class="batch-action-bar" style="display: none;"> <span id="log-selected-count">0 items selected</span> <button type="button" class="btn btn-danger" id="batch-log-delete-btn">Delete Selected</button> </div>
 <div id="log-delete-confirm-modal" class="modal" style="display: none;"> <div class="modal-content" style="max-width: 450px;"> <div class="modal-header"><h2>Confirm Log Deletion</h2><span class="close-btn">&times;</span></div> <div class="modal-body"> <p>Are you sure you want to permanently delete <strong id="log-delete-count">0</strong> log(s)?</p> <p>This action cannot be undone.</p> </div> <div class="modal-footer"> <button type="button" class="btn btn-secondary cancel-modal-btn">Cancel</button> <button type="button" class="btn btn-danger" id="confirm-log-delete-btn">Yes, Delete Selected</button> </div> </div> </div>
@@ -611,70 +667,199 @@ document.addEventListener('DOMContentLoaded', () => {
     } else { console.warn("Log search input not found."); }
 
     // console.log("DOMContentLoaded complete."); // Optional
-// ==================================================================
-// == 5. GLOBAL REPORT SEARCH (WITH DEBUGGING)
-// ==================================================================
-console.log("Setting up global report search...");
 
-const globalSearchInput = document.getElementById('global-report-search');
-const allReportSections = document.querySelectorAll('.placeholder-section');
-const globalNoResults = document.getElementById('global-no-results');
+    // ==================================================================
+    // == 5. GLOBAL REPORT SEARCH (NEW)
+    // ==================================================================
+    console.log("Setting up global report search...");
 
-// --- DEBUG CHECKS ---
-// Let's see what was found on page load
-console.log("Global Search Input:", globalSearchInput ? "✅ Found" : "❌ NOT FOUND");
-console.log("Report Sections Found:", allReportSections.length);
-console.log("No Results Div:", globalNoResults ? "✅ Found" : "❌ NOT FOUND");
-// --- END DEBUG ---
+    const globalSearchInput = document.getElementById('global-report-search');
+    const allSearchableSections = document.querySelectorAll('.searchable-section'); // Use the new class
+    const globalNoResults = document.getElementById('global-no-results');
 
-function filterGlobalReports() {
-    // Check if all required elements are present
-    if (!globalSearchInput || !allReportSections.length || !globalNoResults) {
-        console.warn("Global search elements missing. Search will not work. Check 'Report Sections Found' and 'No Results Div' logs above.");
-        return;
+    // --- Debug Checks ---
+    console.log("Global Search Input:", globalSearchInput ? "✅ Found" : "❌ NOT FOUND");
+    console.log("Searchable Sections Found:", allSearchableSections.length);
+    console.log("Global No Results Div:", globalNoResults ? "✅ Found" : "❌ NOT FOUND");
+    // --- End Debug ---
+
+    function filterGlobalReports() {
+        if (!globalSearchInput || !allSearchableSections.length || !globalNoResults) {
+            console.warn("Global search elements missing. Search will not work.");
+            return;
+        }
+
+        const searchTerm = globalSearchInput.value.toLowerCase().trim();
+        let visibleSections = 0;
+        
+        console.log(`Filtering global reports for: "${searchTerm}"`); // Debug log
+
+        allSearchableSections.forEach(section => {
+            // Get all text content within the section, including table data
+            const sectionText = section.textContent.toLowerCase();
+            const isMatch = sectionText.includes(searchTerm);
+            
+            section.style.display = isMatch ? '' : 'none';
+            
+            if (isMatch) {
+                visibleSections++;
+                // If the log section becomes visible due to global search, re-filter logs
+                if (section.classList.contains('activity-log-section') && typeof filterLogs === 'function') {
+                    // Make sure filterLogs function exists before calling
+                    filterLogs();
+                }
+            }
+        });
+
+        globalNoResults.style.display = (visibleSections === 0 && searchTerm) ? 'block' : 'none';
+        
+        console.log(`Visible searchable sections: ${visibleSections}`); // Debug log
     }
 
-    const searchTerm = globalSearchInput.value.toLowerCase().trim();
-    let visibleSections = 0;
-    
-    // --- DEBUG LOG ---
-    // This will log every time you type
-    console.log(`Filtering for: "${searchTerm}"`);
-    // --- END DEBUG ---
-
-    allReportSections.forEach(section => {
-        const sectionText = section.textContent.toLowerCase();
-        const isMatch = sectionText.includes(searchTerm);
-        
-        section.style.display = isMatch ? '' : 'none';
-        
-        if (isMatch) {
-            visibleSections++;
-        }
-    });
-
-    globalNoResults.style.display = (visibleSections === 0 && searchTerm) ? 'block' : 'none';
-    
-    // --- DEBUG LOG ---
-    console.log(`Visible sections: ${visibleSections}`);
-    // --- END DEBUG ---
-
-    // --- IMPORTANT INTERACTION ---
-    const logSection = document.querySelector('.activity-log-section');
-    if (logSection && logSection.style.display !== 'none') {
-        if (typeof filterLogs === 'function') {
-            filterLogs();
-        }
+    // --- Attach Global Search Listener ---
+    if (globalSearchInput) {
+        globalSearchInput.addEventListener('input', filterGlobalReports);
+        console.log("Attached listener to global report search input.");
+        filterGlobalReports(); // Initial run in case there's a pre-filled value (e.g., browser back button)
+    } else {
+        console.warn("Global report search input ('global-report-search') not found.");
     }
-}
 
-// --- Attach Global Search Listener ---
-if (globalSearchInput) {
-    globalSearchInput.addEventListener('input', filterGlobalReports);
-    console.log("Attached listener to global report search input.");
-} else {
-    console.warn("Global report search input ('global-report-search') not found.");
-}
-});
+    // ==================================================================
+    // == 6. AJAX PAGINATION FOR LOGS (NEW)
+    // ==================================================================
+    console.log("Setting up AJAX pagination for logs...");
+
+    const logSectionContent = document.getElementById('log-section-content');
+
+    function handleAjaxPagination(event) {
+        // Only act on clicks within the pagination container that are links
+        const targetLink = event.target.closest('a.page-link');
+        if (!targetLink || !logSectionContent) {
+            return;
+        }
+
+        // Prevent default page reload
+        event.preventDefault();
+
+        const url = targetLink.href;
+        if (!url) return;
+
+        console.log(`AJAX Pagination: Fetching ${url}`);
+
+        // Optional: Show a loading indicator
+        logSectionContent.style.opacity = '0.5'; // Dim the section
+        // You could add a dedicated spinner element here too
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest' // Identify as AJAX request (optional for backend)
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text(); // Get the HTML response as text
+        })
+        .then(html => {
+            // Parse the fetched HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // Find the new content in the parsed HTML
+            const newLogContent = doc.getElementById('log-section-content');
+
+            if (newLogContent) {
+                // Replace the current content with the new content
+                logSectionContent.innerHTML = newLogContent.innerHTML;
+
+                // Update browser URL without reloading
+                history.pushState({}, '', url);
+
+                // --- Re-attach Listeners for the new content ---
+                // Re-find elements within the newly injected content
+                const newLogSearchInput = logSectionContent.querySelector('#log-search-input');
+                const newSelectAllCheckbox = logSectionContent.querySelector('#select-all-logs-checkbox');
+                const newLogCheckboxes = logSectionContent.querySelectorAll('.log-checkbox');
+                const newPaginationContainer = logSectionContent.querySelector('.pagination-container'); // Re-target pagination
+
+                // Re-attach log search listener
+                if (newLogSearchInput) {
+                    newLogSearchInput.addEventListener('input', filterLogs);
+                    // No need to call filterLogs() here unless the search input might have a value from the server
+                }
+
+                // Re-attach select-all listener
+                if (newSelectAllCheckbox) {
+                    newSelectAllCheckbox.addEventListener('change', handleSelectAllChange); // Use a named function if needed
+                }
+
+                // Re-attach individual checkbox listeners
+                newLogCheckboxes.forEach(cb => {
+                    cb.addEventListener('change', updateLogDeleteBar); // Re-attach update bar listener
+                });
+
+                // Re-attach the main pagination click listener to the *new* pagination container
+                 if (newPaginationContainer) {
+                    newPaginationContainer.addEventListener('click', handleAjaxPagination);
+                 }
+
+
+                // Re-run filter and update bar for the new content
+                filterLogs(); // Filter based on current search input value
+                updateLogDeleteBar(); // Update bar based on new checkboxes
+                console.log("AJAX Pagination: Content updated and listeners re-attached.");
+
+
+            } else {
+                console.error("AJAX Pagination: Could not find '#log-section-content' in fetched HTML.");
+                throw new Error("Invalid response content.");
+            }
+        })
+        .catch(error => {
+            console.error('AJAX Pagination Error:', error);
+            showMessage(`Failed to load page: ${error.message}`, 'error');
+            // Optionally, reload the page as a fallback
+            // window.location.href = url;
+        })
+        .finally(() => {
+            // Optional: Hide loading indicator
+            logSectionContent.style.opacity = '1'; // Restore opacity
+        });
+    }
+
+    // --- Initial Attachment ---
+    // Find the initial pagination container and attach the listener
+    const initialPaginationContainer = logSectionContent?.querySelector('.pagination-container');
+    if (initialPaginationContainer) {
+        initialPaginationContainer.addEventListener('click', handleAjaxPagination);
+        console.log("Attached initial AJAX pagination listener.");
+    } else if (logSectionContent){ // Check if logSectionContent exists but pagination doesn't (maybe only 1 page)
+         console.log("Log pagination container not found initially (likely only one page).");
+    } else {
+         console.warn("Log section content container ('#log-section-content') not found.");
+    }
+
+    // --- Helper for Re-attaching Select All ---
+    // (Ensure you have a named function for the select-all logic if you don't already)
+    // Example: assuming your previous select-all logic was inline:
+    function handleSelectAllChange() {
+       const selectAllCheckbox = logSectionContent.querySelector('#select-all-logs-checkbox'); // Target within current content
+       if (!selectAllCheckbox) return;
+        const isChecked = selectAllCheckbox.checked;
+        logSectionContent.querySelectorAll('#log-table-body tr:not([style*="display: none"]) .log-checkbox').forEach(cb => {
+            cb.checked = isChecked;
+        });
+        updateLogDeleteBar();
+    }
+    // Make sure the initial select-all listener also uses this named function:
+     const initialSelectAll = logSectionContent?.querySelector('#select-all-logs-checkbox');
+     if (initialSelectAll) {
+         initialSelectAll.addEventListener('change', handleSelectAllChange);
+     }
+
+}); // End DOMContentLoaded
 </script>
 {% endblock %}

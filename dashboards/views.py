@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger 
 from django.http import JsonResponse 
 from django.contrib import messages
 from supabase_client import supabase, supabase_service
@@ -6,6 +7,7 @@ import pytz
 from datetime import datetime
 import uuid
 from collections import defaultdict
+import math
 
 # --- Decorators for Access Control ---
 def student_required(function):
@@ -578,6 +580,23 @@ def cancel_reservation_view(request, reservation_id):
     # Redirect back to the reservations page regardless of method (POST or GET)
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
 
+@student_required
+def cancel_order_view(request, order_id):
+    """ Handles cancellation of an approved order by the student who owns it. """
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        try:
+            user_id = request.user.id
+            # Ensure the order is approved, belongs to the user
+            response = supabase.table('orders').select('id').eq('id', order_id).eq('user_id', user_id).eq('status', 'approved').single().execute()
+            if not response.data:
+                raise Exception("Order not found or cannot be cancelled.")
+            # Call RPC to cancel and restore stock
+            supabase.rpc('cancel_or_reject_order', {'p_order_id': order_id, 'p_new_status': 'cancelled'}).execute()
+            return JsonResponse({'success': True, 'message': "🗑️ Your order has been successfully cancelled.", 'order_id': order_id})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': f"Could not cancel the order: {e}"}, status=400)
+    return JsonResponse({'success': False, 'error': 'Invalid request.'}, status=400)
+
 # --- Admin Views ---
 @admin_required
 def admin_dashboard(request):
@@ -600,6 +619,13 @@ def admin_dashboard(request):
 @admin_required
 def manage_products_view(request):
     search_query = request.GET.get('search', '').strip()
+    page_number = request.GET.get('page', 1) # Get page number, default to 1
+    items_per_page = 15
+
+    products = []
+    total_products_count = 0
+    pagination_context = {}
+    
     try:
         query = supabase.table('products').select('*').order('created_at', desc=True)
         if search_query:
@@ -651,7 +677,7 @@ def add_product(request):
                 'stock_quantity': int(request.POST.get('stock-quantity')),
                 'category': request.POST.get('product-category'),
                 'image_url': image_url,
-                'is_available': stock > 0 and 'is_available' in request.POST
+                'is_available': stock > 0
             }
 
             if request.POST.get('product-category') == 'Uniforms':
@@ -695,7 +721,7 @@ def edit_product(request, product_id):
                 'price': float(request.POST.get('product-price')),
                 'stock_quantity': stock,
                 'category': category, 
-                'is_available': stock > 0 and 'is_available' in request.POST
+                'is_available': stock > 0
             }
 
             if category == 'Uniforms':
@@ -788,12 +814,14 @@ def order_management_view(request):
     approved_orders = []
     completed_orders = []
     other_orders = [] # This will hold cancelled/rejected
+    all_orders_empty = True
     
     try:
         params = {'p_search_term': search_query}
         response = supabase.rpc('get_all_orders_with_details', params).execute()
         
         if response.data:
+            all_orders_empty = False
             for item in response.data:
                 if item.get('created_at'):
                     item['created_at'] = datetime.fromisoformat(item['created_at'])
@@ -812,6 +840,7 @@ def order_management_view(request):
                     
     except Exception as e:
         messages.error(request, f"An error occurred while fetching orders: {e}")
+        all_orders_empty = True
 
     context = {
         'pending_orders': pending_orders, # ✅ ADDED: Pass the new list to the template
@@ -820,7 +849,8 @@ def order_management_view(request):
         'other_orders': other_orders,
         'search_query': search_query,
         'active_page': 'order_management',
-        'page_title': 'Order Management'
+        'page_title': 'Order Management',
+        'all_orders_empty': all_orders_empty
     }
     return render(request, 'dashboards/order_management.html', context)
 
@@ -1028,6 +1058,8 @@ def delete_order_view(request, order_id):
 @admin_required
 def reports_view(request):
     search_query = request.GET.get('search', '').strip()
+    log_page_number = request.GET.get('log_page', 1) # Use 'log_page' to avoid conflict if other paginations exist
+    logs_per_page = 10
     report_data = {}
     kpi_data = {}
     inventory_overview = {} # <-- New dict for inventory details
@@ -1039,6 +1071,9 @@ def reports_view(request):
     status_counts_dict = {
         'pending': 0, 'approved': 0, 'completed': 0, 'rejected': 0, 'cancelled': 0
     }
+
+    log_pagination_context = {} # Context specifically for log pagination
+    total_log_count = 0
 
     try:
         # ✅ Call the NEW RPC function using service role
@@ -1079,13 +1114,55 @@ def reports_view(request):
         if unavailable_response.data:
             unavailable_products = unavailable_response.data
 
+        # --- Fetch Paginated Log Data (Corrected) ---
+        try:
+            log_page_number = int(log_page_number)
+        except ValueError:
+            log_page_number = 1
+
+        log_start_index = (log_page_number - 1) * logs_per_page
+        log_end_index = log_start_index + logs_per_page - 1
+
+        # 1. Get the total count separately from the TABLE
+        count_response = supabase_service.table('activity_log').select(
+            '*', # Select something simple
+            count='exact' # Get the count
+        ).execute() # We don't actually need the data here, just the count
+
+        total_log_count = count_response.count if count_response.count is not None else 0
+
+        # 2. Fetch the paginated data using the RPC (WITHOUT count)
+        log_query = supabase_service.rpc(
+            'get_activity_log',
+            {'p_search_term': ''} # Keep search term empty for client-side filtering
+        ).order('created_at', desc=True).range(log_start_index, log_end_index) # Apply order and range
+
+        log_response = log_query.execute()
+        # --- End Correction ---
+
+        # Process the fetched log entries (this part remains the same)
         if log_response.data:
             for entry in log_response.data:
+                # ... (datetime conversion and action_display logic) ...
                 if entry.get('created_at'):
-                    entry['created_at'] = datetime.fromisoformat(entry['created_at'])
+                     entry['created_at'] = datetime.fromisoformat(entry['created_at'])
                 if entry.get('action'):
-                    entry['action_display'] = entry['action'].replace('_', ' ').title()
+                     entry['action_display'] = entry['action'].replace('_', ' ').title()
                 log_entries.append(entry)
+
+        # Calculate Log Pagination Details (this part remains the same)
+        total_log_pages = math.ceil(total_log_count / logs_per_page)
+        # ... (rest of log_pagination_context calculation) ...
+        log_pagination_context = {
+            'current_page': log_page_number,
+            'total_pages': total_log_pages,
+            'has_previous': log_page_number > 1,
+            'has_next': log_page_number < total_log_pages,
+            'previous_page_number': log_page_number - 1 if log_page_number > 1 else 1,
+            'next_page_number': log_page_number + 1 if log_page_number < total_log_pages else total_log_pages,
+            'page_range': range(max(1, log_page_number - 2), min(total_log_pages, log_page_number + 2) + 1),
+            'param_name': 'log_page'
+        }
 
     except Exception as e:
         messages.error(request, f"Error fetching report data: {e}")
@@ -1093,6 +1170,8 @@ def reports_view(request):
         report_data = {'total_products': 0, 'total_orders_reservations': 0}
         kpi_data = {'total_sales': 0, 'inventory_value': 0, 'orders_today': 0, 'pending_reservations': 0}
         # Keep overview dicts empty on error
+        log_entries = []
+        total_log_count = 0
 
     print("--- DEBUG: Final status_counts_dict:", status_counts_dict)
     print("--- DEBUG: Final kpi_data:", kpi_data)
@@ -1116,6 +1195,7 @@ def reports_view(request):
         'low_stock_products': low_stock_products,
         'unavailable_products': unavailable_products,
         'search_query': search_query,
+        'log_pagination': log_pagination_context,
         'active_page': 'reports'
     }
     return render(request, 'dashboards/reports.html', context)

@@ -18,6 +18,8 @@
     outline: none;
     -webkit-appearance: none;
     appearance: none;
+    width: 100%; /* Ensure input fills container */
+    box-sizing: border-box; /* Include padding/border in width */
 }
 .search-input:focus {
     border-color: #1e40af;
@@ -554,4 +556,20 @@ flex-shrink: 0; /* Prevents badge from shrinking if title is long */
     align-items: center;
     gap: 0.75rem;
     transition: opacity 0.5s ease;
+}
+
+/* Style for the container of the top search bar */
+.global-search-container {
+    margin-bottom: 2rem; /* Consistent spacing */
+}
+
+/* ADDED: Global No Results Message Style */
+.no-data-message {
+    text-align: center;
+    padding: 2rem;
+    color: #64748b;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    border: 1px dashed #e2e8f0;
+    margin: 2rem 0; /* Add some margin */
 }

@@ -293,3 +293,16 @@ input:valid:not(:placeholder-shown) {
         margin-bottom: 14px;
     }
 }
+
+/* [register.css] - Add if missing */
+.error-message, .success-message {
+  transition: opacity 0.5s ease-out;
+}
+.error-message.fade-out, .success-message.fade-out {
+  opacity: 0;
+}
+/* Style for the AJAX container */
+#ajax-error-container .error-message {
+    /* Inherit or add specific styles here */
+    margin-bottom: 1rem; /* Example */
+}

@@ -259,6 +259,29 @@
     background-color: #cbd5e1; /* Slightly darker gray on hover */
 }
 
+/* --- Confirmation Modal Sizing (Make them small) --- */
+#cancel-confirm-modal .modal-content,
+#delete-confirm-modal .modal-content,
+#batch-delete-confirm-modal .modal-content {
+    max-width: 600px;
+}
+
+/* Optional: Make the text center-aligned for confirmation */
+#cancel-confirm-modal .modal-body,
+#delete-confirm-modal .modal-body,
+#batch-delete-confirm-modal .modal-body {
+    text-align: center;
+}
+
+#cancel-confirm-modal .summary,
+#delete-confirm-modal .summary {
+    text-align: left; /* Keep the summary part left-aligned */
+    padding: 1rem;
+    background-color: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
 
 /* --- Checkbox Styles --- */
 .order-card {

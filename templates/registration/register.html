@@ -36,7 +36,9 @@
                     {% endfor %}
                 {% endif %}
 
-                <form method="post">
+                <div id="ajax-error-container"></div>
+
+                <form method="post" id="register-form">
                     {% csrf_token %}
                     <input type="hidden" name="user_type" value="student">
 
@@ -138,40 +140,131 @@
 
     <!-- Script Section -->
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- Input Formatting (Keep As Is) ---
+        const studentIdInput = document.getElementById('student_id');
+        if (studentIdInput) {
+            studentIdInput.addEventListener('input', function (e) { /* ... keep formatting ... */ });
+        }
+        const phoneInput = document.getElementById('phone_number');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function (e) { /* ... keep formatting ... */ });
+        }
+         // --- (Keep the full formatting code here) ---
+         if (studentIdInput) { studentIdInput.addEventListener('input', function (e) { let v = e.target.value.replace(/\D/g, ''), f = ''; if (v.length > 0) f = v.substring(0, 2); if (v.length > 2) f += '-' + v.substring(2, 6); if (v.length > 6) f += '-' + v.substring(6, 9); e.target.value = f; }); }
+         if (phoneInput) { phoneInput.addEventListener('input', function (e) { let v = e.target.value.replace(/\D/g, ''); if (v.startsWith('09')) { v = '639' + v.substring(2); } let f = ''; if (v.length > 0) f = '+' + v.substring(0, 2); if (v.length > 2) f += ' ' + v.substring(2, 5); if (v.length > 5) f += ' ' + v.substring(5, 8); if (v.length > 8) f += ' ' + v.substring(8, 12); e.target.value = f; }); }
 
-            // Format Student ID: 12-3456-789
-            const studentIdInput = document.getElementById('student_id');
-            studentIdInput.addEventListener('input', function (e) {
-                let value = e.target.value.replace(/\D/g, '');
-                let formattedValue = '';
 
-                if (value.length > 0) formattedValue = value.substring(0, 2);
-                if (value.length > 2) formattedValue += '-' + value.substring(2, 6);
-                if (value.length > 6) formattedValue += '-' + value.substring(6, 9);
+        // --- AJAX Error Handling ---
+        const ajaxErrorContainer = document.getElementById('ajax-error-container');
+        const messageTimeouts = []; // Store timeouts to clear them
 
-                e.target.value = formattedValue;
-            });
+        function clearAjaxErrors() {
+             if (!ajaxErrorContainer) return;
+             // Clear existing timeouts
+             messageTimeouts.forEach(clearTimeout);
+             messageTimeouts.length = 0; // Empty the array
+             // Remove existing messages immediately
+             ajaxErrorContainer.innerHTML = '';
+        }
 
-            // Format Phone Number: +63 912 345 6789
-            const phoneInput = document.getElementById('phone_number');
-            phoneInput.addEventListener('input', function (e) {
-                let value = e.target.value.replace(/\D/g, '');
+        function showAjaxErrors(errors) {
+             if (!ajaxErrorContainer) return;
+             clearAjaxErrors(); // Clear previous errors first
 
-                if (value.startsWith('09')) {
-                    value = '639' + value.substring(2);
-                }
+             // Ensure errors is always an array
+             const errorList = Array.isArray(errors) ? errors : [errors];
 
-                let formattedValue = '';
-                if (value.length > 0) formattedValue = '+' + value.substring(0, 2);
-                if (value.length > 2) formattedValue += ' ' + value.substring(2, 5);
-                if (value.length > 5) formattedValue += ' ' + value.substring(5, 8);
-                if (value.length > 8) formattedValue += ' ' + value.substring(8, 12);
+             errorList.forEach(message => {
+                 const errorDiv = document.createElement('div');
+                 errorDiv.className = 'error-message'; // Use your CSS class
+                 errorDiv.textContent = message;
+                 ajaxErrorContainer.appendChild(errorDiv);
 
-                e.target.value = formattedValue;
-            });
+                 // Set timeout for this specific message
+                 const timeoutId = setTimeout(() => {
+                     errorDiv.classList.add('fade-out');
+                     setTimeout(() => {
+                         errorDiv.remove();
+                     }, 500); // Match CSS transition
+                 }, 3000); // 3 seconds
+                 messageTimeouts.push(timeoutId); // Store timeout ID
+             });
+        }
 
+        // --- Auto-hide Initial Django Messages (Keep As Is) ---
+        const initialMessages = document.querySelectorAll('.form-container > .error-message, .form-container > .success-message'); // Target direct children
+        initialMessages.forEach(messageElement => {
+            setTimeout(() => {
+                messageElement.classList.add('fade-out');
+                setTimeout(() => {
+                    messageElement.remove();
+                }, 500);
+            }, 3000); // Hide initial messages faster or slower?
         });
-    </script>
+
+
+        // --- AJAX Form Submission ---
+        const registerForm = document.getElementById('register-form');
+        const registerButton = registerForm ? registerForm.querySelector('button[type="submit"]') : null;
+
+        if (registerForm && registerButton) {
+            registerForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+
+                // --- Loading State ---
+                const originalButtonText = registerButton.textContent;
+                registerButton.disabled = true;
+                registerButton.textContent = 'REGISTERING...';
+                // Add styles if needed: registerButton.style.opacity = '0.7';
+
+                clearAjaxErrors(); // Clear previous errors
+
+                const formData = new FormData(registerForm);
+                const url = registerForm.action || window.location.href; // Use current URL if action is empty
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        // Handle validation errors or Supabase errors
+                        throw new Error(data.errors ? data.errors.join('; ') : (data.error || `HTTP error! Status: ${response.status}`));
+                    }
+
+                    // --- SUCCESS ---
+                    console.log("Registration successful:", data.message);
+                    // Optional: Show success message briefly before redirecting
+                    // showAjaxErrors([data.message], 'success'); // Need to adapt showAjaxErrors for success class
+                    // Redirect to login page
+                    window.location.href = data.redirect_url;
+                    // Don't reset button on success redirect
+
+                } catch (error) {
+                    // --- ERROR ---
+                    console.error("Registration failed:", error);
+                    // Split combined errors if they came as a single string
+                    const errorMessages = error.message.includes('; ') ? error.message.split('; ') : [error.message];
+                    showAjaxErrors(errorMessages);
+
+                    // --- Reset Button ---
+                    registerButton.disabled = false;
+                    registerButton.textContent = originalButtonText;
+                    // registerButton.style.opacity = '1';
+                }
+            });
+        } else {
+            console.error("Register form or button not found!");
+        }
+    });
+</script>
 </body>
 </html>

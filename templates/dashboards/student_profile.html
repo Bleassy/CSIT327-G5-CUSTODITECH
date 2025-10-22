@@ -8,13 +8,7 @@
 {% block content %}
 <h1 class="welcome-title">My Profile</h1>
 
-{% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-            <li class="{{ message.tags }}">{{ message }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
+
 
 <div class="profile-layout">
     <!-- Left Side: Profile Details -->

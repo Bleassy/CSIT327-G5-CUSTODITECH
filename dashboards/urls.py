@@ -17,6 +17,8 @@ urlpatterns = [
 
 
    
+    path('student/cancel-order/<int:order_id>/', views.cancel_order_view, name='cancel_order'),
+
     # --- Admin URLs ---
     path('admin/', views.admin_dashboard, name='admin_dashboard'),
     path('redirect/', views.dashboard_redirect, name='dashboard_redirect'),

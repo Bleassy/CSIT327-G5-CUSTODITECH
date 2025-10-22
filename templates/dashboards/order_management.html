@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/order_management.css' %}?v=1.3"> {# Incremented version #}
+    <link rel="stylesheet" href="{% static 'css/order_management.css' %}?v=1.4"> {# Incremented version #}
 {% endblock %}
 
 {% block content %}
@@ -10,20 +10,16 @@
     <h1>Order & Reservation Management</h1>
 </div>
 
-<div class="page-controls">
-    <div class="search-form">
-        <input type="search" id="admin-order-search" class="search-input" placeholder="Search by Student Name/ID, Product Name, Category, or Status..." value="{{ search_query }}">
-    </div>
+<div class="global-search-container search-container page-controls">
+    <input type="search" id="global-order-search" class="search-input"
+           placeholder="Search all orders (Student Name/ID, Product Name, Category, Status...).">
 </div>
-
-<!-- Form for Batch Status Update (Approved section) -->
 <form id="batch-status-form" method="POST" action="{% url 'update_order_status' order_id=0 %}"> {# Dummy URL, will be overridden #}
     {% csrf_token %}
     <input type="hidden" name="order_ids" id="batch-status-order-ids">
     <input type="hidden" name="status" id="batch-status-action">
 </form>
 
-<!-- ✅ UPDATED: Form for Batch Deletion (Completed/Other sections) now points to the correct admin URL -->
 <form id="batch-delete-form" method="POST" action="{% url 'admin_batch_delete_orders' %}">
     {% csrf_token %}
     <input type="hidden" name="order_ids" id="batch-delete-order-ids">
@@ -35,144 +31,150 @@
     <input type="hidden" name="status" id="batch-pending-status-action">
 </form>
 
+{% if not all_orders_empty %}
 
-<!-- Approved Orders Section -->
-<section class="order-section" data-section-status="approved">
-    <h2 class="section-title">Approved Orders</h2>
-    {% if approved_orders %}
-    <div class="select-all-container">
-        <input type="checkbox" class="select-all-checkbox" data-section="approved">
-        <label>Select All Approved</label>
-    </div>
-    {% endif %}
-    <div class="orders-grid">
-        {% for order in approved_orders %}
-<div class="order-card" data-id="{{ order.id }}" data-order-type="{{ order.order_type|title|default:'N/A' }}" data-name="{{ order.product_name }}" data-size="{{ order.product_size|default:'' }}" data-category="{{ order.product_category|default:'N/A' }}" data-description="{{ order.product_description|default:'No description available.' }}" data-image-url="{{ order.product_image_url|default:'...' }}" data-quantity="{{ order.quantity }}" data-total-price="{{ order.total_price|floatformat:2 }}" data-payment-method="{{ order.payment_method|default:'Cash'|title }}" data-created-at="{{ order.created_at|date:'M d, Y' }}" data-status="{{ order.status }}" data-student-name="{{ order.student_name|default:'N/A' }}" data-student-id="{{ order.student_id|default:'N/A' }}">
-            <span class="status-badge status-{{ order.status }}">{{ order.status|title }}</span>
-            <input type="checkbox" class="order-checkbox approved-checkbox" value="{{ order.id }}">
-            <img src="{{ order.product_image_url|default:'...' }}" alt="{{ order.product_name }}" class="product-image">
-            <div class="card-body">
-                <h3 class="product-name">{{ order.product_name }}{% if order.product_size %} - {{ order.product_size }}{% endif %}</h3>
-                <div class="details-grid">
-                    <span>Order ID:</span><strong>#{{ order.id }}</strong>
-                    <span>Type:</span><strong>{{ order.order_type|title|default:'N/A' }}</strong>
-                    <span>Student:</span><strong>{{ order.student_name|default:'N/A' }} ({{ order.student_id|default:'N/A' }})</strong>
-                    <span>Date:</span><strong>{{ order.created_at|date:"M d, Y" }}</strong>
-                    <span>Quantity:</span><strong>{{ order.quantity }}</strong>
-                    <span>Total Price:</span><strong>₱{{ order.total_price|floatformat:2 }}</strong>
-                    <span>Payment:</span><strong>{{ order.payment_method|default:'Cash'|title }}</strong>
+<div class="searchable-section">
+    <section class="order-section" data-section-status="approved">
+        <h2 class="section-title">Approved Orders</h2>
+        {% if approved_orders %}
+        <div class="select-all-container">
+            <input type="checkbox" class="select-all-checkbox" data-section="approved">
+            <label>Select All Approved</label>
+        </div>
+        {% endif %}
+        <div class="orders-grid">
+            {% for order in approved_orders %}
+            <div class="order-card" data-id="{{ order.id }}" data-order-type="{{ order.order_type|title|default:'N/A' }}" data-name="{{ order.product_name }}" data-size="{{ order.product_size|default:'' }}" data-category="{{ order.product_category|default:'N/A' }}" data-description="{{ order.product_description|default:'No description available.' }}" data-image-url="{{ order.product_image_url|default:'...' }}" data-quantity="{{ order.quantity }}" data-total-price="{{ order.total_price|floatformat:2 }}" data-payment-method="{{ order.payment_method|default:'Cash'|title }}" data-created-at="{{ order.created_at|date:'M d, Y' }}" data-status="{{ order.status }}" data-student-name="{{ order.student_name|default:'N/A' }}" data-student-id="{{ order.student_id|default:'N/A' }}">
+                <span class="status-badge status-{{ order.status }}">{{ order.status|title }}</span>
+                <input type="checkbox" class="order-checkbox approved-checkbox" value="{{ order.id }}">
+                <img src="{{ order.product_image_url|default:'...' }}" alt="{{ order.product_name }}" class="product-image">
+                <div class="card-body">
+                    <h3 class="product-name">{{ order.product_name }}{% if order.product_size %} - {{ order.product_size }}{% endif %}</h3>
+                    <div class="details-grid">
+                        <span>Order ID:</span><strong>#{{ order.id }}</strong>
+                        <span>Type:</span><strong>{{ order.order_type|title|default:'N/A' }}</strong>
+                        <span>Student:</span><strong>{{ order.student_name|default:'N/A' }} ({{ order.student_id|default:'N/A' }})</strong>
+                        <span>Date:</span><strong>{{ order.created_at|date:"M d, Y" }}</strong>
+                        <span>Quantity:</span><strong>{{ order.quantity }}</strong>
+                        <span>Total Price:</span><strong>₱{{ order.total_price|floatformat:2 }}</strong>
+                        <span>Payment:</span><strong>{{ order.payment_method|default:'Cash'|title }}</strong>
+                    </div>
                 </div>
             </div>
+            {% empty %}
+            <div class="no-data-cell"><p>No approved orders found.</p></div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <div class="no-data-cell"><p>No approved orders found.</p></div>
-        {% endfor %}
-    </div>
-</section>
-
-<!-- Pending orders section -->
- <section class="order-section" data-section-status="pending">
-    <h2 class="section-title">Pending Orders</h2>
-    {% if pending_orders %}
-    <div class="select-all-container">
-        <input type="checkbox" class="select-all-checkbox" data-section="pending">
-        <label>Select All Pending</label>
-    </div>
-    {% endif %}
-    <div class="orders-grid">
-        {% for order in pending_orders %}
-        <div class="order-card" data-id="{{ order.id }}" data-order-type="{{ order.order_type|title|default:'N/A' }}" data-name="{{ order.product_name }}" data-size="{{ order.product_size|default:'' }}" data-category="{{ order.product_category|default:'N/A' }}" data-description="{{ order.product_description|default:'No description available.' }}" data-image-url="{{ order.product_image_url|default:'...' }}" data-quantity="{{ order.quantity }}" data-total-price="{{ order.total_price|floatformat:2 }}" data-payment-method="{{ order.payment_method|default:'Cash'|title }}" data-created-at="{{ order.created_at|date:'M d, Y' }}" data-status="{{ order.status }}" data-student-name="{{ order.student_name|default:'N/A' }}" data-student-id="{{ order.student_id|default:'N/A' }}">
-            
-            <span class="status-badge status-{{ order.status }}">{{ order.status|title }}</span>
-            
-            <input type="checkbox" class="order-checkbox pending-checkbox" value="{{ order.id }}">
-            
-            <img src="{{ order.product_image_url|default:'...' }}" alt="{{ order.product_name }}" class="product-image">
-            <div class="card-body">
-                <h3 class="product-name">{{ order.product_name }}{% if order.product_size %} - {{ order.product_size }}{% endif %}</h3>
-                <div class="details-grid">
-                    <span>Order ID:</span><strong>#{{ order.id }}</strong>
-                    <span>Type:</span><strong>{{ order.order_type|title|default:'N/A' }}</strong>
-                    <span>Student:</span><strong>{{ order.student_name|default:'N/A' }} ({{ order.student_id|default:'N/A' }})</strong>
-                    <span>Date:</span><strong>{{ order.created_at|date:"M d, Y" }}</strong>
-                    <span>Quantity:</span><strong>{{ order.quantity }}</strong>
-                    <span>Total Price:</span><strong>₱{{ order.total_price|floatformat:2 }}</strong>
-                    <span>Payment:</span><strong>{{ order.payment_method|default:'Cash'|title }}</strong>
+    </section>
+</div> <div class="searchable-section">
+    <section class="order-section" data-section-status="pending">
+        <h2 class="section-title">Pending Orders</h2>
+        {% if pending_orders %}
+        <div class="select-all-container">
+            <input type="checkbox" class="select-all-checkbox" data-section="pending">
+            <label>Select All Pending</label>
+        </div>
+        {% endif %}
+        <div class="orders-grid">
+            {% for order in pending_orders %}
+            <div class="order-card" data-id="{{ order.id }}" data-order-type="{{ order.order_type|title|default:'N/A' }}" data-name="{{ order.product_name }}" data-size="{{ order.product_size|default:'' }}" data-category="{{ order.product_category|default:'N/A' }}" data-description="{{ order.product_description|default:'No description available.' }}" data-image-url="{{ order.product_image_url|default:'...' }}" data-quantity="{{ order.quantity }}" data-total-price="{{ order.total_price|floatformat:2 }}" data-payment-method="{{ order.payment_method|default:'Cash'|title }}" data-created-at="{{ order.created_at|date:'M d, Y' }}" data-status="{{ order.status }}" data-student-name="{{ order.student_name|default:'N/A' }}" data-student-id="{{ order.student_id|default:'N/A' }}">
+                <span class="status-badge status-{{ order.status }}">{{ order.status|title }}</span>
+                <input type="checkbox" class="order-checkbox pending-checkbox" value="{{ order.id }}">
+                <img src="{{ order.product_image_url|default:'...' }}" alt="{{ order.product_name }}" class="product-image">
+                <div class="card-body">
+                    <h3 class="product-name">{{ order.product_name }}{% if order.product_size %} - {{ order.product_size }}{% endif %}</h3>
+                    <div class="details-grid">
+                        <span>Order ID:</span><strong>#{{ order.id }}</strong>
+                        <span>Type:</span><strong>{{ order.order_type|title|default:'N/A' }}</strong>
+                        <span>Student:</span><strong>{{ order.student_name|default:'N/A' }} ({{ order.student_id|default:'N/A' }})</strong>
+                        <span>Date:</span><strong>{{ order.created_at|date:"M d, Y" }}</strong>
+                        <span>Quantity:</span><strong>{{ order.quantity }}</strong>
+                        <span>Total Price:</span><strong>₱{{ order.total_price|floatformat:2 }}</strong>
+                        <span>Payment:</span><strong>{{ order.payment_method|default:'Cash'|title }}</strong>
+                    </div>
                 </div>
             </div>
+            {% empty %}
+            <div class="no-data-cell"><p>No pending orders found.</p></div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <div class="no-data-cell"><p>No pending orders found.</p></div>
-        {% endfor %}
-    </div>
-</section>
-
-<!-- Completed Orders Section -->
-<section class="order-section" data-section-status="completed">
-    <h2 class="section-title">Completed Orders</h2>
-    {% if completed_orders %}
-    <div class="select-all-container">
-        <input type="checkbox" class="select-all-checkbox" data-section="completed">
-        <label>Select All Completed</label>
-    </div>
-    {% endif %}
-    <div class="orders-grid">
-        {% for order in completed_orders %}
-        <div class="order-card" data-id="{{ order.id }}" data-order-type="{{ order.order_type|title|default:'N/A' }}" data-name="{{ order.product_name }}" data-size="{{ order.product_size|default:'' }}" data-category="{{ order.product_category|default:'N/A' }}" data-description="{{ order.product_description|default:'No description available.' }}" data-image-url="{{ order.product_image_url|default:'...' }}" data-quantity="{{ order.quantity }}" data-total-price="{{ order.total_price|floatformat:2 }}" data-payment-method="{{ order.payment_method|default:'Cash'|title }}" data-created-at="{{ order.created_at|date:'M d, Y' }}" data-status="{{ order.status }}" data-student-name="{{ order.student_name|default:'N/A' }}" data-student-id="{{ order.student_id|default:'N/A' }}">
-            <span class="status-badge status-{{ order.status }}">{{ order.status|title }}</span>
-            <input type="checkbox" class="order-checkbox completed-checkbox" value="{{ order.id }}">
-            <img src="{{ order.product_image_url|default:'...' }}" alt="{{ order.product_name }}" class="product-image">
-            <div class="card-body">
-                <h3 class="product-name">{{ order.product_name }}{% if order.product_size %} - {{ order.product_size }}{% endif %}</h3>
-                <div class="details-grid">
-                    <span>Order ID:</span><strong>#{{ order.id }}</strong>
-                    <span>Type:</span><strong>{{ order.order_type|title|default:'N/A' }}</strong>
-                    <span>Student:</span><strong>{{ order.student_name|default:'N/A' }} ({{ order.student_id|default:'N/A' }})</strong>
-                    <span>Date:</span><strong>{{ order.created_at|date:"M d, Y" }}</strong>
-                    <span>Quantity:</span><strong>{{ order.quantity }}</strong>
+    </section>
+</div> <div class="searchable-section">
+    <section class="order-section" data-section-status="completed">
+        <h2 class="section-title">Completed Orders</h2>
+        {% if completed_orders %}
+        <div class="select-all-container">
+            <input type="checkbox" class="select-all-checkbox" data-section="completed">
+            <label>Select All Completed</label>
+        </div>
+        {% endif %}
+        <div class="orders-grid">
+            {% for order in completed_orders %}
+            <div class="order-card" data-id="{{ order.id }}" data-order-type="{{ order.order_type|title|default:'N/A' }}" data-name="{{ order.product_name }}" data-size="{{ order.product_size|default:'' }}" data-category="{{ order.product_category|default:'N/A' }}" data-description="{{ order.product_description|default:'No description available.' }}" data-image-url="{{ order.product_image_url|default:'...' }}" data-quantity="{{ order.quantity }}" data-total-price="{{ order.total_price|floatformat:2 }}" data-payment-method="{{ order.payment_method|default:'Cash'|title }}" data-created-at="{{ order.created_at|date:'M d, Y' }}" data-status="{{ order.status }}" data-student-name="{{ order.student_name|default:'N/A' }}" data-student-id="{{ order.student_id|default:'N/A' }}">
+                <span class="status-badge status-{{ order.status }}">{{ order.status|title }}</span>
+                <input type="checkbox" class="order-checkbox completed-checkbox" value="{{ order.id }}">
+                <img src="{{ order.product_image_url|default:'...' }}" alt="{{ order.product_name }}" class="product-image">
+                <div class="card-body">
+                    <h3 class="product-name">{{ order.product_name }}{% if order.product_size %} - {{ order.product_size }}{% endif %}</h3>
+                    <div class="details-grid">
+                        <span>Order ID:</span><strong>#{{ order.id }}</strong>
+                        <span>Type:</span><strong>{{ order.order_type|title|default:'N/A' }}</strong>
+                        <span>Student:</span><strong>{{ order.student_name|default:'N/A' }} ({{ order.student_id|default:'N/A' }})</strong>
+                        <span>Date:</span><strong>{{ order.created_at|date:"M d, Y" }}</strong>
+                        <span>Quantity:</span><strong>{{ order.quantity }}</strong>
+                    </div>
                 </div>
             </div>
+            {% empty %}
+            <div class="no-data-cell"><p>No completed orders found.</p></div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <div class="no-data-cell"><p>No completed orders found.</p></div>
-        {% endfor %}
-    </div>
-</section>
-
-<!-- Cancelled/Rejected Orders Section -->
-<section class="order-section" data-section-status="cancelled rejected">
-    <h2 class="section-title">Cancelled & Rejected Orders</h2>
-    {% if other_orders %}
-    <div class="select-all-container">
-        <input type="checkbox" class="select-all-checkbox" data-section="other">
-        <label>Select All Cancelled/Rejected</label>
-    </div>
-    {% endif %}
-    <div class="orders-grid">
-        {% for order in other_orders %}
-        <div class="order-card" data-id="{{ order.id }}" data-order-type="{{ order.order_type|title|default:'N/A' }}" data-name="{{ order.product_name }}" data-size="{{ order.product_size|default:'' }}" data-category="{{ order.product_category|default:'N/A' }}" data-description="{{ order.product_description|default:'No description available.' }}" data-image-url="{{ order.product_image_url|default:'...' }}" data-quantity="{{ order.quantity }}" data-total-price="{{ order.total_price|floatformat:2 }}" data-payment-method="{{ order.payment_method|default:'Cash'|title }}" data-created-at="{{ order.created_at|date:'M d, Y' }}" data-status="{{ order.status }}" data-student-name="{{ order.student_name|default:'N/A' }}" data-student-id="{{ order.student_id|default:'N/A' }}">
-            <span class="status-badge status-{{ order.status }}">{{ order.status|title }}</span>
-            <input type="checkbox" class="order-checkbox other-checkbox" value="{{ order.id }}">
-            <img src="{{ order.product_image_url|default:'...' }}" alt="{{ order.product_name }}" class="product-image">
-            <div class="card-body">
-                <h3 class="product-name">{{ order.product_name }}{% if order.product_size %} - {{ order.product_size }}{% endif %}</h3>
-                <div class="details-grid">
-                    <span>Order ID:</span><strong>#{{ order.id }}</strong>
-                    <span>Type:</span><strong>{{ order.order_type|title|default:'N/A' }}</strong>
-                    <span>Student:</span><strong>{{ order.student_name|default:'N/A' }} ({{ order.student_id|default:'N/A' }})</strong>
-                    <span>Date:</span><strong>{{ order.created_at|date:"M d, Y" }}</strong>
-                    <span>Status:</span><strong>{{ order.status|title }}</strong>
+    </section>
+</div> <div class="searchable-section">
+    <section class="order-section" data-section-status="cancelled rejected">
+        <h2 class="section-title">Cancelled & Rejected Orders</h2>
+        {% if other_orders %}
+        <div class="select-all-container">
+            <input type="checkbox" class="select-all-checkbox" data-section="other">
+            <label>Select All Cancelled/Rejected</label>
+        </div>
+        {% endif %}
+        <div class="orders-grid">
+            {% for order in other_orders %}
+            <div class="order-card" data-id="{{ order.id }}" data-order-type="{{ order.order_type|title|default:'N/A' }}" data-name="{{ order.product_name }}" data-size="{{ order.product_size|default:'' }}" data-category="{{ order.product_category|default:'N/A' }}" data-description="{{ order.product_description|default:'No description available.' }}" data-image-url="{{ order.product_image_url|default:'...' }}" data-quantity="{{ order.quantity }}" data-total-price="{{ order.total_price|floatformat:2 }}" data-payment-method="{{ order.payment_method|default:'Cash'|title }}" data-created-at="{{ order.created_at|date:'M d, Y' }}" data-status="{{ order.status }}" data-student-name="{{ order.student_name|default:'N/A' }}" data-student-id="{{ order.student_id|default:'N/A' }}">
+                <span class="status-badge status-{{ order.status }}">{{ order.status|title }}</span>
+                <input type="checkbox" class="order-checkbox other-checkbox" value="{{ order.id }}">
+                <img src="{{ order.product_image_url|default:'...' }}" alt="{{ order.product_name }}" class="product-image">
+                <div class="card-body">
+                    <h3 class="product-name">{{ order.product_name }}{% if order.product_size %} - {{ order.product_size }}{% endif %}</h3>
+                    <div class="details-grid">
+                        <span>Order ID:</span><strong>#{{ order.id }}</strong>
+                        <span>Type:</span><strong>{{ order.order_type|title|default:'N/A' }}</strong>
+                        <span>Student:</span><strong>{{ order.student_name|default:'N/A' }} ({{ order.student_id|default:'N/A' }})</strong>
+                        <span>Date:</span><strong>{{ order.created_at|date:"M d, Y" }}</strong>
+                        <span>Status:</span><strong>{{ order.status|title }}</strong>
+                    </div>
                 </div>
             </div>
+            {% empty %}
+            <div class="no-data-cell"><p>No cancelled or rejected orders found.</p></div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <div class="no-data-cell"><p>No cancelled or rejected orders found.</p></div>
-        {% endfor %}
+    </section>
+</div>
+
+<div id="global-no-results" class="no-data-message" style="display: none; margin-top: 2rem;">
+    <p>No orders found matching your search across all sections.</p>
+</div>
+
+{% else %}
+
+<div class="no-data-message" style="margin-top: 2rem;">
+        <p>There are currently no orders, reservations, completed orders, or rejected and cancelled orders in the system. 🤷‍♀️</p>
     </div>
-</section>
 
+{% endif %}
 
-<!-- ACTION BARS -->
 <div id="batch-status-bar" class="batch-action-bar" style="display: none;">
     <span id="status-selected-count">0 items selected</span>
     <div>
@@ -186,7 +188,6 @@
         <button type="button" class="btn btn-primary" id="batch-status-update-btn" style="margin-left: 1rem;">Update</button>
     </div>
 </div>
-
 <div id="batch-pending-status-bar" class="batch-action-bar" style="display: none;">
     <span id="pending-status-selected-count">0 items selected</span>
     <div>
@@ -204,7 +205,6 @@
     <button type="button" class="btn btn-danger" id="batch-delete-btn">Delete Selected</button>
 </div>
 
-<!-- MODAL -->
 <div id="order-details-modal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header"><h2>Order Details</h2><span class="close-btn">&times;</span></div>
@@ -214,11 +214,11 @@
                     <img id="details-image" src="" alt="Product Image" class="details-image">
                 </div>
                 <div class="details-info">
-                    <div class="details-header-with-badge"> 
-<h3 id="details-name" class="details-name"></h3>
-                       <span id="details-status-badge" class="status-badge"></span>
-</div>
-<div class="details-summary-grid">
+                    <div class="details-header-with-badge">
+                        <h3 id="details-name" class="details-name"></h3>
+                         <span id="details-status-badge" class="status-badge"></span>
+                    </div>
+                    <div class="details-summary-grid">
                         <span>Order ID:</span><strong id="details-order-id"></strong>
                         <span>Type:</span><strong id="details-order-type"></strong>
                         <span>Student:</span><strong id="details-student"></strong>
@@ -232,43 +232,38 @@
                 </div>
             </div>
         </div>
-
         <div class="modal-footer">
-            <form id="single-status-form" method="POST" action="">
-                {% csrf_token %}
-                <label for="single-status-select">Status:</label>
-                <select name="status" id="single-status-select" class="status-select">
-                    <option value="approved">Approved</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
-                    <option value="rejected">Rejected</option>
-                </select>
-                <button type="submit" class="btn btn-primary">Update Status</button>
-            </form>
-
-            <form id="single-pending-status-form" method="POST" action="" style="display: none;">
-        {% csrf_token %}
-        <label for="single-pending-status-select">Status:</label>
-        <select name="status" id="single-pending-status-select" class="status-select">
-            <option value="cancelled">Cancelled</option>
-            <option value="rejected">Rejected</option>
-        </select>
-        <button type="submit" class="btn btn-primary">Update Status</button>
-            </form>
+             <form id="single-status-form" method="POST" action="" style="display: none;"> 
+                 {% csrf_token %}
+                 <label for="single-status-select">Status:</label>
+                 <select name="status" id="single-status-select" class="status-select">
+                     <option value="approved">Approved</option>
+                     <option value="completed">Completed</option>
+                     <option value="cancelled">Cancelled</option>
+                     <option value="rejected">Rejected</option>
+                 </select>
+                 <button type="submit" class="btn btn-primary">Update Status</button>
+             </form>
+             <form id="single-pending-status-form" method="POST" action="" style="display: none;">
+                 {% csrf_token %}
+                 <label for="single-pending-status-select">Status:</label>
+                 <select name="status" id="single-pending-status-select" class="status-select">
+                     <option value="cancelled">Cancelled</option>
+                     <option value="rejected">Rejected</option>
+                 </select>
+                 <button type="submit" class="btn btn-primary">Update Status</button>
+             </form>
+             <form id="single-delete-form" method="POST" action="" style="display: none;">
+                 {% csrf_token %}
+                 <button type="button" class="btn btn-danger" id="open-single-delete-modal-btn">
+                     Delete Order
+                </button>
+             </form>
             
-              <form id="single-delete-form" method="POST" action="" style="display: none;">         
-                {% csrf_token %}
-                <button type="button" class="btn btn-danger" id="open-single-delete-modal-btn">                
-                Delete Order
-             </button>
-             </form>
         </div>
-
-        
     </div>
 </div>
 
-<!-- ✅ NEW: Batch Delete Confirmation Modal -->
 <div id="batch-delete-confirm-modal" class="modal" style="display: none;">
     <div class="modal-content" style="max-width: 450px;">
         <div class="modal-header"><h2>Confirm Batch Deletion</h2><span class="close-btn">&times;</span></div>
@@ -288,7 +283,7 @@
         <div class="modal-header"><h2>Confirm Deletion</h2><span class="close-btn">&times;</span></div>
         <div class="modal-body">
             <p>Are you sure you want to permanently delete this order?
-               (<strong id="single-delete-order-id">#...</strong>)
+                (<strong id="single-delete-order-id">#...</strong>)
             </p>
             <p>This action cannot be undone.</p>
         </div>
@@ -305,7 +300,7 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     // ==================================================================
     // == 1. GET ALL ELEMENTS
     // ==================================================================
@@ -325,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const batchStatusBar = document.getElementById('batch-status-bar');
     const batchPendingStatusBar = document.getElementById('batch-pending-status-bar');
     const batchDeleteBar = document.getElementById('batch-delete-bar');
-    
+
     // --- Buttons ---
     const batchStatusUpdateBtn = document.getElementById('batch-status-update-btn');
     const batchPendingStatusUpdateBtn = document.getElementById('batch-pending-status-update-btn');
@@ -333,9 +328,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmBatchDeleteBtn = document.getElementById('confirm-batch-delete-btn');
     const openSingleDeleteModalBtn = document.getElementById('open-single-delete-modal-btn');
     const confirmSingleDeleteBtn = document.getElementById('confirm-single-delete-btn');
-    
+
     // --- Search & Content ---
-    const searchInput = document.getElementById('admin-order-search');
+    // REMOVED: const searchInput = document.getElementById('admin-order-search');
+    const globalSearchInput = document.getElementById('global-order-search'); // ADDED
+    const allSearchableSections = document.querySelectorAll('.searchable-section'); // ADDED
+    const globalNoResults = document.getElementById('global-no-results'); // ADDED
+
     const orderSections = document.querySelectorAll('.order-section');
     const allCheckboxes = document.querySelectorAll('.order-checkbox');
     const selectAllCheckboxes = document.querySelectorAll('.select-all-checkbox');
@@ -367,7 +366,9 @@ document.addEventListener('DOMContentLoaded', () => {
      * Gets the CSRF token from any of the forms.
      */
     function getCsrfToken() {
-        return document.querySelector('form [name=csrfmiddlewaretoken]').value;
+        // More robust - searches the whole document if the first form isn't found
+        let tokenInput = document.querySelector('form [name=csrfmiddlewaretoken]');
+        return tokenInput ? tokenInput.value : '';
     }
 
     /**
@@ -379,7 +380,8 @@ document.addEventListener('DOMContentLoaded', () => {
             card.classList.add('moving'); // Add fade-out animation
             setTimeout(() => {
                 card.remove();
-                filterOrders(); // Re-check "no data" messages
+                // We'll call filterGlobalOrders which handles no-data visibility
+                filterGlobalOrders();
                 updateActionBars();
             }, 300); // Wait for animation
         }
@@ -392,38 +394,44 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = document.querySelector(`.order-card[data-id="${orderId}"]`);
         if (!card) return;
 
-        let targetGrid, newCheckboxClass;
+        let targetGrid, newCheckboxClass, targetSectionSelector;
 
-        // Determine target grid and new checkbox class
+        // Determine target grid, checkbox class, and section selector
         if (newStatus === 'approved') {
-            targetGrid = document.querySelector('.order-section[data-section-status="approved"] .orders-grid');
+            targetSectionSelector = '.order-section[data-section-status="approved"]';
             newCheckboxClass = 'order-checkbox approved-checkbox';
         } else if (newStatus === 'pending') {
-            targetGrid = document.querySelector('.order-section[data-section-status="pending"] .orders-grid');
+            targetSectionSelector = '.order-section[data-section-status="pending"]';
             newCheckboxClass = 'order-checkbox pending-checkbox';
         } else if (newStatus === 'completed') {
-            targetGrid = document.querySelector('.order-section[data-section-status="completed"] .orders-grid');
+            targetSectionSelector = '.order-section[data-section-status="completed"]';
             newCheckboxClass = 'order-checkbox completed-checkbox';
         } else if (newStatus === 'cancelled' || newStatus === 'rejected') {
-            targetGrid = document.querySelector('.order-section[data-section-status*="cancelled"] .orders-grid');
+            targetSectionSelector = '.order-section[data-section-status*="cancelled"]'; // Matches "cancelled rejected"
             newCheckboxClass = 'order-checkbox other-checkbox';
         }
+
+        const targetSection = document.querySelector(targetSectionSelector);
+        if (targetSection) {
+             targetGrid = targetSection.querySelector('.orders-grid');
+        }
+
 
         if (targetGrid) {
             // Animate card out
             card.classList.add('moving');
-            
+
             setTimeout(() => {
                 // Update card data
                 card.dataset.status = newStatus;
-                
+
                 // Update status badge
                 const statusBadge = card.querySelector('.status-badge');
                 if (statusBadge) {
                     statusBadge.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
                     statusBadge.className = `status-badge status-${newStatus}`;
                 }
-                
+
                 // Update checkbox
                 const checkbox = card.querySelector('.order-checkbox');
                 if (checkbox) {
@@ -433,37 +441,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Move card
                 targetGrid.prepend(card);
-                
+
                 // Animate card in
-                card.classList.remove('moving'); 
-                
-                // Update UI
-                filterOrders(); // Re-check "no data" messages
+                card.classList.remove('moving');
+
+                // Update UI - Use global filter now
+                filterGlobalOrders();
                 updateActionBars();
             }, 300); // Wait for fade-out
+        } else {
+             console.error(`Could not find target grid for status "${newStatus}" using selector "${targetSectionSelector}"`);
         }
     }
 
-    // --- Modal Logic (Unchanged) ---
-    const openModal = (modal) => modal.style.display = 'flex';
-    const closeModal = (modal) => modal.style.display = 'none';
+    // --- Modal Logic ---
+    const openModal = (modal) => { if (modal) modal.style.display = 'flex'; };
+    const closeModal = (modal) => { if (modal) modal.style.display = 'none'; };
     document.querySelectorAll('.close-btn, .cancel-modal-btn').forEach(btn => {
         btn.addEventListener('click', () => closeModal(btn.closest('.modal')));
     });
     window.addEventListener('click', (e) => { if (e.target.classList.contains('modal')) closeModal(e.target); });
 
-    // --- Card Click Logic (Unchanged) ---
+    // --- Card Click Logic (Opens Modal) ---
     document.querySelectorAll('.order-card').forEach(card => {
         card.addEventListener('click', (e) => {
-            const checkbox = card.querySelector('.order-checkbox');
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON') {
-                if (e.target.classList.contains('order-checkbox')) e.stopPropagation();
+            // Prevent modal opening if clicking checkbox or button inside card (if any)
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                 // Specifically allow checkbox click to propagate for selection logic
+                 if (!e.target.classList.contains('order-checkbox')) {
+                      e.stopPropagation(); // Stop modal opening for buttons etc.
+                 }
                 return;
             }
-            if (checkbox) {
-                checkbox.checked = !checkbox.checked;
-                checkbox.dispatchEvent(new Event('change'));
-            }
+
+            // --- Toggle Checkbox when clicking card body (but not checkbox itself) ---
+             const checkbox = card.querySelector('.order-checkbox');
+             if (checkbox && !e.target.classList.contains('order-checkbox')) {
+                 checkbox.checked = !checkbox.checked;
+                 // Manually trigger the 'change' event to update action bars
+                 checkbox.dispatchEvent(new Event('change'));
+                 // Important: Stop propagation here so the logic doesn't run twice if checkbox handler also calls it
+                 e.stopPropagation();
+             }
+             // --- End Checkbox Toggle ---
+
+
             const data = card.dataset;
             detailsModal.querySelector('#details-image').src = data.imageUrl;
             detailsModal.querySelector('#details-name').textContent = data.size ? `${data.name} - ${data.size}` : data.name;
@@ -475,134 +497,173 @@ document.addEventListener('DOMContentLoaded', () => {
             detailsModal.querySelector('#details-quantity').textContent = `${data.quantity} pc(s)`;
             detailsModal.querySelector('#details-total-price').textContent = `₱${data.totalPrice}`;
             detailsModal.querySelector('#details-payment-method').textContent = data.paymentMethod;
-            detailsModal.querySelector('#details-order-type').textContent = data.orderType; 
+            detailsModal.querySelector('#details-order-type').textContent = data.orderType;
             const statusBadge = detailsModal.querySelector('#details-status-badge');
             const status = data.status;
             statusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-            statusBadge.className = 'status-badge'; 
+            statusBadge.className = 'status-badge';
             statusBadge.classList.add(`status-${status}`);
-            
+
             // Set action URLs for all forms
             singleStatusForm.action = `/dashboard/admin/update-order-status/${data.id}/`;
             singlePendingStatusForm.action = `/dashboard/admin/update-order-status/${data.id}/`;
             singleDeleteForm.action = `/dashboard/admin/delete-order/${data.id}/`;
-            
-            // Show the correct form based on status
-            singleStatusForm.style.display = 'none';
-            singlePendingStatusForm.style.display = 'none';
-            singleDeleteForm.style.display = 'none';
 
-            if (data.status === 'approved') {
-                singleStatusForm.style.display = 'flex';
-                singleStatusForm.querySelector('#single-status-select').value = data.status;
-            } else if (data.status === 'pending') {
-                singlePendingStatusForm.style.display = 'flex';
-            } else {
-                singleDeleteForm.style.display = 'block';
-            }
+             // --- Show/Hide Footer Forms based on Status ---
+             // Hide all first
+             singleStatusForm.style.display = 'none';
+             singlePendingStatusForm.style.display = 'none';
+             singleDeleteForm.style.display = 'none';
+
+             if (status === 'approved') {
+                 singleStatusForm.style.display = 'flex'; // Show the full status update form
+                 singleStatusForm.querySelector('#single-status-select').value = status; // Pre-select current status
+             } else if (status === 'pending') {
+                 singlePendingStatusForm.style.display = 'flex'; // Show the pending-specific status update form
+             } else { // For 'completed', 'cancelled', 'rejected'
+                 singleDeleteForm.style.display = 'flex'; // Show only the delete button form
+             }
+             // --- End Show/Hide ---
+
             openModal(detailsModal);
         });
     });
 
-    // --- Filter/Search Logic (Unchanged) ---
-    function filterOrders() {
-        const query = searchInput.value.toLowerCase().trim();
-        let sectionVisibleCardCount = {};
-        orderSections.forEach(section => {
-            sectionVisibleCardCount[section.dataset.sectionStatus.split(' ')[0]] = 0;
-        });
-        document.querySelectorAll('.order-card').forEach(card => {
-            const id = card.dataset.id || '';
-            const name = card.dataset.name.toLowerCase() || '';
-            const category = card.dataset.category.toLowerCase() || '';
-            const status = card.dataset.status.toLowerCase() || '';
-            const studentName = card.dataset.studentName.toLowerCase() || '';
-            const studentId = card.dataset.studentId.toLowerCase() || '';
-            const searchableText = `${id} ${name} ${category} ${status} ${studentName} ${studentId}`;
-            let isVisible = true;
-            if (query.length > 0) {
-                if (!searchableText.includes(query)) {
-                    isVisible = false;
+    // ==================================================================
+    // == 3. GLOBAL SEARCH FILTER (NEW)
+    // ==================================================================
+    function filterGlobalOrders() {
+        if (!globalSearchInput || !allSearchableSections.length || !globalNoResults) {
+            console.warn("Global search elements missing.");
+            return;
+        }
+
+        const searchTerm = globalSearchInput.value.toLowerCase().trim();
+        let visibleSectionsCount = 0;
+
+        allSearchableSections.forEach(sectionWrapper => {
+            const section = sectionWrapper.querySelector('.order-section'); // Get the actual section inside
+            if (!section) return;
+
+            const cards = sectionWrapper.querySelectorAll('.order-card');
+            let sectionHasVisibleCard = false;
+
+            cards.forEach(card => {
+                const id = card.dataset.id || '';
+                const name = card.dataset.name.toLowerCase() || '';
+                const category = card.dataset.category.toLowerCase() || '';
+                const status = card.dataset.status.toLowerCase() || '';
+                const studentName = card.dataset.studentName.toLowerCase() || '';
+                const studentId = card.dataset.studentId.toLowerCase() || '';
+                const searchableText = `${id} ${name} ${category} ${status} ${studentName} ${studentId}`;
+
+                const isMatch = searchTerm === '' || searchableText.includes(searchTerm);
+                card.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) {
+                    sectionHasVisibleCard = true;
+                } else {
+                    // Uncheck hidden cards
+                    const cb = card.querySelector('.order-checkbox');
+                    if (cb) cb.checked = false;
                 }
-            }
-            card.style.display = isVisible ? 'flex' : 'none';
-            if (isVisible) {
-                const section = card.closest('.order-section');
-                if (section) {
-                    const primaryStatus = section.dataset.sectionStatus.split(' ')[0]; 
-                    sectionVisibleCardCount[primaryStatus]++;
-                }
+            });
+
+             // Show/hide the section's "no data" message based on card visibility
+             const noDataCell = section.querySelector('.no-data-cell');
+             if (noDataCell) {
+                 noDataCell.style.display = sectionHasVisibleCard ? 'none' : 'block';
+             }
+
+            // Show/hide the entire section wrapper
+            const shouldShowSection = (searchTerm === '' || sectionHasVisibleCard);
+            sectionWrapper.style.display = sectionHasVisibleCard ? '' : 'none';
+            if(sectionHasVisibleCard) {
+                visibleSectionsCount++;
             }
         });
-        updateSectionVisibility(query, sectionVisibleCardCount);
+
+        // Show/hide the global "no results" message
+        globalNoResults.style.display = (visibleSectionsCount === 0 && searchTerm !== '') ? 'block' : 'none';
+
+        // Update action bars after filtering
         updateActionBars();
     }
-    function updateSectionVisibility(query, visibleCounts) {
-        orderSections.forEach(section => {
-            const grid = section.querySelector('.orders-grid');
-            const primaryStatus = section.dataset.sectionStatus.split(' ')[0];
-            const originalNoDataCell = section.querySelector('.no-data-cell:not(.temp-no-results)');
-            let tempNoResults = section.querySelector('.temp-no-results');
-            if (!tempNoResults) {
-                tempNoResults = document.createElement('div');
-                tempNoResults.className = 'no-data-cell temp-no-results';
-                tempNoResults.innerHTML = '<p>No matching orders found.</p>';
-                grid.appendChild(tempNoResults);
-            }
-            const isVisible = visibleCounts[primaryStatus] > 0;
-            if (query.length > 0) {
-                if (!isVisible) {
-                    tempNoResults.style.display = 'block';
-                    if (originalNoDataCell) originalNoDataCell.style.display = 'none';
-                } else {
-                    tempNoResults.style.display = 'none';
-                }
-            } else {
-                tempNoResults.style.display = 'none';
-                if (originalNoDataCell) {
-                    const totalCards = section.querySelectorAll('.order-card').length;
-                    originalNoDataCell.style.display = (totalCards === 0) ? 'block' : 'none';
-                }
-            }
-        });
-    }
-    searchInput.addEventListener('input', filterOrders);
-    filterOrders();
 
-    // --- Batch Action/Checkbox Logic (Unchanged) ---
+    if (globalSearchInput) {
+        globalSearchInput.addEventListener('input', filterGlobalOrders);
+        filterGlobalOrders(); // Initial filter on load
+    } else {
+        console.warn("Global order search input not found.");
+    }
+
+
+    // ==================================================================
+    // == 4. BATCH ACTION / CHECKBOX LOGIC
+    // ==================================================================
+
     function updateActionBars() {
-        const approvedChecked = document.querySelectorAll('.approved-checkbox:checked').length;
-        const completedChecked = document.querySelectorAll('.completed-checkbox:checked').length;
-        const otherChecked = document.querySelectorAll('.other-checkbox:checked').length;
-        const pendingChecked = document.querySelectorAll('.pending-checkbox:checked').length;
-        batchStatusBar.style.display = approvedChecked > 0 ? 'flex' : 'none';
-        batchStatusBar.querySelector('#status-selected-count').textContent = `${approvedChecked} item(s) selected`;
-        batchPendingStatusBar.style.display = pendingChecked > 0 ? 'flex' : 'none';
-        batchPendingStatusBar.querySelector('#pending-status-selected-count').textContent = `${pendingChecked} item(s) selected`;
+        // Count checked checkboxes *only within visible cards*
+        const approvedChecked = document.querySelectorAll('.searchable-section:not([style*="display: none"]) .approved-checkbox:checked').length;
+        const completedChecked = document.querySelectorAll('.searchable-section:not([style*="display: none"]) .completed-checkbox:checked').length;
+        const otherChecked = document.querySelectorAll('.searchable-section:not([style*="display: none"]) .other-checkbox:checked').length;
+        const pendingChecked = document.querySelectorAll('.searchable-section:not([style*="display: none"]) .pending-checkbox:checked').length;
+
+        // --- Update visibility and counts for each bar ---
+        if (batchStatusBar) {
+             batchStatusBar.style.display = approvedChecked > 0 ? 'flex' : 'none';
+             if (approvedChecked > 0) batchStatusBar.querySelector('#status-selected-count').textContent = `${approvedChecked} item(s) selected`;
+        }
+        if (batchPendingStatusBar) {
+            batchPendingStatusBar.style.display = pendingChecked > 0 ? 'flex' : 'none';
+            if (pendingChecked > 0) batchPendingStatusBar.querySelector('#pending-status-selected-count').textContent = `${pendingChecked} item(s) selected`;
+        }
         const deleteCount = completedChecked + otherChecked;
-        batchDeleteBar.style.display = deleteCount > 0 ? 'flex' : 'none';
-        batchDeleteBar.querySelector('#delete-selected-count').textContent = `${deleteCount} item(s) selected`;
+         if (batchDeleteBar) {
+            batchDeleteBar.style.display = deleteCount > 0 ? 'flex' : 'none';
+            if (deleteCount > 0) batchDeleteBar.querySelector('#delete-selected-count').textContent = `${deleteCount} item(s) selected`;
+         }
+
+        // --- Update visual selection state for cards ---
         allCheckboxes.forEach(cb => {
             const card = cb.closest('.order-card');
             if (card) {
+                // Add 'selected' class only if checked AND visible
                 card.classList.toggle('selected', cb.checked && card.style.display !== 'none');
-                if (card.style.display === 'none') card.classList.remove('selected');
+                // Ensure hidden cards never look selected
+                if (card.style.display === 'none') {
+                    card.classList.remove('selected');
+                }
             }
         });
+
+         // --- Update "Select All" Checkboxes ---
+         selectAllCheckboxes.forEach(sa => {
+             const section = sa.dataset.section;
+             const visibleCheckboxesInGroup = document.querySelectorAll(`.searchable-section:not([style*="display: none"]) .${section}-checkbox`);
+             const checkedVisibleInGroup = document.querySelectorAll(`.searchable-section:not([style*="display: none"]) .${section}-checkbox:checked`);
+
+             const totalVisible = visibleCheckboxesInGroup.length;
+             const checkedCount = checkedVisibleInGroup.length;
+
+             sa.checked = (checkedCount > 0 && checkedCount === totalVisible);
+             sa.indeterminate = (checkedCount > 0 && checkedCount < totalVisible);
+         });
     }
+
+    // --- Select All Logic ---
     selectAllCheckboxes.forEach(sa => {
         sa.addEventListener('change', () => {
             const clickedSection = sa.dataset.section;
             const clickedGroupClass = `${clickedSection}-checkbox`;
-            document.querySelectorAll(`.${clickedGroupClass}`).forEach(cb => {
-                const card = cb.closest('.order-card');
-                if (card && card.style.display !== 'none') {
-                    cb.checked = sa.checked;
-                } else if (sa.checked === false) {
-                    cb.checked = false;
-                }
+            const isChecked = sa.checked;
+
+            // Apply check state only to VISIBLE checkboxes in this group
+            document.querySelectorAll(`.searchable-section:not([style*="display: none"]) .${clickedGroupClass}`).forEach(cb => {
+                 cb.checked = isChecked;
             });
-            if (sa.checked) {
+
+            // If checking a group, uncheck all other groups (visible or not)
+            if (isChecked) {
                 allCheckboxes.forEach(cb => {
                     if (!cb.classList.contains(clickedGroupClass)) {
                         cb.checked = false;
@@ -611,12 +672,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectAllCheckboxes.forEach(otherSA => {
                     if (otherSA !== sa) {
                         otherSA.checked = false;
+                        otherSA.indeterminate = false; // Reset indeterminate state too
                     }
                 });
             }
             updateActionBars();
         });
     });
+
+    // --- Individual Checkbox Logic (Handles Exclusive Selection) ---
     function handleExclusiveSelection(e) {
         const clickedCheckbox = e.currentTarget;
         let clickedGroup = null;
@@ -624,34 +688,42 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (clickedCheckbox.classList.contains('pending-checkbox')) clickedGroup = 'pending-checkbox';
         else if (clickedCheckbox.classList.contains('completed-checkbox')) clickedGroup = 'completed-checkbox';
         else if (clickedCheckbox.classList.contains('other-checkbox')) clickedGroup = 'other-checkbox';
-        if (!clickedCheckbox.checked || !clickedGroup) {
-            updateActionBars();
-            return; 
+
+        // If checking a box, uncheck all boxes from other groups
+        if (clickedCheckbox.checked && clickedGroup) {
+            allCheckboxes.forEach(cb => {
+                if (cb === clickedCheckbox) return; // Skip self
+                let cbGroup = null;
+                if (cb.classList.contains('approved-checkbox')) cbGroup = 'approved-checkbox';
+                else if (cb.classList.contains('pending-checkbox')) cbGroup = 'pending-checkbox';
+                else if (cb.classList.contains('completed-checkbox')) cbGroup = 'completed-checkbox';
+                else if (cb.classList.contains('other-checkbox')) cbGroup = 'other-checkbox';
+
+                // If checkbox belongs to a DIFFERENT group, uncheck it
+                if (cbGroup && cbGroup !== clickedGroup) {
+                    cb.checked = false;
+                }
+            });
+
+            // Uncheck other "Select All" boxes
+            selectAllCheckboxes.forEach(sa => {
+                const sectionGroup = `${sa.dataset.section}-checkbox`;
+                if (sectionGroup !== clickedGroup) {
+                    sa.checked = false;
+                    sa.indeterminate = false;
+                }
+            });
         }
-        allCheckboxes.forEach(cb => {
-            if (cb === clickedCheckbox) return;
-            let cbGroup = null;
-            if (cb.classList.contains('approved-checkbox')) cbGroup = 'approved-checkbox';
-            else if (cb.classList.contains('pending-checkbox')) cbGroup = 'pending-checkbox';
-            else if (cb.classList.contains('completed-checkbox')) cbGroup = 'completed-checkbox';
-            else if (cb.classList.contains('other-checkbox')) cbGroup = 'other-checkbox';
-            if (cbGroup && cbGroup !== clickedGroup) {
-                cb.checked = false;
-            }
-        });
-        selectAllCheckboxes.forEach(sa => {
-            const sectionGroup = `${sa.dataset.section}-checkbox`;
-            if (sectionGroup !== clickedGroup) {
-                sa.checked = false;
-            }
-        });
-        updateActionBars();
+        updateActionBars(); // Update bars after any change
     }
     allCheckboxes.forEach(cb => cb.addEventListener('change', handleExclusiveSelection));
-    updateActionBars(); // Initial check
+
+    // Initial check on load
+    updateActionBars();
+
 
     // ==================================================================
-    // == 3. ATTACH AJAX SUBMIT LISTENERS
+    // == 5. ATTACH AJAX SUBMIT LISTENERS
     // ==================================================================
 
     /**
@@ -675,7 +747,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return response.json();
         })
         .catch(error => {
-            // This catch handles network errors *and* non-JSON responses (like a 500 error page)
             console.error('Fetch error:', error);
             showMessage(`A network or server error occurred: ${error.message}`, 'error');
             return null; // Return null to stop the .then() chain
@@ -685,161 +756,196 @@ document.addEventListener('DOMContentLoaded', () => {
             button.textContent = originalText;
         });
     }
-    
+
     // --- BATCH STATUS UPDATE (Approved Section) ---
-    batchStatusUpdateBtn.addEventListener('click', () => {
-        const selectedIds = Array.from(document.querySelectorAll('.approved-checkbox:checked')).map(cb => cb.value);
-        if (selectedIds.length === 0) return;
+    if (batchStatusUpdateBtn) {
+        batchStatusUpdateBtn.addEventListener('click', () => {
+             // Get IDs only from VISIBLE checked boxes in this group
+            const selectedIds = Array.from(document.querySelectorAll('.searchable-section:not([style*="display: none"]) .approved-checkbox:checked')).map(cb => cb.value);
+            if (selectedIds.length === 0) return;
 
-        const formData = new FormData(batchStatusForm);
-        formData.set('order_ids', selectedIds.join(','));
-        formData.set('status', document.getElementById('batch-status-select').value);
-        
-        const url = batchStatusForm.getAttribute('action');
+            const formData = new FormData(batchStatusForm);
+            formData.set('order_ids', selectedIds.join(','));
+            formData.set('status', document.getElementById('batch-status-select').value);
+            const url = batchStatusForm.getAttribute('action'); // Assumes action is correct
 
-        handleFetch(url, formData, batchStatusUpdateBtn).then(data => {
-            if (data && data.success) {
-                showMessage(data.message, 'success');
-                data.orders.forEach(order => {
-                    moveOrderCard(order.id, order.status);
-                });
-                updateActionBars(); // This will uncheck and hide the bar
-            } else if (data) {
-                showMessage(data.error || 'An unknown error occurred.', 'error');
-            }
+            handleFetch(url, formData, batchStatusUpdateBtn).then(data => {
+                if (data && data.success) {
+                    showMessage(data.message, 'success');
+                    data.orders.forEach(order => {
+                        moveOrderCard(order.id, order.status);
+                    });
+                    // updateActionBars will be called by moveOrderCard -> filterGlobalOrders
+                } else if (data) {
+                    showMessage(data.error || 'An unknown error occurred.', 'error');
+                }
+            });
         });
-    });
-    
+    }
+
     // --- BATCH STATUS UPDATE (Pending Section) ---
-    batchPendingStatusUpdateBtn.addEventListener('click', () => {
-        const selectedIds = Array.from(document.querySelectorAll('.pending-checkbox:checked')).map(cb => cb.value);
-        if (selectedIds.length === 0) return;
+     if (batchPendingStatusUpdateBtn) {
+        batchPendingStatusUpdateBtn.addEventListener('click', () => {
+             // Get IDs only from VISIBLE checked boxes in this group
+            const selectedIds = Array.from(document.querySelectorAll('.searchable-section:not([style*="display: none"]) .pending-checkbox:checked')).map(cb => cb.value);
+            if (selectedIds.length === 0) return;
 
-        const formData = new FormData(batchPendingStatusForm);
-        formData.set('order_ids', selectedIds.join(','));
-        formData.set('status', document.getElementById('batch-pending-status-select').value);
-        
-        const url = batchPendingStatusForm.getAttribute('action');
+            const formData = new FormData(batchPendingStatusForm);
+            formData.set('order_ids', selectedIds.join(','));
+            formData.set('status', document.getElementById('batch-pending-status-select').value);
+            const url = batchPendingStatusForm.getAttribute('action'); // Assumes action is correct
 
-        handleFetch(url, formData, batchPendingStatusUpdateBtn).then(data => {
-            if (data && data.success) {
-                showMessage(data.message, 'success');
-                data.orders.forEach(order => {
-                    moveOrderCard(order.id, order.status);
-                });
-                updateActionBars();
-            } else if (data) {
-                showMessage(data.error || 'An unknown error occurred.', 'error');
-            }
+            handleFetch(url, formData, batchPendingStatusUpdateBtn).then(data => {
+                if (data && data.success) {
+                    showMessage(data.message, 'success');
+                    data.orders.forEach(order => {
+                        moveOrderCard(order.id, order.status);
+                    });
+                     // updateActionBars will be called by moveOrderCard -> filterGlobalOrders
+                } else if (data) {
+                    showMessage(data.error || 'An unknown error occurred.', 'error');
+                }
+            });
         });
-    });
+     }
 
     // --- BATCH DELETE (Trigger Modal) ---
-    batchDeleteBtn.addEventListener('click', () => {
-        const selectedIds = Array.from(document.querySelectorAll('.completed-checkbox:checked, .other-checkbox:checked')).map(cb => cb.value);
-        const count = selectedIds.length;
-        if (count > 0) {
-            batchDeleteConfirmModal.querySelector('#batch-delete-count').textContent = count;
-            confirmBatchDeleteBtn.dataset.ids = selectedIds.join(',');
-            openModal(batchDeleteConfirmModal);
-        }
-    });
+    if (batchDeleteBtn) {
+        batchDeleteBtn.addEventListener('click', () => {
+             // Get IDs only from VISIBLE checked boxes in relevant groups
+            const selectedIds = Array.from(document.querySelectorAll('.searchable-section:not([style*="display: none"]) .completed-checkbox:checked, .searchable-section:not([style*="display: none"]) .other-checkbox:checked')).map(cb => cb.value);
+            const count = selectedIds.length;
+            if (count > 0 && batchDeleteConfirmModal) {
+                batchDeleteConfirmModal.querySelector('#batch-delete-count').textContent = count;
+                confirmBatchDeleteBtn.dataset.ids = selectedIds.join(',');
+                openModal(batchDeleteConfirmModal);
+            }
+        });
+    }
 
     // --- BATCH DELETE (Confirm & Fetch) ---
-    confirmBatchDeleteBtn.addEventListener('click', function() {
-        const idsToSubmit = this.dataset.ids;
-        if (!idsToSubmit) return;
+     if (confirmBatchDeleteBtn) {
+        confirmBatchDeleteBtn.addEventListener('click', function() {
+            const idsToSubmit = this.dataset.ids;
+            if (!idsToSubmit) return;
 
-        const formData = new FormData(batchDeleteForm);
-        formData.set('order_ids', idsToSubmit);
-        
-        const url = batchDeleteForm.getAttribute('action');
+            const formData = new FormData(batchDeleteForm);
+            formData.set('order_ids', idsToSubmit);
+            const url = batchDeleteForm.getAttribute('action'); // Assumes action is correct
 
-        handleFetch(url, formData, this).then(data => {
-            if (data && data.success) {
-                showMessage(data.message, 'success');
-                closeModal(batchDeleteConfirmModal);
-                data.order_ids.forEach(id => {
-                    removeOrderCard(id);
-                });
-                updateActionBars(); // This will hide the bar
-            } else if (data) {
-                showMessage(data.error || 'An unknown error occurred.', 'error');
-            }
+            handleFetch(url, formData, this).then(data => {
+                if (data && data.success) {
+                    showMessage(data.message, 'success');
+                    closeModal(batchDeleteConfirmModal);
+                    data.order_ids.forEach(id => { // Use the IDs returned from backend
+                        removeOrderCard(id);
+                    });
+                     // updateActionBars will be called by removeOrderCard -> filterGlobalOrders
+                } else if (data) {
+                    showMessage(data.error || 'An unknown error occurred.', 'error');
+                }
+            });
         });
-    });
-    
-    // --- SINGLE STATUS UPDATE (Full Form) ---
-    singleStatusForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        const url = this.action;
-        const button = this.querySelector('button[type="submit"]');
+     }
 
-        handleFetch(url, formData, button).then(data => {
-            if (data && data.success) {
-                showMessage(data.message, 'success');
-                closeModal(detailsModal);
-                data.orders.forEach(order => { // Will only be one
-                    moveOrderCard(order.id, order.status);
-                });
-            } else if (data) {
-                showMessage(data.error || 'An unknown error occurred.', 'error');
-            }
+    // --- SINGLE STATUS UPDATE (Full Form - Approved) ---
+    if (singleStatusForm) {
+        singleStatusForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const url = this.action;
+            const button = this.querySelector('button[type="submit"]');
+
+            handleFetch(url, formData, button).then(data => {
+                if (data && data.success) {
+                    showMessage(data.message, 'success');
+                    closeModal(detailsModal);
+                    data.orders.forEach(order => { // Expecting one order
+                        moveOrderCard(order.id, order.status);
+                    });
+                    // updateActionBars called by moveOrderCard
+                } else if (data) {
+                    showMessage(data.error || 'An unknown error occurred.', 'error');
+                }
+            });
         });
-    });
-    
+    }
+
     // --- SINGLE STATUS UPDATE (Pending Form) ---
-    singlePendingStatusForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        const url = this.action;
-        const button = this.querySelector('button[type="submit"]');
+     if (singlePendingStatusForm) {
+        singlePendingStatusForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const url = this.action;
+            const button = this.querySelector('button[type="submit"]');
 
-        handleFetch(url, formData, button).then(data => {
-            if (data && data.success) {
-                showMessage(data.message, 'success');
-                closeModal(detailsModal);
-                data.orders.forEach(order => { // Will only be one
-                    moveOrderCard(order.id, order.status);
-                });
-            } else if (data) {
-                showMessage(data.error || 'An unknown error occurred.', 'error');
-            }
+            handleFetch(url, formData, button).then(data => {
+                if (data && data.success) {
+                    showMessage(data.message, 'success');
+                    closeModal(detailsModal);
+                    data.orders.forEach(order => { // Expecting one order
+                        moveOrderCard(order.id, order.status);
+                    });
+                     // updateActionBars called by moveOrderCard
+                } else if (data) {
+                    showMessage(data.error || 'An unknown error occurred.', 'error');
+                }
+            });
         });
-    });
+     }
 
     // --- SINGLE DELETE (Trigger Modal) ---
-    openSingleDeleteModalBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const actionUrl = singleDeleteForm.action; 
-        const orderId = actionUrl.split('/delete-order/')[1].replace('/', '');
-        singleDeleteConfirmModal.querySelector('#single-delete-order-id').textContent = `#${orderId}`;
-        // Pass the URL to the final confirm button
-        confirmSingleDeleteBtn.dataset.url = actionUrl;
-        openModal(singleDeleteConfirmModal);
-    });
+    if (openSingleDeleteModalBtn) {
+        openSingleDeleteModalBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation(); // Prevent form submission if inside a form
+            const actionUrl = singleDeleteForm.action; // Get URL from the hidden form
+            if (!actionUrl) return;
 
-    // --- SINGLE DELETE (Confirm & Fetch) ---
-    confirmSingleDeleteBtn.addEventListener('click', function() {
-        const url = this.dataset.url;
-        if (!url) return;
+            const orderIdMatch = actionUrl.match(/\/delete-order\/(\d+)\/?$/);
+            const orderId = orderIdMatch ? orderIdMatch[1] : null;
 
-        // Create empty FormData just to work with our handleFetch helper
-        const formData = new FormData(); 
-
-        handleFetch(url, formData, this).then(data => {
-            if (data && data.success) {
-                showMessage(data.message, 'success');
-                closeModal(singleDeleteConfirmModal);
-                closeModal(detailsModal);
-                removeOrderCard(data.order_id);
-            } else if (data) {
-                showMessage(data.error || 'An unknown error occurred.', 'error');
+            if (orderId && singleDeleteConfirmModal) {
+                singleDeleteConfirmModal.querySelector('#single-delete-order-id').textContent = `#${orderId}`;
+                confirmSingleDeleteBtn.dataset.url = actionUrl; // Pass the URL to the final confirm button
+                openModal(singleDeleteConfirmModal);
+            } else {
+                 console.error("Could not extract order ID or find single delete confirmation modal.");
             }
         });
-    });
+    }
 
-});
+
+    // --- SINGLE DELETE (Confirm & Fetch) ---
+     if (confirmSingleDeleteBtn) {
+        confirmSingleDeleteBtn.addEventListener('click', function() {
+            const url = this.dataset.url;
+            if (!url) return;
+
+             const orderIdMatch = url.match(/\/delete-order\/(\d+)\/?$/);
+             const orderId = orderIdMatch ? orderIdMatch[1] : null;
+             if (!orderId) {
+                  console.error("Could not extract order ID from URL:", url);
+                  return;
+             }
+
+            // Create empty FormData just to work with our handleFetch helper for POST
+            const formData = new FormData();
+
+            handleFetch(url, formData, this).then(data => {
+                if (data && data.success) {
+                    showMessage(data.message, 'success');
+                    closeModal(singleDeleteConfirmModal);
+                    closeModal(detailsModal); // Close the details modal too
+                    removeOrderCard(data.order_id || orderId); // Use ID from response or fallback to extracted ID
+                     // updateActionBars called by removeOrderCard
+                } else if (data) {
+                    showMessage(data.error || 'An unknown error occurred.', 'error');
+                }
+            });
+        });
+     }
+
+}); // End DOMContentLoaded
 </script>
 {% endblock %}

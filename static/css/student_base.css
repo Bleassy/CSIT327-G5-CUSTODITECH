@@ -130,3 +130,56 @@
         padding: 1rem;
     }
 }
+
+/* Container for messages */
+.messages {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0; /* Space below messages, before content */
+}
+
+/* Base style for all message list items */
+.messages li {
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  border: 1px solid transparent; /* Base border */
+  font-weight: 500;
+  display: flex; /* Optional: for aligning icon if you add one */
+  align-items: center; /* Optional */
+  gap: 0.75rem; /* Optional: space for icon */
+  transition: opacity 0.5s ease-out; /* For smooth fade-out if using JS */
+}
+
+/* Style specifically for ERROR messages */
+.messages li.error {
+  color: #991b1b; /* Dark red text */
+  background-color: #fee2e2; /* Light red background */
+  border-color: #fca5a5; /* Red border */
+}
+
+/* Style specifically for SUCCESS messages */
+.messages li.success {
+  color: #15803d; /* Dark green text */
+  background-color: #dcfce7; /* Light green background */
+  border-color: #86efac; /* Green border */
+}
+
+/* Style specifically for WARNING messages (if you use them) */
+.messages li.warning {
+  color: #92400e; /* Dark yellow/orange text */
+  background-color: #fef3c7; /* Light yellow background */
+  border-color: #fde68a; /* Yellow border */
+}
+
+/* Optional: Style for INFO messages (if you use them) */
+.messages li.info {
+  color: #1e40af; /* Dark blue text */
+  background-color: #dbeafe; /* Light blue background */
+  border-color: #93c5fd; /* Blue border */
+}
+
+/* Fade-out class for JS */
+.messages li.fade-out {
+    opacity: 0;
+}
