@@ -139,7 +139,7 @@ Before you begin, ensure you have the following installed on your system:
 2. Copy the HTTPS URL provided.
 3. Open your terminal or Git Bash and run the following command, replacing the URL with the one you just copied:
 ```bash
-git clone [https://github.com/your-username/CSIT327-G5-CUSTODITECH.git](https://github.com/your-username/CSIT327-G5-CUSTODITECH.git)
+git clone https://github.com/your-username/CSIT327-G5-CUSTODITECH.git
 ```
 4. Navigate into the newly created project folder:
 ```bash
@@ -152,7 +152,7 @@ cd CSIT327-G5-CUSTODITECH
 1. Your fork is already configured as the origin remote. You can verify this by running git remote -v.
 2. Now, add the original project repository as a new remote called upstream
 ```bash
-git remote add upstream [https://github.com/theo2815/CSIT327-G5-CUSTODITECH.git](https://github.com/theo2815/CSIT327-G5-CUSTODITECH.git)
+git remote add upstream https://github.com/theo2815/CSIT327-G5-CUSTODITECH.git
 ```
 3. Verify that you now have two remotes (origin and upstream) by runnin
 ```bash
