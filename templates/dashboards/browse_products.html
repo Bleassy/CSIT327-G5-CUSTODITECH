@@ -83,7 +83,7 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" id="details-add-to-cart-btn">Add to Cart</button>
+            <button type="button" class="btn btn-secondary" id="details-add-to-cart-btn">Reserve Now</button>
             <button type="button" class="btn btn-primary" id="details-buy-now-btn">Buy Now</button>
         </div>
     </div>
@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 addToCartBtn.textContent = 'Reserve (Out of Stock)';
                 buyNowBtn.style.display = 'none';
             } else {
-                addToCartBtn.textContent = 'Add to Cart';
+                addToCartBtn.textContent = 'Reserve Now';
                 buyNowBtn.style.display = 'inline-block';
             }
             openModal(detailsModal);

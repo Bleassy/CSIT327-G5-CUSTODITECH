@@ -396,3 +396,34 @@ body {
     from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* --- Header Avatar Styles --- */
+.admin-name-link {
+    display: block;
+    border-radius: 50%;
+    padding: 2px;
+    background: transparent;
+    transition: background-color 0.2s;
+}
+.admin-name-link:hover,
+.admin-name-link.active {
+    background-color: rgba(30, 64, 175, 0.1); /* Light blue */
+}
+
+.header-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover; /* For img */
+}
+
+.header-initials-admin {
+    background-color: #e0e7ff; /* Lighter blue */
+    color: #1e40af; /* Blue */
+    font-weight: 600;
+    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}

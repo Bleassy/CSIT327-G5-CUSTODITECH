@@ -2,61 +2,293 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/student_profile.css' %}?v=1.0">
+    <link rel="stylesheet" href="{% static 'css/student_profile.css' %}?v=1.1">
 {% endblock %}
 
 {% block content %}
 <h1 class="welcome-title">My Profile</h1>
 
+<div class="profile-layout-tabbed">
 
+    <nav class="profile-nav">
+        <a href="#personal-info" class="profile-nav-link active" data-tab-target="#personal-info-card">My Profile</a>
+        <a href="#password" class="profile-nav-link" data-tab-target="#password-card">Change Password</a>
+    </nav>
 
-<div class="profile-layout">
-    <!-- Left Side: Profile Details -->
-    <div class="profile-card">
-        <h2>Personal Information</h2>
-        <form action="{% url 'student_profile' %}" method="post">
-            {% csrf_token %}
-            <input type="hidden" name="form_type" value="details">
-            <div class="form-group">
-                <label for="full_name">Full Name</label>
-                <input type="text" id="full_name" name="full_name" value="{{ profile.full_name|default:'' }}" required>
-            </div>
-            <div class="form-group">
-                <label for="student_id">Student ID</label>
-                <input type="text" id="student_id" name="student_id" value="{{ profile.student_id|default:'' }}" disabled>
-            </div>
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" value="{{ profile.email|default:'' }}" disabled>
-            </div>
-            <div class="form-group">
-                <label for="phone_number">Phone Number</label>
-                <input type="text" id="phone_number" name="phone_number" value="{{ profile.phone_number|default:'' }}">
-            </div>
-            <div class="form-group">
-                <label for="address">Address</label>
-                <textarea id="address" name="address" rows="3">{{ profile.address|default:'' }}</textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">Update Details</button>
-        </form>
-    </div>
+    <div class="profile-content">
+    
+        <div class="profile-card view-mode active" id="personal-info-card">
+            <h2>Personal Information</h2>
+            
+            <form id="details-form" action="{% url 'student_profile' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="details">
 
-    <!-- Right Side: Change Password -->
-    <div class="profile-card">
-        <h2>Change Password</h2>
-        <form action="{% url 'student_profile' %}" method="post">
-            {% csrf_token %}
-            <input type="hidden" name="form_type" value="password">
-            <div class="form-group">
-                <label for="new_password1">New Password</label>
-                <input type="password" id="new_password1" name="new_password1" required minlength="6">
-            </div>
-            <div class="form-group">
-                <label for="new_password2">Confirm New Password</label>
-                <input type="password" id="new_password2" name="new_password2" required minlength="6">
-            </div>
-            <button type="submit" class="btn btn-primary">Change Password</button>
-        </form>
+                <div class="avatar-upload-container">
+                    <div class="avatar-preview" id="avatar-preview">
+                        {% if profile.avatar_url %}
+                            <img src="{{ profile.avatar_url }}" alt="Profile Picture">
+                        {% else %}
+                            <span id="avatar-initials">{{ request.user.get_full_name|default:'U'|first|upper }}</span>
+                        {% endif %}
+                    </div>
+                    <input type="file" name="avatar_image" id="avatar_image" accept="image/png, image/jpeg">
+                    <label for="avatar_image" class="avatar-edit-label">Change Photo</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="full_name">Full Name</label>
+                    <input type="text" id="full_name" name="full_name" value="{{ profile.full_name|default:'' }}" required>
+                    <p class="form-view-text" data-field="full_name">{{ profile.full_name|default:'Not set' }}</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="student_id">Student ID</label>
+                    <input type="text" id="student_id" name="student_id" value="{{ profile.student_id|default:'' }}" disabled>
+                    <p class="form-view-text">{{ profile.student_id|default:'Not set' }}</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="{{ profile.email|default:'' }}" disabled>
+                    <p class="form-view-text">{{ profile.email|default:'' }}</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone_number">Phone Number</label>
+                    <input type="text" id="phone_number" name="phone_number" value="{{ profile.phone_number|default:'' }}">
+                    <p class="form-view-text" data-field="phone_number">{{ profile.phone_number|default:'Not set' }}</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <textarea id="address" name="address" rows="3">{{ profile.address|default:'' }}</textarea>
+                    <p class="form-view-text" data-field="address">{{ profile.address|default:'Not set' }}</p>
+                </div>
+
+                <div class="form-footer">
+                    <button type="button" class="btn btn-secondary" id="cancel-edit-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="save-details-btn">Save Changes</button>
+                    <button type="button" class="btn btn-primary" id="edit-profile-btn">Edit Profile</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="profile-card" id="password-card">
+            <h2>Change Password</h2>
+
+            <form id="password-form" action="{% url 'student_profile' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="password">
+                
+                <div id="password-errors" class="form-errors" style="display: none;"></div>
+
+                <div class="form-group">
+                    <label for="current_password">Current Password</label>
+                    <input type="password" id="current_password" name="current_password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="new_password1">New Password</label>
+                    <input type="password" id="new_password1" name="new_password1" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="new_password2">Confirm New Password</label>
+                    <input type="password" id="new_password2" name="new_password2" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary">Change Password</button>
+            </form>
+        </div>
+
     </div>
 </div>
+{% endblock %}
+
+{# ✅ --- ENTIRE JAVASCRIPT BLOCK REPLACED --- #}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // --- Helper function to show dynamic success/error messages ---
+    function showDynamicMessage(message, className = 'success') {
+        const messagesContainer = document.getElementById('messages-container');
+        if (!messagesContainer) return;
+        const li = document.createElement('li');
+        li.className = className;
+        li.textContent = message;
+        messagesContainer.prepend(li);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => {
+            li.style.opacity = '0';
+            li.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => li.remove(), 500);
+        }, 5000);
+    }
+    
+    // --- Helper function for password validation errors ---
+    const passwordErrorContainer = document.getElementById('password-errors');
+    function showPasswordErrors(errors) {
+        if (!passwordErrorContainer) return;
+        passwordErrorContainer.innerHTML = '';
+        const ul = document.createElement('ul');
+        errors.forEach(error => {
+            const li = document.createElement('li');
+            li.textContent = error;
+            ul.appendChild(li);
+        });
+        passwordErrorContainer.appendChild(ul);
+        passwordErrorContainer.style.display = 'block';
+    }
+    function clearPasswordErrors() {
+        if (passwordErrorContainer) passwordErrorContainer.style.display = 'none';
+    }
+
+    // --- Main function to handle AJAX form submission ---
+    function handleAjaxFormSubmit(form) {
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            // ✅ --- UPDATED: Password Validation Logic ---
+            if (form.id === 'password-form') {
+                clearPasswordErrors();
+                const current = form.querySelector('#current_password').value;
+                const password = form.querySelector('#new_password1').value;
+                const confirm = form.querySelector('#new_password2').value;
+                let errors = [];
+
+                if (!current) { errors.push('Please enter your current password.'); } // New check
+                if (password !== confirm) { errors.push('Passwords do not match.'); }
+                if (password.length < 8) { errors.push('Password must be at least 8 characters long.'); }
+                if (!/[A-Z]/.test(password)) { errors.push('Password needs an uppercase letter.'); }
+                if (!/[a-z]/.test(password)) { errors.push('Password needs a lowercase letter.'); }
+                if (!/[0-9]/.test(password)) { errors.push('Password needs a number.'); }
+                if (!/[@$!%*?&]/.test(password)) { errors.push('Password needs a special character (@$!%*?&).'); }
+                // ✅ NEW: Check if new and current password are the same
+                if (current && current === password) { errors.push('New password cannot be the same as the current password.'); }
+
+                if (errors.length > 0) {
+                    showPasswordErrors(errors);
+                    return; // Stop the submission
+                }
+            }
+            // ✅ --- End of Password Validation ---
+
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.textContent;
+            submitButton.disabled = true;
+            submitButton.textContent = 'Saving...';
+            const formData = new FormData(form);
+            const url = form.action;
+            const method = form.method;
+            const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    body: formData,
+                    headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                const data = await response.json();
+                if (!response.ok) { throw new Error(data.error || 'An unknown error occurred.'); }
+
+                // --- Success ---
+                showDynamicMessage(data.message, 'success');
+                if (form.id === 'password-form') {
+                    form.reset();
+                    clearPasswordErrors(); // Clear errors on success
+                }
+                if (form.id === 'details-form') {
+                    // Full update logic
+                    form.querySelector('.form-view-text[data-field="full_name"]').textContent = formData.get('full_name') || 'Not set';
+                    form.querySelector('.form-view-text[data-field="phone_number"]').textContent = formData.get('phone_number') || 'Not set';
+                    form.querySelector('.form-view-text[data-field="address"]').textContent = formData.get('address') || 'Not set';
+                    if (data.avatar_url) {
+                        const previewEl = document.getElementById('avatar-preview');
+                        previewEl.innerHTML = `<img src="${data.avatar_url}" alt="Profile Picture">`;
+                    }
+                    document.getElementById('personal-info-card').classList.add('view-mode');
+                }
+            } catch (error) {
+                console.error('Form submission error:', error);
+                // ✅ UPDATED: Show server-side validation errors in the password box
+                if (form.id === 'password-form') {
+                    showPasswordErrors([error.message]); // Show backend errors (e.g., "Wrong password")
+                } else {
+                    showDynamicMessage(`Error: ${error.message}`, 'error');
+                }
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            }
+        });
+    }
+
+    // Attach the AJAX handler to both forms
+    const detailsForm = document.getElementById('details-form');
+    const passwordForm = document.getElementById('password-form');
+    if (detailsForm) handleAjaxFormSubmit(detailsForm);
+    if (passwordForm) handleAjaxFormSubmit(passwordForm);
+
+    // --- View/Edit Mode Toggle Logic ---
+    const infoCard = document.getElementById('personal-info-card');
+    const editBtn = document.getElementById('edit-profile-btn');
+    const cancelBtn = document.getElementById('cancel-edit-btn');
+    if (infoCard && editBtn && cancelBtn) {
+        editBtn.addEventListener('click', () => { infoCard.classList.remove('view-mode'); });
+        cancelBtn.addEventListener('click', () => {
+            infoCard.classList.add('view-mode');
+            if (detailsForm) {
+                detailsForm.reset();
+                // Full image preview reset logic
+                const avatarInput = document.getElementById('avatar_image');
+                if (avatarInput) avatarInput.value = ''; 
+                const previewEl = document.getElementById('avatar-preview');
+                const originalImage = "{{ profile.avatar_url }}";
+                const originalInitials = "{{ request.user.get_full_name|default:'U'|first|upper }}";
+                if (originalImage) {
+                    previewEl.innerHTML = `<img src="${originalImage}" alt="Profile Picture">`;
+                } else {
+                    previewEl.innerHTML = `<span>${originalInitials}</span>`;
+                }
+            }
+        });
+    }
+
+    // --- Avatar Image Preview ---
+    const avatarInput = document.getElementById('avatar_image');
+    const avatarPreview = document.getElementById('avatar-preview');
+    if (avatarInput && avatarPreview) {
+        avatarInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarPreview.innerHTML = `<img src="${e.target.result}" alt="Image Preview">`;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    // --- Tabbed Navigation Logic ---
+    const navLinks = document.querySelectorAll('.profile-nav-link');
+    const contentCards = document.querySelectorAll('.profile-content .profile-card');
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault(); 
+            const targetId = link.dataset.tabTarget;
+            const targetCard = document.querySelector(targetId);
+            if (targetCard) {
+                navLinks.forEach(nav => nav.classList.remove('active'));
+                contentCards.forEach(card => card.classList.remove('active'));
+                link.classList.add('active');
+                targetCard.classList.add('active');
+                
+                // ✅ NEW: Clear password errors when switching tabs
+                clearPasswordErrors();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

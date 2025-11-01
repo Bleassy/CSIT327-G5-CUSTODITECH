@@ -8,6 +8,7 @@ from datetime import datetime
 import uuid
 from collections import defaultdict
 import math
+import requests
 
 # --- Decorators for Access Control ---
 def student_required(function):
@@ -44,7 +45,7 @@ def log_activity(user, action, details=None):
     try:
         # ✅ THE FIX IS HERE: Use the powerful 'supabase_service' client for logging
         supabase_service.table('activity_log').insert({
-            'user_id': user.id,
+            'user_id': str(user.id),
             'action': action,
             'details': details or {}
         }).execute()
@@ -78,9 +79,32 @@ def student_dashboard(request):
     Renders the main student dashboard with a welcome message and summaries
     of the most recent reservation and order.
     """
+    # ✅ CORRECTED INDENTATION FOR THIS ENTIRE BLOCK
     raw_name = getattr(request.user, 'get_full_name', lambda: 'Wildcat')()
-    display_name = raw_name.split()[0] if isinstance(raw_name, str) else "Wildcat"
+    display_name = "Wildcat" # Default name
+
+    if isinstance(raw_name, str) and raw_name: # Check if it's a non-empty string
+        if ' ' in raw_name:
+            # Case 1: It's a full name like "Jairus Dave"
+            display_name = raw_name.split(' ')[0]
+        elif '@' in raw_name:
+            # Case 2: It's an email like "jairus.dave@cit.edu"
+            name_part = raw_name.split('@')[0] # Gets "jairus.dave"
+            if '.' in name_part:
+                display_name = name_part.split('.')[0] # Gets "jairus"
+            else:
+                display_name = name_part # Gets "jairus" from "jairus@cit.edu"
+        else:
+            # Case 3: It's just a username like "jairus.dave"
+            if '.' in raw_name:
+                display_name = raw_name.split('.')[0] # Gets "jairus"
+            else:
+                display_name = raw_name # Use the name as-is
+
+    # Finally, capitalize the result
+    display_name = display_name.capitalize()
     
+    # ✅ This is line 105 (in your file) - it is now correctly indented
     latest_reservation = None
     latest_order = None
     
@@ -494,50 +518,112 @@ def checkout_reservation_view(request):
     print("--- CHECKOUT VIEW REACHED --- Not a POST request, redirecting.")
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
 
+
 @student_required
 def student_profile_view(request):
     user_id = request.user.id
     
-    # Handle form submissions for updating profile or password
-    if request.method == 'POST':
+    # --- Handle AJAX POST request ---
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         form_type = request.POST.get('form_type')
 
         # --- Handle Profile Details Update ---
         if form_type == 'details':
+            # ✅ FIX: Indented this entire 'try...except' block
             try:
+                # NEW: Handle file upload
+                avatar_url = None
+                avatar_file = request.FILES.get('avatar_image')
+
+                if avatar_file:
+                    # Create a unique file name
+                    file_ext = avatar_file.name.split('.')[-1]
+                    file_name = f'user_{user_id}_{uuid.uuid4()}.{file_ext}'
+
+                    # Upload to Supabase Storage
+                    supabase_service.storage.from_('avatars').upload(
+                        file=avatar_file.read(),
+                        path=file_name,
+                        file_options={"content-type": avatar_file.content_type}
+                    )
+
+                    # Get the public URL
+                    avatar_url = supabase_service.storage.from_('avatars').get_public_url(file_name)
+
+                # Prepare parameters for the RPC function
                 params = {
                     'p_full_name': request.POST.get('full_name'),
                     'p_phone_number': request.POST.get('phone_number'),
                     'p_address': request.POST.get('address')
                 }
+
+                # NEW: Add avatar_url to params ONLY if a new one was uploaded
+                if avatar_url:
+                    params['p_avatar_url'] = avatar_url
+
+                # Call the RPC function
                 supabase.rpc('update_my_profile', params).execute()
-                messages.success(request, 'Your profile has been updated successfully!')
+
+                # NEW: Send back the new avatar_url in the success message
+                response_data = {
+                    'success': True, 
+                    'message': '✅ Your profile has been updated successfully!'
+                }
+                if avatar_url:
+                    response_data['avatar_url'] = avatar_url
+
+                return JsonResponse(response_data)
+
             except Exception as e:
-                messages.error(request, f'Error updating profile: {e}')
-        
+                # (Error handling is the same)
+                return JsonResponse({'success': False, 'error': f'Error updating profile: {e}'}, status=400)
+
         # --- Handle Password Change ---
         elif form_type == 'password':
+            current_password = request.POST.get('current_password')
             new_password1 = request.POST.get('new_password1')
             new_password2 = request.POST.get('new_password2')
 
+            # --- Frontend validation is repeated on backend for security ---
             if new_password1 != new_password2:
-                messages.error(request, 'Passwords do not match.')
-            elif len(new_password1) < 6:
-                messages.error(request, 'Password must be at least 6 characters long.')
-            else:
-                try:
-                    # Use the Supabase Auth API to update the user's password
-                    supabase.auth.update_user({'password': new_password1})
-                    messages.success(request, 'Your password has been changed successfully!')
-                except Exception as e:
-                    messages.error(request, f'Error changing password: {e}')
-        
-        return redirect('student_profile')
+                return JsonResponse({'success': False, 'error': 'Passwords do not match.'}, status=400)
+            if len(new_password1) < 8: # Check for 8 characters, not 6
+                return JsonResponse({'success': False, 'error': 'Password must be at least 8 characters long.'}, status=400)
 
-    # --- Handle GET request to display the page ---
+            # ✅ 1. CHECK IF NEW PASSWORD IS SAME AS OLD
+            if current_password == new_password1:
+                return JsonResponse({'success': False, 'error': 'New password cannot be the same as the current password.'}, status=400)
+
+            try:
+                # ✅ 2. VALIDATE CURRENT PASSWORD
+                # We do this by trying to sign in with it.
+                user_email = request.user.email
+                auth_response = supabase.auth.sign_in_with_password({
+                    "email": user_email,
+                    "password": current_password
+                })
+
+                # If we get here without error, the password was correct.
+                # ✅ 3. UPDATE TO NEW PASSWORD
+                supabase.auth.update_user({'password': new_password1})
+
+                return JsonResponse({'success': True, 'message': '🔑 Your password has been changed successfully!'})
+
+            except requests.exceptions.HTTPError as e:
+                # ✅ 4. CATCH AUTHENTICATION ERROR
+                if "Invalid login credentials" in str(e):
+                    return JsonResponse({'success': False, 'error': 'Your current password was incorrect.'}, status=400)
+                else:
+                    return JsonResponse({'success': False, 'error': f'An error occurred: {e}'}, status=400)
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': f'Error changing password: {e}'}, status=400)
+
+        # Fallback for unknown form type
+        return JsonResponse({'success': False, 'error': 'Invalid form submission.'}, status=400)
+
+    # --- Handle GET request to display the page (this part is unchanged) ---
     profile_data = {}
     try:
-        # Fetch the user's current profile to pre-fill the form
         response = supabase.table('user_profiles').select('*').eq('user_id', user_id).single().execute()
         profile_data = response.data
     except Exception as e:
@@ -549,7 +635,6 @@ def student_profile_view(request):
         'page_title': 'My Profile'
     }
     return render(request, 'dashboards/student_profile.html', context)
-
 
 @student_required
 def cancel_reservation_view(request, reservation_id):
@@ -596,6 +681,8 @@ def cancel_order_view(request, order_id):
         except Exception as e:
             return JsonResponse({'success': False, 'error': f"Could not cancel the order: {e}"}, status=400)
     return JsonResponse({'success': False, 'error': 'Invalid request.'}, status=400)
+
+    
 
 # --- Admin Views ---
 @admin_required
@@ -1234,50 +1321,91 @@ def batch_delete_logs_view(request):
 @admin_required
 def admin_profile_view(request):
     user_id = request.user.id
-    
-    # Handle form submissions
-    if request.method == 'POST':
+
+    # --- Handle AJAX POST request ---
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         form_type = request.POST.get('form_type')
 
-        # Handle Profile Details Update
+        # --- Handle Profile Details Update ---
         if form_type == 'details':
             try:
+                # ✅ NEW: Handle file upload
+                avatar_url = None
+                avatar_file = request.FILES.get('avatar_image')
+
+                if avatar_file:
+                    # Create a unique file name
+                    file_ext = avatar_file.name.split('.')[-1]
+                    file_name = f'user_{user_id}_{uuid.uuid4()}.{file_ext}'
+
+                    # Upload to Supabase Storage (using service client for admin)
+                    supabase_service.storage.from_('avatars').upload(
+                        file=avatar_file.read(),
+                        path=file_name,
+                        file_options={"content-type": avatar_file.content_type}
+                    )
+
+                    # Get the public URL
+                    avatar_url = supabase_service.storage.from_('avatars').get_public_url(file_name)
+
+                # Prepare parameters for the RPC function
                 params = {
                     'p_full_name': request.POST.get('full_name'),
                     'p_phone_number': request.POST.get('phone_number'),
                     'p_address': request.POST.get('address')
                 }
+
+                # ✅ NEW: Add avatar_url to params ONLY if a new one was uploaded
+                if avatar_url:
+                    params['p_avatar_url'] = avatar_url
+
+                # Call the RPC function (using user's auth)
                 supabase.rpc('update_my_profile', params).execute()
-                messages.success(request, 'Your profile has been updated successfully!')
+
+                # ✅ NEW: Send back the new avatar_url in the success message
+                response_data = {
+                    'success': True, 
+                    'message': '✅ Your profile has been updated successfully!'
+                }
+                if avatar_url:
+                    response_data['avatar_url'] = avatar_url
+
+                return JsonResponse(response_data)
+
             except Exception as e:
-                messages.error(request, f'Error updating profile: {e}')
-        
+                return JsonResponse({'success': False, 'error': f'Error updating profile: {e}'}, status=400)
+
         # Handle Password Change
         elif form_type == 'password':
             new_password1 = request.POST.get('new_password1')
             new_password2 = request.POST.get('new_password2')
 
             if new_password1 != new_password2:
-                messages.error(request, 'Passwords do not match.')
+                # ✅ Return JSON
+                return JsonResponse({'success': False, 'error': 'Passwords do not match.'}, status=400)
             elif len(new_password1) < 6:
-                messages.error(request, 'Password must be at least 6 characters long.')
+                # ✅ Return JSON
+                return JsonResponse({'success': False, 'error': 'Password must be at least 6 characters long.'}, status=400)
             else:
                 try:
                     supabase.auth.update_user({'password': new_password1})
-                    messages.success(request, 'Your password has been changed successfully!')
+                    # ✅ Return JSON
+                    return JsonResponse({'success': True, 'message': '🔑 Your password has been changed successfully!'})
                 except Exception as e:
-                    messages.error(request, f'Error changing password: {e}')
-        
-        return redirect('admin_profile')
+                    # ✅ Return JSON
+                    return JsonResponse({'success': False, 'error': f'Error changing password: {e}'}, status=400)
 
-    # Handle GET request to display the page
+        # Fallback for unknown form type
+        return JsonResponse({'success': False, 'error': 'Invalid form submission.'}, status=400)
+
+    # --- Handle GET request to display the page (this part is unchanged) ---
     profile_data = {}
     try:
         response = supabase.table('user_profiles').select('*').eq('user_id', user_id).single().execute()
         profile_data = response.data
     except Exception as e:
         messages.error(request, f'Could not load your profile: {e}')
-        
+
     context = {
         'profile': profile_data,
         'active_page': 'profile',
@@ -1286,3 +1414,108 @@ def admin_profile_view(request):
     return render(request, 'dashboards/admin_profile.html', context)
 
 
+@admin_required
+def manage_students_view(request):
+    search_query = request.GET.get('search', '').strip()
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+    try:
+        current_page = int(request.GET.get('page', 1))
+    except ValueError:
+        current_page = 1
+    
+    page_size = 10 # Set how many students per page
+    
+    stats = {}
+    students = []
+    total_count = 0
+    total_pages = 1
+    
+    try:
+        # 1. Get the stat card data (only on the initial page load)
+        if not is_ajax:
+            stats_response = supabase_service.rpc('get_student_stats').execute()
+            if stats_response.data:
+                stats = stats_response.data[0]
+            else:
+                stats = {'total_students': 0, 'blocked_students': 0}
+
+        # 2. Get student list
+        params = {
+            'p_search_term': search_query,
+            'p_page_size': page_size,
+            'p_page_number': current_page
+        }
+        students_response = supabase_service.rpc('get_paginated_student_profiles', params).execute()
+        
+        if students_response.data:
+            students = students_response.data
+            total_count = students[0].get('total_count', 0)
+            total_pages = math.ceil(total_count / page_size)
+
+            if not is_ajax:
+                for student in students:
+                    if student.get('created_at'):
+                        student['created_at'] = datetime.fromisoformat(student['created_at'])
+        
+        if is_ajax:
+            # If this is a background search, send all data as JSON
+            return JsonResponse({
+                'students': students,
+                'total_count': total_count,
+                'total_pages': total_pages,
+                'current_page': current_page,
+                'page_range': list(range(1, total_pages + 1)) # Convert range to a list for JSON
+            })
+
+    except Exception as e:
+        if is_ajax:
+            return JsonResponse({'error': str(e)}, status=500)
+        messages.error(request, f"Error fetching student data: {e}")
+        print(f"--- Manage Students Error: {e} ---")
+        
+    # This is for the normal, full-page load
+    context = {
+        'stats': stats,
+        'students': students,
+        'search_query': search_query,
+        'total_count': total_count,
+        'total_pages': total_pages,
+        'current_page': current_page,
+        'page_range': range(1, total_pages + 1),
+        'active_page': 'manage_students',
+        'page_title': 'Manage Student Accounts'
+    }
+    return render(request, 'dashboards/manage_students.html', context)
+
+
+@admin_required
+def admin_block_student_view(request, user_id):
+    """
+    Handles blocking or unblocking a student.
+    This view expects an AJAX request.
+    """
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        try:
+            # The 'is_blocked' value from the form will be a string 'true' or 'false'
+            is_blocked_str = request.POST.get('is_blocked', 'false')
+            is_blocked = True if is_blocked_str == 'true' else False
+
+            params = {
+                'p_user_id': str(user_id),
+                'p_is_blocked': is_blocked
+            }
+            supabase_service.rpc('admin_update_user_status', params).execute()
+
+            action_text = "blocked" if is_blocked else "unblocked"
+            log_activity(
+                request.user, 
+                'STUDENT_STATUS_UPDATED',
+                {'student_user_id': str(user_id), 'action': action_text}
+            )
+            return JsonResponse({'success': True, 'message': f'Student has been {action_text}.'})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)

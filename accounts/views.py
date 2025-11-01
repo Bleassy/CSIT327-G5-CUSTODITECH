@@ -85,16 +85,6 @@ def register(request):
             })
 
             if response.user:
-                # Try creating profile (best effort)
-                try:
-                    supabase.table('user_profiles').insert({
-                        'user_id': response.user.id, 'email': email, 'full_name': full_name,
-                        'user_type': 'student', 'student_id': student_id,
-                        'phone_number': phone_number, 'address': address,
-                    }).execute()
-                    print(f"✅ Profile created for user: {email}")
-                except Exception as profile_e:
-                    print(f"⚠️ Profile creation failed: {profile_e}") # Log only
 
                 # --- Handle SUCCESS ---
                 success_msg = 'Registration successful!'
@@ -159,6 +149,17 @@ def login_view(request):
                 # 2. Get user's actual role
                 user_metadata = response.user.user_metadata
                 actual_user_type = user_metadata.get('user_type', 'student')
+                is_blocked = user_metadata.get('is_blocked', False)
+
+                if is_blocked:
+                    supabase.auth.sign_out() # Sign them out of Supabase immediately
+                    error_msg = "You are currently blocked. Please visit the Custodian Department to resolve this issue."
+                    
+                    if is_ajax:
+                        return JsonResponse({'success': False, 'error': error_msg}, status=403) # 403 Forbidden
+                    else:
+                        messages.error(request, error_msg)
+                        return redirect('login')
 
                 # 3. Check role match
                 if actual_user_type == selected_role:

@@ -44,6 +44,8 @@
 
                 <a href="{% url 'order_management' %}" class="nav-btn {% if active_page == 'order_management' %}active{% endif %}">📅 Order Management</a>
 
+                <a href="{% url 'manage_students' %}" class="nav-btn {% if active_page == 'manage_students' %}active{% endif %}">👥 Manage Students</a>
+
                 <a href="{% url 'reports' %}" class="nav-btn {% if active_page == 'reports' %}active{% endif %}">📊 Reports</a>
 
             </nav>
@@ -54,9 +56,14 @@
 
                 <a href="{% url 'admin_profile' %}" class="admin-name-link {% if active_page == 'profile' %}active{% endif %}">
 
-                    <span class="admin-name">{{ request.user.get_full_name|first|upper }}</span>
-
-                </a>
+    {% if profile.avatar_url %}
+        <img src="{{ profile.avatar_url }}" alt="Profile" class="header-avatar">
+    {% else %}
+        <span class="header-avatar header-initials-admin">
+            {{ profile.full_name|default:'A'|first|upper }}
+        </span>
+    {% endif %}
+    </a>
 
                 <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
 

@@ -14,6 +14,7 @@ urlpatterns = [
     path('student/cancel-reservation/<int:reservation_id>/', views.cancel_reservation_view, name='cancel_reservation'),
     path('student/batch-delete-orders/', views.batch_delete_orders_view, name='batch_delete_orders'),
     path('student/delete-order/<int:order_id>/', views.delete_single_order_view, name='delete_single_order'),
+    
 
 
    
@@ -34,5 +35,7 @@ urlpatterns = [
     path('admin/reports/', views.reports_view, name='reports'),
     path('dashboard/admin/batch-delete-logs/', views.batch_delete_logs_view, name='batch_delete_logs'),
     path('admin/batch-delete-orders/', views.admin_batch_delete_orders_view, name='admin_batch_delete_orders'),
+    path('admin/manage-students/', views.manage_students_view, name='manage_students'),
+    path('admin/block-student/<uuid:user_id>/', views.admin_block_student_view, name='admin_block_student'),
 ]
 

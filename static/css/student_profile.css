@@ -96,3 +96,207 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* --- New Profile View/Edit Mode Styles --- */
+
+/* This holds the plain-text value */
+.form-view-text {
+    font-size: 16px;
+    color: #333;
+    padding: 10px 12px; /* Match input padding */
+    min-height: 42px; /* Match input height */
+    line-height: 1.5;
+    word-break: break-word; /* Wrap long text */
+}
+
+/* --- The Logic --- */
+
+/* By default, HIDE the inputs/textareas */
+.profile-card.view-mode .form-group input[type="text"],
+.profile-card.view-mode .form-group input[type="email"],
+.profile-card.view-mode .form-group textarea {
+    display: none;
+}
+
+/* By default, SHOW the plain-text version */
+.profile-card.view-mode .form-view-text {
+    display: block;
+}
+
+/* By default, HIDE the plain-text version */
+.form-view-text {
+    display: none;
+}
+
+/* --- Button Swapping --- */
+
+/* HIDE Save/Cancel when in view-mode */
+.profile-card.view-mode #save-details-btn,
+.profile-card.view-mode #cancel-edit-btn {
+    display: none;
+}
+
+/* SHOW Edit when in view-mode */
+.profile-card.view-mode #edit-profile-btn {
+    display: inline-block;
+}
+
+/* SHOW Save/Cancel when NOT in view-mode */
+#save-details-btn,
+#cancel-edit-btn {
+    display: inline-block;
+}
+
+/* HIDE Edit when NOT in view-mode */
+#edit-profile-btn {
+    display: none;
+}
+
+/* Style for the button footer */
+.form-footer {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 1rem;
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+
+/* --- New Avatar Styles --- */
+
+.avatar-upload-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.avatar-preview {
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    background-color: #f1f5f9;
+    border: 3px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: 600;
+    color: #800000;
+    overflow: hidden; /* This makes the image fit the circle */
+}
+
+.avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* This crops the image to fill the circle */
+}
+
+/* This is the "Change" button */
+.avatar-edit-label {
+    margin-top: 1rem;
+    font-size: 14px;
+    font-weight: 500;
+    color: #800000;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* Hide the actual file input box */
+#avatar_image {
+    display: none;
+}
+
+/* --- Logic for View/Edit Mode --- */
+
+/* By default, hide the upload elements in view mode */
+.profile-card.view-mode .avatar-edit-label {
+    display: none;
+}
+
+/* When in edit mode, show the upload elements */
+.profile-card:not(.view-mode) .avatar-edit-label {
+    display: block;
+}
+
+/* --- New Tabbed Profile Layout --- */
+
+/* This is the main 2-column container */
+.profile-layout-tabbed {
+    display: grid;
+    grid-template-columns: 1fr 3fr; /* 1 part for nav, 3 parts for content */
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+/* 1. The Left-Side Navigation Menu */
+.profile-nav {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.profile-nav-link {
+    display: block;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    color: #475569;
+    margin-bottom: 0.5rem;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.profile-nav-link:hover {
+    background-color: #f8fafc;
+}
+
+.profile-nav-link.active {
+    background-color: #800000; /* Your primary color */
+    color: white;
+    font-weight: 600;
+}
+
+/* 2. The Right-Side Content Area */
+.profile-content .profile-card {
+    display: none; /* Hide all content cards by default */
+}
+
+.profile-content .profile-card.active {
+    display: block; /* Show only the one with the 'active' class */
+}
+
+/* Responsive adjustment */
+@media (max-width: 992px) {
+    .profile-layout-tabbed {
+        grid-template-columns: 1fr; /* Stack nav on top of content */
+    }
+}
+
+/* --- New Validation Error Styles --- */
+.form-errors {
+    background-color: #fee2e2; /* Light red */
+    color: #991b1b; /* Dark red text */
+    border: 1px solid #fca5a5; /* Red border */
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-errors ul {
+    margin: 0;
+    padding-left: 1.25rem; /* Indent the bullet points */
+}
+
+.form-errors li {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 0.25rem; /* Space between list items */
+}
+
+.form-errors li:last-child {
+    margin-bottom: 0;
+}

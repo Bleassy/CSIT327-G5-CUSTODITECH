@@ -1,0 +1,230 @@
+/* static/css/manage_students.css */
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+.page-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* --- Stat Card Styles --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+.stat-card h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    margin: 0 0 0.5rem 0;
+}
+.stat-card-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #1e40af;
+}
+
+/* --- NEW Search Bar Styles --- */
+.page-controls {
+    margin-bottom: 2.5rem;
+}
+
+/* Make search container generic */
+.search-container {
+     margin-bottom: 2rem; /* Consistent bottom margin */
+     width: 100%;
+}
+
+.search-form {
+    display: flex;
+    width: 100%;
+}
+
+.search-input {
+    flex-grow: 1;
+    padding: 14px 20px;
+    font-size: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    
+    outline: none;
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
+    appearance: none;
+    width: 100%; /* Make it fill the container */
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #1e40af; /* Admin primary color */
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    z-index: 2;
+    position: relative;
+}
+
+/* Hide the old button class */
+.search-btn {
+    display: none;
+}
+
+/* --- Table Styles --- */
+.table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    overflow-x: auto;
+}
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+.data-table th, .data-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+.data-table th {
+    background-color: #f8fafc;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover { background-color: #f8fafc; }
+.no-data-cell { text-align: center; padding: 40px; color: #64748b; }
+
+.action-buttons { display: flex; gap: 8px; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.btn-primary { background-color: #1e40af; color: white; }
+.btn-primary:hover { background-color: #1c3d90; }
+.btn-danger { background-color: #ef4444; color: white; }
+.btn-danger:hover { background-color: #dc2626; }
+.btn-secondary { background-color: #e2e8f0; color: #475569; }
+.btn-secondary:hover { background-color: #cbd5e1; }
+.btn-warning { background-color: #f59e0b; color: white; }
+.btn-warning:hover { background-color: #d97706; }
+.btn-success { background-color: #22c55e; color: white; }
+.btn-success:hover { background-color: #16a34a; }
+
+/* Status Badges */
+.badge { padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; display: inline-block; }
+.badge-active { background-color: #dcfce7; color: #166534; }
+.badge-blocked { background-color: #fee2e2; color: #991b1b; }
+
+/* --- Pagination --- */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1.5rem;
+}
+.pagination-info {
+    font-size: 14px;
+    color: #64748b;
+}
+.pagination-links a, .pagination-links strong {
+    padding: 8px 14px;
+    margin-left: 4px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #475569;
+    background-color: #f1f5f9;
+    font-weight: 500;
+}
+.pagination-links strong {
+    background-color: #1e40af;
+    color: white;
+}
+.pagination-links a:hover {
+    background-color: #e2e8f0;
+}
+
+/* --- Student Profile Modal --- */
+.modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; animation: fadeIn 0.3s; }
+.modal-content { background-color: #fff; margin: 5% auto; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideIn 0.3s; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding: 1.5rem; }
+.modal-header h2 { margin: 0; font-size: 20px; }
+.close-btn { font-size: 28px; cursor: pointer; color: #64748b; }
+.modal-body { padding: 1.5rem; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 1rem; padding: 1.5rem; border-top: 1px solid #e2e8f0; background-color: #f8fafc; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+
+.profile-modal-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin: 0 auto 1.5rem auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e0e7ff;
+    color: #1e40af;
+    font-size: 3rem;
+    font-weight: 600;
+    overflow: hidden;
+}
+.profile-modal-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.profile-modal-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.75rem 1.5rem;
+}
+.profile-modal-grid span {
+    font-weight: 500;
+    color: #64748b;
+}
+.profile-modal-grid strong {
+    font-weight: 600;
+    color: #1e293b;
+    word-break: break-word;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); } }
+
+
+/* --- NEW: Loading Spinner Styles --- */
+.table-loading {
+    display: table-row; /* Show the row */
+}
+.table-loading td {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+}
+.spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(30, 64, 175, 0.2); /* Light admin blue */
+    border-top-color: #1e40af; /* Admin primary color */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

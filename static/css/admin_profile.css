@@ -6,13 +6,54 @@
     margin-bottom: 2rem;
 }
 
-.profile-layout {
+/* ✅ UPDATED: Replaced .profile-layout with .profile-layout-tabbed */
+.profile-layout-tabbed {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1fr 3fr; /* 1 part for nav, 3 parts for content */
     gap: 2rem;
     align-items: flex-start;
 }
 
+/* ✅ NEW: Left-Side Navigation Menu */
+.profile-nav {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.profile-nav-link {
+    display: block;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    color: #475569;
+    margin-bottom: 0.5rem;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.profile-nav-link:hover {
+    background-color: #f8fafc;
+}
+
+.profile-nav-link.active {
+    background-color: #1e40af; /* ✅ Admin primary color */
+    color: white;
+    font-weight: 600;
+}
+
+/* ✅ NEW: Content Area Styling */
+.profile-content .profile-card {
+    display: none; /* Hide all content cards by default */
+}
+
+.profile-content .profile-card.active {
+    display: block; /* Show only the one with the 'active' class */
+}
+
+
+/* (Existing styles for cards, forms, buttons) */
 .profile-card {
     background: white;
     border-radius: 12px;
@@ -81,12 +122,14 @@
     background-color: #1c3d90;
 }
 
+/* ✅ UPDATED: Responsive layout */
 @media (max-width: 992px) {
-    .profile-layout {
+    .profile-layout-tabbed {
         grid-template-columns: 1fr;
     }
 }
 
+/* ✅ ADDED: .success-message from your existing code */
 .success-message {
     color: #155724; /* Dark green text */
     background-color: #d4edda; /* Light green background */
@@ -96,4 +139,117 @@
     border: 1px solid #c3e6cb; /* Slightly darker green border */
     font-weight: 500;
     text-align: center;
+}
+
+/* --- New Avatar Styles --- */
+.avatar-upload-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.avatar-preview {
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    background-color: #f1f5f9;
+    border: 3px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: 600;
+    color: #1e40af; /* Admin primary color */
+    overflow: hidden;
+}
+
+.avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-edit-label {
+    margin-top: 1rem;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e40af; /* Admin primary color */
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+#avatar_image {
+    display: none; /* Hide the file input */
+}
+
+/* --- View/Edit Mode Styles --- */
+.form-view-text {
+    font-size: 16px;
+    color: #333;
+    padding: 10px 12px;
+    min-height: 42px;
+    line-height: 1.5;
+    word-break: break-word;
+    display: none; /* Hidden by default */
+}
+
+/* When in view-mode, hide inputs... */
+.profile-card.view-mode .form-group input[type="text"],
+.profile-card.view-mode .form-group input[type="email"],
+.profile-card.view-mode .form-group textarea {
+    display: none;
+}
+
+/* ...and show the plain text */
+.profile-card.view-mode .form-view-text {
+    display: block;
+}
+
+/* ...and hide the upload button */
+.profile-card.view-mode .avatar-edit-label {
+    display: none;
+}
+
+/* --- Button Swapping --- */
+.form-footer {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 1rem;
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.profile-card.view-mode #save-details-btn,
+.profile-card.view-mode #cancel-edit-btn {
+    display: none;
+}
+
+.profile-card:not(.view-mode) #edit-profile-btn {
+    display: none;
+}
+
+/* --- Password Error Box --- */
+.form-errors {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    display: none; /* Hidden by default */
+}
+.form-errors ul {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+.form-errors li {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+.form-errors li:last-child {
+    margin-bottom: 0;
 }

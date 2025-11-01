@@ -9,6 +9,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body class="buyer-dashboard">
+
     <header class="dashboard-header">
         <div class="header-left">
             <a class="logo">
@@ -18,15 +19,22 @@
         </div>
         <nav class="main-nav">
             <a href="{% url 'student_dashboard' %}" class="nav-btn {% if active_page == 'dashboard' %}active{% endif %}">🏠 Dashboard</a>
-            <a href="{% url 'browse_products' %}" class="nav-btn {% if active_page == 'browse' %}active{% endif %}">🛒 Browse Products</a>
+            <a href="{% url 'browse_products' %}" class="nav-btn {% if active_page == 'browse' %}active{% endif %}">🛍️ Browse Products</a>
             <a href="{% url 'my_reservations' %}" class="nav-btn {% if active_page == 'reservations' %}active{% endif %}">📅 My Reservations</a>
             <a href="{% url 'my_orders' %}" class="nav-btn {% if active_page == 'orders' %}active{% endif %}">📦 My Orders</a>
         </nav>
         <div class="header-right">
             <!-- ✅ UPDATED: The student name is now a link to the profile page -->
             <a href="{% url 'student_profile' %}" class="student-name-link {% if active_page == 'profile' %}active{% endif %}">
-                <span class="student-name">{{ request.user.get_full_name|first|upper }}</span>
-            </a>
+
+    {% if profile.avatar_url %}
+        <img src="{{ profile.avatar_url }}" alt="Profile" class="header-avatar">
+    {% else %}
+        <span class="header-avatar header-initials">
+            {{ profile.full_name|default:request.user.get_full_name|default:'U'|first|upper }}
+        </span>
+    {% endif %}
+    </a>
             <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
         </div>
     </header>

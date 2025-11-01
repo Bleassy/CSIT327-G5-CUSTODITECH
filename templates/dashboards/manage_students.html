@@ -1,0 +1,435 @@
+{% extends 'dashboards/admin_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/manage_students.css' %}?v=1.2">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Manage Student Accounts</h1>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Total Student Accounts</h3>
+        {# ✅ ADDED: ID for total students count #}
+        <div class="stat-card-value" id="total-students-count">{{ stats.total_students }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Blocked Accounts</h3>
+        {# ✅ ADDED: ID for blocked students count #}
+        <div class="stat-card-value" id="blocked-students-count">{{ stats.blocked_students }}</div>
+    </div>
+</div>
+
+<div class="page-controls">
+    <div class="search-form">
+        <input type="search" id="student-search-input" class="search-input" placeholder="Search by Student ID, Name, or Email...">
+    </div>
+</div>
+
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Email</th>
+                <th>Phone Number</th>
+                <th>Status</th>
+                <th>Created Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="student-table-body">
+            {% for student in students %}
+            <tr class="student-row" 
+                data-name="{{ student.full_name|default:''|lower }}" 
+                data-email="{{ student.email|lower }}" 
+                data-student-id="{{ student.student_id|default:''|lower }}">
+                
+                <td>{{ student.full_name|default:'N/A' }}</td>
+                <td>{{ student.email }}</td>
+                <td>{{ student.phone_number|default:'N/A' }}</td>
+                <td>
+                    {% if student.is_blocked %}
+                        <span class="badge badge-blocked">Blocked</span>
+                    {% else %}
+                        <span class="badge badge-active">Active</span>
+                    {% endif %}
+                </td>
+                <td>{{ student.created_at|date:"M d, Y" }}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button type="button" class="btn btn-primary btn-view-profile"
+                                data-name="{{ student.full_name|default:'N/A' }}"
+                                data-email="{{ student.email }}"
+                                data-student-id="{{ student.student_id|default:'N/A' }}"
+                                data-phone="{{ student.phone_number|default:'N/A' }}"
+                                data-address="{{ student.address|default:'N/A' }}"
+                                data-avatar-url="{{ student.avatar_url|default:'' }}">
+                            View
+                        </button>
+                        <form class="block-unblock-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ student.user_id }}">
+                            {% if student.is_blocked %}
+                                <input type="hidden" name="is_blocked" value="false">
+                                <button type="submit" class="btn btn-success">Unblock</button>
+                            {% else %}
+                                <input type="hidden" name="is_blocked" value="true">
+                                <button type="submit" class="btn btn-danger">Block</button>
+                            {% endif %}
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr id="initial-empty-row">
+                <td colspan="6" class="no-data-cell">
+                    No student accounts found.
+                </td>
+            </tr>
+            {% endfor %}
+
+            <tr id="no-results-row" style="display: none;">
+                <td colspan="6" class="no-data-cell">
+                    No students found matching your filter.
+                </td>
+            </tr>
+            
+            <tr id="loading-row" class="table-loading" style="display: none;">
+                <td colspan="6">
+                    <div class="spinner"></div> Loading...
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="pagination-container" id="pagination-container">
+    {% if total_pages > 1 %}
+    <div class="pagination-info">
+        Showing page {{ current_page }} of {{ total_pages }} ({{ total_count }} total students)
+    </div>
+    <div class="pagination-links">
+        {% for page_num in page_range %}
+            {% if page_num == current_page %}
+                <strong>{{ page_num }}</strong>
+            {% else %}
+                <a href="?page={{ page_num }}" class="pagination-link" data-page="{{ page_num }}">{{ page_num }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<div id="student-profile-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Student Profile</h2>
+            <span class="close-btn">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="profile-modal-avatar" id="modal-avatar">
+            </div>
+            <div class="profile-modal-grid">
+                <span>Full Name:</span> <strong id="modal-full-name"></strong>
+                <span>Student ID:</span> <strong id="modal-student-id"></strong>
+                <span>Email:</span> <strong id="modal-email"></strong>
+                <span>Phone:</span> <strong id="modal-phone"></strong>
+                <span>Address:</span> <strong id="modal-address"></strong>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary cancel-btn">Close</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // --- Get All Static Elements ---
+    const profileModal = document.getElementById('student-profile-modal');
+    const searchInput = document.getElementById('student-search-input');
+    const tableBody = document.getElementById('student-table-body');
+    const noResultsRow = document.getElementById('no-results-row');
+    const initialEmptyRow = document.getElementById('initial-empty-row');
+    const paginationContainer = document.getElementById('pagination-container');
+    const loadingRow = document.getElementById('loading-row');
+    
+    // ✅ ADDED: Get the stat card elements
+    const blockedStudentsCountEl = document.getElementById('blocked-students-count');
+    const totalStudentsCountEl = document.getElementById('total-students-count'); // (In case you add a "delete" feature later)
+    
+    // Global state
+    let searchTimer;
+    let currentSearchTerm = '';
+    
+    // --- Helper: Show/Hide Modals ---
+    const openModal = (modal) => modal.style.display = 'flex';
+    const closeModal = (modal) => modal.style.display = 'none';
+    if (profileModal) {
+        const closeModalBtn = profileModal.querySelector('.close-btn');
+        const cancelModalBtn = profileModal.querySelector('.cancel-btn');
+        if (closeModalBtn) closeModalBtn.addEventListener('click', () => closeModal(profileModal));
+        if (cancelModalBtn) cancelModalBtn.addEventListener('click', () => closeModal(profileModal));
+        window.addEventListener('click', (e) => {
+            if (e.target == profileModal) closeModal(profileModal);
+        });
+    }
+
+    // --- Helper: Show Dynamic Message ---
+    function showDynamicMessage(message, className = 'success') {
+        const messagesContainer = document.getElementById('message-container');
+        if (!messagesContainer) return;
+        const li = document.createElement('li');
+        li.className = className;
+        li.textContent = message;
+        messagesContainer.prepend(li);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => {
+            li.style.opacity = '0';
+            li.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => li.remove(), 500);
+        }, 5000);
+    }
+    
+    // --- Helper: Open Profile Modal ---
+    function openProfileModal(button) {
+        const data = button.dataset;
+        document.getElementById('modal-full-name').textContent = data.name;
+        document.getElementById('modal-student-id').textContent = data.studentId;
+        document.getElementById('modal-email').textContent = data.email;
+        document.getElementById('modal-phone').textContent = data.phone;
+        document.getElementById('modal-address').textContent = data.address;
+        const avatarContainer = document.getElementById('modal-avatar');
+        if (data.avatarUrl) {
+            avatarContainer.innerHTML = `<img src="${data.avatarUrl}" alt="Avatar">`;
+        } else {
+            const initial = data.name.charAt(0).toUpperCase() || 'S';
+            avatarContainer.innerHTML = `<span>${initial}</span>`;
+        }
+        openModal(profileModal);
+    }
+    
+    // --- Helper: Handle Block/Unblock Form Submit ---
+    async function handleBlockFormSubmit(e) {
+        e.preventDefault();
+        const form = e.currentTarget;
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.textContent;
+        submitButton.disabled = true;
+        submitButton.textContent = '...';
+
+        const formData = new FormData(form);
+        const userId = formData.get('user_id');
+        const isBlocked = formData.get('is_blocked'); // This is the action we are *about* to perform
+        const url = `/dashboard/admin/block-student/${userId}/`;
+        const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'An unknown error occurred');
+
+            // --- Success! ---
+            showDynamicMessage(data.message, 'success');
+
+            // ✅ ADDED: Live Stat Card Update
+            if (blockedStudentsCountEl) {
+                let currentCount = parseInt(blockedStudentsCountEl.textContent);
+                if (isBlocked === 'true') {
+                    // We just blocked a user, so increment the count
+                    currentCount++;
+                } else {
+                    // We just unblocked a user, so decrement the count
+                    currentCount--;
+                }
+                blockedStudentsCountEl.textContent = currentCount;
+            }
+
+            // Live UI Update for the row
+            const row = form.closest('tr');
+            const statusBadge = row.querySelector('.badge');
+            const isBlockedInput = form.querySelector('input[name="is_blocked"]');
+
+            if (isBlocked === 'true') {
+                statusBadge.textContent = 'Blocked';
+                statusBadge.className = 'badge badge-blocked';
+                submitButton.textContent = 'Unblock';
+                submitButton.className = 'btn btn-success';
+                isBlockedInput.value = 'false';
+            } else {
+                statusBadge.textContent = 'Active';
+                statusBadge.className = 'badge badge-active';
+                submitButton.textContent = 'Block';
+                submitButton.className = 'btn btn-danger';
+                isBlockedInput.value = 'true';
+            }
+            submitButton.disabled = false;
+
+        } catch (error) {
+            showDynamicMessage(error.message, 'error');
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+        }
+    }
+    
+    // --- Helper: Re-attach Listeners to New Rows ---
+    function attachListenersToRows() {
+        tableBody.querySelectorAll('.btn-view-profile').forEach(button => {
+            button.addEventListener('click', () => openProfileModal(button));
+        });
+        tableBody.querySelectorAll('.block-unblock-form').forEach(form => {
+            form.removeEventListener('submit', handleBlockFormSubmit); 
+            form.addEventListener('submit', handleBlockFormSubmit);
+        });
+    }
+
+    // --- Helper: Render New Table Rows ---
+    function renderTableRows(students) {
+        tableBody.innerHTML = ''; // Clear the table
+        
+        if (students.length === 0) {
+            // Show "no results" or "initial empty" based on search
+            if (currentSearchTerm.length > 0) {
+                if (noResultsRow) noResultsRow.style.display = '';
+            } else if (initialEmptyRow) {
+                initialEmptyRow.style.display = '';
+            }
+            return;
+        }
+        
+        if (noResultsRow) noResultsRow.style.display = 'none';
+        if (initialEmptyRow) initialEmptyRow.style.display = 'none';
+        
+        students.forEach(student => {
+            const isBlocked = student.is_blocked || false;
+            const statusBadge = isBlocked ? `<span class="badge badge-blocked">Blocked</span>` : `<span class="badge badge-active">Active</span>`;
+            const blockButton = isBlocked ? `<input type="hidden" name="is_blocked" value="false"><button type="submit" class="btn btn-success">Unblock</button>` : `<input type="hidden" name="is_blocked" value="true"><button type="submit" class="btn btn-danger">Block</button>`;
+            let formattedDate = student.created_at ? new Date(student.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) : 'N/A';
+            
+            const rowHtml = `
+                <tr class="student-row" data-name="${student.full_name?.toLowerCase() || ''}" data-email="${student.email?.toLowerCase() || ''}" data-student-id="${student.student_id?.toLowerCase() || ''}">
+                    <td>${student.full_name || 'N/A'}</td>
+                    <td>${student.email || 'N/A'}</td>
+                    <td>${student.phone_number || 'N/A'}</td>
+                    <td>${statusBadge}</td>
+                    <td>${formattedDate}</td>
+                    <td><div class="action-buttons">
+                        <button type="button" class="btn btn-primary btn-view-profile"
+                                data-name="${student.full_name || 'N/A'}"
+                                data-email="${student.email || 'N/A'}"
+                                data-student-id="${student.student_id || 'N/A'}"
+                                data-phone="${student.phone_number || 'N/A'}"
+                                data-address="${student.address || 'N/A'}"
+                                data-avatar-url="${student.avatar_url || ''}">
+                            View
+                        </button>
+                        <form class="block-unblock-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="${student.user_id}">
+                            ${blockButton}
+                        </form>
+                    </div></td>
+                </tr>`;
+            tableBody.insertAdjacentHTML('beforeend', rowHtml);
+        });
+        
+        attachListenersToRows();
+    }
+    
+    // --- Helper to render pagination links ---
+    function renderPagination(data) {
+        if (!paginationContainer) return;
+        paginationContainer.innerHTML = ''; // Clear old pagination
+
+        if (data.total_pages <= 1) return; // Don't show if only 1 page
+
+        const infoHtml = `<div class="pagination-info">Showing page ${data.current_page} of ${data.total_pages} (${data.total_count} total students)</div>`;
+        let linksHtml = '<div class="pagination-links">';
+
+        data.page_range.forEach(page_num => {
+            if (page_num == data.current_page) {
+                linksHtml += `<strong>${page_num}</strong>`;
+            } else {
+                linksHtml += `<a href="?page=${page_num}" class="pagination-link" data-page="${page_num}">${page_num}</a>`;
+            }
+        });
+        linksHtml += '</div>';
+        
+        paginationContainer.innerHTML = infoHtml + linksHtml;
+        
+        // Re-attach listeners to the new links
+        attachPaginationListeners();
+    }
+
+    // --- Helper to attach listeners to pagination ---
+    function attachPaginationListeners() {
+        paginationContainer.querySelectorAll('.pagination-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault(); // Stop the link from reloading the page
+                const pageNum = e.currentTarget.dataset.page;
+                fetchStudents(pageNum, currentSearchTerm); // Fetch the new page
+            });
+        });
+    }
+
+    // --- Main function to fetch data ---
+    async function fetchStudents(page = 1, search = '') {
+        if (loadingRow) loadingRow.style.display = ''; // Show loading
+        if (noResultsRow) noResultsRow.style.display = 'none';
+        if (initialEmptyRow) initialEmptyRow.style.display = 'none';
+        tableBody.querySelectorAll('.student-row').forEach(row => row.remove()); // Clear only student rows
+        
+        try {
+            const url = `{% url 'manage_students' %}?page=${page}&search=${encodeURIComponent(search)}&format=json`;
+            const response = await fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (!response.ok) throw new Error('Failed to fetch students.');
+            
+            const data = await response.json();
+            if (data.error) throw new Error(data.error);
+            
+            if (loadingRow) loadingRow.style.display = 'none'; // Hide loading
+            
+            renderTableRows(data.students);
+            renderPagination(data);
+            
+        } catch (error) {
+            console.error("Fetch error:", error);
+            if (loadingRow) loadingRow.style.display = 'none';
+            showDynamicMessage(error.message, 'error');
+        }
+    }
+
+    // --- Attach Initial Event Listeners ---
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            currentSearchTerm = searchInput.value;
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                fetchStudents(1, currentSearchTerm); // Search always resets to page 1
+            }, 300); // 300ms debounce
+        });
+    }
+    
+    // Attach listeners to the rows and pagination that loaded with the page
+    attachListenersToRows();
+    attachPaginationListeners();
+});
+</script>
+{% endblock %}

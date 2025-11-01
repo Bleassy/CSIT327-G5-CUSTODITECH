@@ -183,3 +183,34 @@
 .messages li.fade-out {
     opacity: 0;
 }
+
+/* --- Header Avatar Styles --- */
+.student-name-link {
+    display: block;
+    border-radius: 50%;
+    padding: 2px; /* Creates a small border/halo */
+    background: transparent;
+    transition: background-color 0.2s;
+}
+.student-name-link:hover,
+.student-name-link.active {
+    background-color: rgba(128, 0, 0, 0.1); /* Light maroon */
+}
+
+.header-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover; /* For img */
+}
+
+.header-initials {
+    background-color: #fde8e8; /* Lighter maroon */
+    color: #800000; /* Maroon */
+    font-weight: 600;
+    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
