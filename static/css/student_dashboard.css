@@ -148,6 +148,38 @@
     }
 }
 
+/* --- ✅ NEW: Mobile Responsive Fixes --- */
+@media (max-width: 768px) {
+    /* 1. Fix Welcome Card */
+    .welcome-card {
+        height: auto; /* Remove fixed height */
+        padding: 1.5rem;
+        text-align: center; /* Center text */
+    }
+    .welcome-card h1 {
+        font-size: 28px; /* Reduce font size */
+    }
+    .welcome-card p {
+        font-size: 16px; /* Reduce font size */
+    }
+
+    /* 2. Fix Summary Item Cards */
+    .item-card {
+        flex-direction: column; /* Stack image on top of details */
+        gap: 1rem; /* Adjust gap for vertical stacking */
+    }
+    .item-image {
+        width: 100%; /* Make image full-width */
+        height: 180px; /* Give it a consistent height */
+        /* object-fit: cover; is already set */
+    }
+    .item-details h4 {
+        margin-bottom: 0.5rem; /* Tighter spacing */
+    }
+}
+/* --- End of New Fixes --- */
+
+
 /* --- Message/Alert Styling (New Design) --- */
 .message-container {
     margin-bottom: 2rem; 

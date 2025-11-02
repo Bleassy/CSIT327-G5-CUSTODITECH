@@ -300,3 +300,37 @@
 .form-errors li:last-child {
     margin-bottom: 0;
 }
+
+/* --- NEW: Style for individual error messages --- */
+.form-error-message {
+    color: #d9534f; /* A standard error red */
+    font-size: 0.875rem;
+    margin-top: 5px;
+    min-height: 1em; /* Prevents layout shift when text appears */
+}
+
+/* --- ✅ NEW: Mobile Responsive Fixes --- */
+@media (max-width: 768px) {
+    .profile-card {
+        padding: 1.5rem; /* Reduce padding on mobile */
+    }
+
+    .form-footer {
+        flex-direction: column; /* Stack buttons vertically */
+        gap: 1rem; /* Add space between stacked buttons */
+    }
+
+    /* Make buttons in footer full-width */
+    .form-footer .btn {
+        width: 100%;
+    }
+
+    /* Reduce padding on nav for more space */
+    .profile-nav {
+        padding: 0.5rem;
+    }
+    .profile-nav-link {
+        padding: 0.75rem 1rem;
+    }
+}
+

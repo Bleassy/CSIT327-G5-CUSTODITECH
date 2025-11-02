@@ -650,10 +650,14 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 closeModal(cancelConfirmModal);
                 showDynamicMessage(`Error: ${error.message}`, 'error');
-                // Re-enable button on error
+                // The reset logic is now in 'finally'
+            } finally {
+                // --- THIS IS THE FIX ---
+                // This code runs after EITHER try or catch finishes.
+                // It guarantees the button is always reset.
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
-            } 
+            }
         });
     }
     // --- END OF ADDED SCRIPT ---

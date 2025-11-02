@@ -882,7 +882,7 @@ def delete_product(request, product_id):
             # ✅ CHANGED: Return JSON
             return JsonResponse({
                 'success': True, 
-                'message': '🗑️ Product deleted successfully!', 
+                'message': 'Product deleted successfully!', 
                 'product_id': product_id # Send the ID back to the JS
             })
         except Exception as e:
@@ -1033,7 +1033,7 @@ def batch_update_products(request):
                 # ✅ Return JSON success
                 return JsonResponse({
                     'success': True, 
-                    'message': '🗑️ Product deleted successfully!',
+                    'message': 'Product deleted successfully!',
                     'product_ids': product_ids # Send back the IDs
                 })
                 

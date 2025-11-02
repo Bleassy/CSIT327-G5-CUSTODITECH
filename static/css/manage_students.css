@@ -228,3 +228,53 @@
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* --- ✅ NEW: Mobile Responsive Fixes --- */
+@media (max-width: 768px) {
+    .page-header {
+        align-items: center; /* Center the title */
+    }
+
+    .data-table {
+        font-size: 13px; /* Make table font smaller */
+    }
+
+    .data-table th, .data-table td {
+        padding: 12px 10px; /* Reduce padding */
+    }
+
+    .action-buttons {
+        flex-direction: column; /* Stack buttons */
+        align-items: flex-start;
+    }
+    .action-buttons .btn {
+        width: 100%; /* Make buttons full-width in the cell */
+        text-align: center;
+    }
+
+    .modal-content {
+        margin: 5% auto; /* Less vertical margin */
+        width: 95%; /* Use more of the screen */
+    }
+
+    .profile-modal-grid {
+        grid-template-columns: 1fr; /* Stack modal details */
+        gap: 0.5rem;
+    }
+    .profile-modal-grid span {
+        font-weight: 400; /* Lighter weight for labels */
+    }
+    .profile-modal-grid strong {
+        margin-bottom: 0.5rem; /* Add space below value */
+    }
+
+    .pagination-container {
+        flex-direction: column; /* Stack pagination */
+        gap: 1rem;
+    }
+    .pagination-links {
+        display: flex;
+        flex-wrap: wrap; /* Allow links to wrap */
+        justify-content: center;
+    }
+}

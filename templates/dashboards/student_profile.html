@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/student_profile.css' %}?v=1.1">
+    <link rel="stylesheet" href="{% static 'css/student_profile.css' %}?v=1.2">
 {% endblock %}
 
 {% block content %}
@@ -19,6 +19,8 @@
     
         <div class="profile-card view-mode active" id="personal-info-card">
             <h2>Personal Information</h2>
+            
+            <div id="details-server-errors" class="form-errors" style="display: none;"></div>
             
             <form id="details-form" action="{% url 'student_profile' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
@@ -40,6 +42,7 @@
                     <label for="full_name">Full Name</label>
                     <input type="text" id="full_name" name="full_name" value="{{ profile.full_name|default:'' }}" required>
                     <p class="form-view-text" data-field="full_name">{{ profile.full_name|default:'Not set' }}</p>
+                    <p class="form-error-message" id="full_name-error"></p> 
                 </div>
                 
                 <div class="form-group">
@@ -56,14 +59,16 @@
                 
                 <div class="form-group">
                     <label for="phone_number">Phone Number</label>
-                    <input type="text" id="phone_number" name="phone_number" value="{{ profile.phone_number|default:'' }}">
+                    <input type="text" id="phone_number" name="phone_number" value="{{ profile.phone_number|default:'' }}" placeholder="e.g., 09123456789">
                     <p class="form-view-text" data-field="phone_number">{{ profile.phone_number|default:'Not set' }}</p>
+                    <p class="form-error-message" id="phone_number-error"></p> 
                 </div>
                 
                 <div class="form-group">
                     <label for="address">Address</label>
-                    <textarea id="address" name="address" rows="3">{{ profile.address|default:'' }}</textarea>
+                    <textarea id="address" name="address" rows="3" placeholder="Street, Barangay, City, Province">{{ profile.address|default:'' }}</textarea>
                     <p class="form-view-text" data-field="address">{{ profile.address|default:'Not set' }}</p>
+                    <p class="form-error-message" id="address-error"></p> 
                 </div>
 
                 <div class="form-footer">
@@ -104,7 +109,7 @@
 </div>
 {% endblock %}
 
-{# ✅ --- ENTIRE JAVASCRIPT BLOCK REPLACED --- #}
+{# ✅ --- REFACTORED JAVASCRIPT BLOCK --- #}
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -125,7 +130,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 5000);
     }
     
-    // --- Helper function for password validation errors ---
+    // --- Helpers for DETAILS server errors (not validation) ---
+    const detailsServerErrorContainer = document.getElementById('details-server-errors');
+    function showDetailsServerError(error) {
+        if (!detailsServerErrorContainer) return;
+        detailsServerErrorContainer.innerHTML = `<ul><li>${error}</li></ul>`;
+        detailsServerErrorContainer.style.display = 'block';
+    }
+    function clearDetailsServerError() {
+        if (detailsServerErrorContainer) {
+            detailsServerErrorContainer.innerHTML = '';
+            detailsServerErrorContainer.style.display = 'none';
+        }
+    }
+
+    // --- Helper to clear all individual field errors ---
+    function clearAllFieldErrors() {
+        document.querySelectorAll('#details-form .form-error-message').forEach(el => {
+            el.textContent = '';
+        });
+    }
+
+    // --- Helper function for PASSWORD validation errors ---
     const passwordErrorContainer = document.getElementById('password-errors');
     function showPasswordErrors(errors) {
         if (!passwordErrorContainer) return;
@@ -143,36 +169,109 @@ document.addEventListener('DOMContentLoaded', () => {
         if (passwordErrorContainer) passwordErrorContainer.style.display = 'none';
     }
 
+    // --- Phone Number Formatter ---
+    function formatPhoneNumber(value) {
+        const unformattedRegex = /^09\d{9}$/; // 11 digits total, starting with "09"
+        if (unformattedRegex.test(value)) {
+            const group1 = value.substring(1, 4); // "912"
+            const group2 = value.substring(4, 7); // "345"
+            const group3 = value.substring(7, 11); // "6789"
+            return `+63 ${group1} ${group2} ${group3}`;
+        }
+        return value; // Return original if no match
+    }
+
+    // ✅ --- NEW: Individual Validation Functions ---
+    const fullNameInput = document.getElementById('full_name');
+    const phoneInput = document.getElementById('phone_number');
+    const addressInput = document.getElementById('address');
+
+    function validateFullName() {
+        const fullName = fullNameInput.value;
+        const errorEl = document.getElementById('full_name-error');
+        const fullNameRegex = /^[a-zA-ZñÑ. ]+$/;
+        
+        if (fullName && !fullNameRegex.test(fullName)) {
+            errorEl.textContent = 'Full name can only contain letters, spaces, and periods.';
+            return false;
+        }
+        errorEl.textContent = ''; // Clear error
+        return true;
+    }
+
+    function validatePhoneNumber() {
+        // First, format the number
+        phoneInput.value = formatPhoneNumber(phoneInput.value.trim());
+        const phoneNumber = phoneInput.value;
+        const errorEl = document.getElementById('phone_number-error');
+        const phoneRegex = /^\+63 9\d{2} \d{3} \d{4}$/;
+        
+        if (phoneNumber && !phoneRegex.test(phoneNumber)) {
+            errorEl.textContent = 'Please enter a valid Philippine mobile number format: +63 912 345 6789.';
+            return false;
+        }
+        errorEl.textContent = ''; // Clear error
+        return true;
+    }
+
+    function validateAddress() {
+        const address = addressInput.value;
+        const errorEl = document.getElementById('address-error');
+        
+        if (address && (address.match(/,/g) || []).length < 3) {
+            errorEl.textContent = 'Address format: Street, Barangay, City, Province.';
+            return false;
+        }
+        errorEl.textContent = ''; // Clear error
+        return true;
+    }
+    // ✅ --- END: Individual Validation Functions ---
+
     // --- Main function to handle AJAX form submission ---
     function handleAjaxFormSubmit(form) {
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             
-            // ✅ --- UPDATED: Password Validation Logic ---
+            // --- Password Validation Logic ---
             if (form.id === 'password-form') {
                 clearPasswordErrors();
+                let errors = [];
                 const current = form.querySelector('#current_password').value;
                 const password = form.querySelector('#new_password1').value;
                 const confirm = form.querySelector('#new_password2').value;
-                let errors = [];
-
-                if (!current) { errors.push('Please enter your current password.'); } // New check
+                
+                if (!current) { errors.push('Please enter your current password.'); } 
                 if (password !== confirm) { errors.push('Passwords do not match.'); }
                 if (password.length < 8) { errors.push('Password must be at least 8 characters long.'); }
                 if (!/[A-Z]/.test(password)) { errors.push('Password needs an uppercase letter.'); }
                 if (!/[a-z]/.test(password)) { errors.push('Password needs a lowercase letter.'); }
                 if (!/[0-9]/.test(password)) { errors.push('Password needs a number.'); }
                 if (!/[@$!%*?&]/.test(password)) { errors.push('Password needs a special character (@$!%*?&).'); }
-                // ✅ NEW: Check if new and current password are the same
                 if (current && current === password) { errors.push('New password cannot be the same as the current password.'); }
 
                 if (errors.length > 0) {
                     showPasswordErrors(errors);
-                    return; // Stop the submission
+                    return; 
+                }
+            } 
+            
+            // ✅ --- MODIFIED: Details Validation Logic ---
+            else if (form.id === 'details-form') {
+                clearDetailsServerError(); // Clear *only* server errors
+
+                // Run all validations and check
+                const isNameValid = validateFullName();
+                const isPhoneValid = validatePhoneNumber();
+                const isAddressValid = validateAddress();
+                
+                // Stop submission if any validation failed
+                if (!isNameValid || !isPhoneValid || !isAddressValid) {
+                    return;
                 }
             }
-            // ✅ --- End of Password Validation ---
-
+            // ✅ --- End of Modified Details Validation ---
+            
+            // --- This part runs if validation passes ---
             const submitButton = form.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.textContent;
             submitButton.disabled = true;
@@ -189,13 +288,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
                 });
                 const data = await response.json();
-                if (!response.ok) { throw new Error(data.error || 'An unknown error occurred.'); }
+                if (!response.ok) { 
+                    if (form.id === 'details-form') {
+                        showDetailsServerError(data.error || 'An unknown error occurred.');
+                        throw new Error(data.error); 
+                    } else {
+                        throw new Error(data.error || 'An unknown error occurred.'); 
+                    }
+                }
 
                 // --- Success ---
                 showDynamicMessage(data.message, 'success');
                 if (form.id === 'password-form') {
                     form.reset();
-                    clearPasswordErrors(); // Clear errors on success
+                    clearPasswordErrors(); 
                 }
                 if (form.id === 'details-form') {
                     // Full update logic
@@ -207,13 +313,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         previewEl.innerHTML = `<img src="${data.avatar_url}" alt="Profile Picture">`;
                     }
                     document.getElementById('personal-info-card').classList.add('view-mode');
+                    clearAllFieldErrors(); // Clear field errors on success
+                    clearDetailsServerError(); // Clear server errors on success
                 }
             } catch (error) {
                 console.error('Form submission error:', error);
-                // ✅ UPDATED: Show server-side validation errors in the password box
                 if (form.id === 'password-form') {
-                    showPasswordErrors([error.message]); // Show backend errors (e.g., "Wrong password")
-                } else {
+                    showPasswordErrors([error.message]); 
+                } else if (form.id !== 'details-form') { 
                     showDynamicMessage(`Error: ${error.message}`, 'error');
                 }
             } finally {
@@ -229,14 +336,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if (detailsForm) handleAjaxFormSubmit(detailsForm);
     if (passwordForm) handleAjaxFormSubmit(passwordForm);
 
+    // ✅ --- MODIFIED: Add 'blur' listeners for instant validation ---
+    if (fullNameInput) {
+        fullNameInput.addEventListener('blur', validateFullName);
+    }
+    if (phoneInput) {
+        // We just need to run the phone validator, which also formats
+        phoneInput.addEventListener('blur', validatePhoneNumber);
+    }
+    if (addressInput) {
+        addressInput.addEventListener('blur', validateAddress);
+    }
+    // ✅ --- END of new listeners ---
+
+
     // --- View/Edit Mode Toggle Logic ---
     const infoCard = document.getElementById('personal-info-card');
     const editBtn = document.getElementById('edit-profile-btn');
     const cancelBtn = document.getElementById('cancel-edit-btn');
     if (infoCard && editBtn && cancelBtn) {
         editBtn.addEventListener('click', () => { infoCard.classList.remove('view-mode'); });
+        
+        // MODIFIED: 'Cancel' button logic
         cancelBtn.addEventListener('click', () => {
             infoCard.classList.add('view-mode');
+            clearAllFieldErrors(); // Clear field errors
+            clearDetailsServerError(); // Clear server errors
             if (detailsForm) {
                 detailsForm.reset();
                 // Full image preview reset logic
@@ -284,8 +409,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 link.classList.add('active');
                 targetCard.classList.add('active');
                 
-                // ✅ NEW: Clear password errors when switching tabs
+                // MODIFIED: Clear all errors when switching tabs
                 clearPasswordErrors();
+                clearAllFieldErrors();
+                clearDetailsServerError();
             }
         });
     });

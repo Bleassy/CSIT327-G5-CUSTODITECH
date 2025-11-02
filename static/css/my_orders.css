@@ -287,16 +287,7 @@
 .order-card {
     position: relative; /* Needed for absolute positioning of checkbox */
     padding-left: 3rem; /* Make space for the checkbox */
-    /* cursor: default; /* Remove pointer cursor if card click opens modal */
-    /* Remove hover effect if card click opens modal */
-    /* transition: none; */
-    /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); */
 }
-/* Adjust hover if you keep the modal click */
-/* .order-card:hover {
-    transform: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-} */
 
 .order-checkbox {
     position: absolute;
@@ -335,9 +326,8 @@
     width: 100%;
     background-color: #1e293b; /* Dark background */
     color: white;
-    /* Adjust padding: Keep top/bottom, add right padding, keep left padding */
-    padding: 1rem 3rem 1rem 2rem; /* Example: Added 3rem right padding */
-    box-sizing: border-box; /* Include padding in the width calculation */
+    padding: 1rem 3rem 1rem 2rem;
+    box-sizing: border-box; 
     display: none;
     align-items: center;
     justify-content: space-between;
@@ -447,4 +437,68 @@
     align-items: center; /* Center icon and text vertically */
     gap: 0.75rem; /* Space between icon and text */
     transition: opacity 0.5s ease;
+}
+
+/* --- ✅ NEW: Mobile Responsive Fixes --- */
+@media (max-width: 768px) {
+    /* 1. Fix Order Card layout */
+    .order-card {
+        flex-direction: column; /* Stack image on top of details */
+        padding-left: 0; /* Remove side padding */
+    }
+
+    .product-image {
+        width: 100%; /* Make image full-width */
+        height: 180px; /* Give it a consistent height */
+        object-fit: cover;
+        border-right: none; /* Remove border */
+        border-bottom: 1px solid #f1f5f9; /* Add border below */
+    }
+
+    .card-body {
+        padding: 1rem; /* Slightly reduce padding */
+    }
+
+    /* 2. Fix Checkbox position */
+    .order-checkbox {
+        top: 1rem; /* Adjust position */
+        left: 1rem;
+    }
+    
+    /* On mobile, cards with checkboxes need padding again */
+    .order-card.history {
+        padding-left: 3rem; /* Re-add padding */
+    }
+    .order-card.history .product-image {
+        width: 100%; /* Keep it 100% */
+    }
+    .order-card.history .card-body {
+         padding-left: 1rem; /* Keep padding */
+    }
+
+    /* 3. Fix Modal Details Layout */
+    .details-layout {
+        flex-direction: column; /* Stack image on top of details */
+    }
+
+    .details-image-container,
+    .details-info {
+        /* Remove the flex-basis so they stack */
+        flex-basis: auto; 
+    }
+
+    /* 4. Fix Batch Action Bar padding */
+    .batch-action-bar {
+        padding: 1rem;
+    }
+
+    /* 5. Fix card header wrapping */
+    .card-header {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .status-badge {
+        align-self: flex-start; /* Align badge to the left */
+    }
 }

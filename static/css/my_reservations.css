@@ -22,10 +22,18 @@
     border: 1px solid #f1f5f9;
     display: flex;
     overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.reservation-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 }
 
+
 .reservation-card.backorder {
-    opacity: 0.8;
+    opacity: 1; /* Make it fully opaque to match other cards */
+    background-color: #f8fafc; /* A slightly different background */
 }
 
 .product-image {
@@ -155,16 +163,6 @@
     background-color: #b91c1c;
 }
 
-/* Make the whole card clickable */
-.reservation-card {
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.reservation-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-}
-
 /* --- Reservation Details Modal --- */
 #reservation-details-modal .modal-content {
     max-width: 600px; /* Make this modal a bit wider */
@@ -216,25 +214,6 @@
     color: #1e293b;
 }
 
-
-
-.reservation-card.backorder {
-    cursor: pointer;
-    opacity: 1; /* Make it fully opaque to match the other cards */
-    background-color: #f8fafc; /* Slightly different background to distinguish it */
-}
-
-.reservation-card.backorder {
-    cursor: pointer;
-    opacity: 1; /* Make it fully opaque to match other cards */
-    background-color: #f8fafc; /* A slightly different background */
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.reservation-card.backorder:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-}
-
 #backorder-details-modal .modal-content {
     max-width: 600px; /* Make this modal a bit wider */
 }
@@ -270,7 +249,7 @@
 
 
 .reservation-card.removing {
-  /* Animate these properties over 0.4 seconds */
+ /* Animate these properties over 0.4 seconds */
   transition:
       opacity 0.4s ease-out,
       max-height 0.4s ease-out,
@@ -280,7 +259,7 @@
       padding-bottom 0.4s ease-out,
       border-width 0.4s ease-out; /* Smoothly collapse border */
 
-  /* Target state */
+ /* Target state */
   opacity: 0;
   max-height: 0;        /* Collapse the height */
   margin-top: 0;
@@ -292,3 +271,31 @@
   overflow: hidden;     /* Crucial: Prevent content spill during collapse */
 }
 
+/* --- ✅ NEW: Mobile Responsive Fixes --- */
+@media (max-width: 768px) {
+    /* 1. Fix Reservation Card layout */
+    .reservation-card {
+        flex-direction: column; /* Stack image on top of details */
+    }
+
+    .product-image {
+        width: 100%; /* Make image full-width */
+        height: 150px; /* Give it a consistent height */
+        object-fit: cover;
+    }
+
+    .card-body {
+        padding: 1rem; /* Slightly reduce padding */
+    }
+
+    /* 2. Fix Modal Details Layout */
+    .details-layout {
+        flex-direction: column; /* Stack image on top of details */
+    }
+
+    .details-image-container,
+    .details-info {
+        /* Remove the flex-basis so they stack */
+        flex-basis: auto; 
+    }
+}

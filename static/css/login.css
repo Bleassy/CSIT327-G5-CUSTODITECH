@@ -7,7 +7,7 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
-    display: flex;
+    /* display: flex;  <-- MODIFIED: This is not needed and can complicate stacking */
     background-color: #f5f5f5;
 }
 
@@ -15,7 +15,7 @@ body {
     display: flex;
     width: 100%;
     min-height: 100vh;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* This correctly wraps the two sections on small screens if needed */
 }
 
 /* Left Side - Login Form */
@@ -212,8 +212,11 @@ body {
     }
     
     .left-side, .right-side {
-        min-width: 100%;
-        padding: 30px 20px;
+        /* ✅ MODIFIED: This is the main fix */
+        flex: 0 1 auto; /* Stop them from growing (0), let them shrink (1), and set base size to auto (auto) */
+        width: 100%;   /* Make them full width */
+        min-width: 100%; /* Override the 300px min-width */
+        padding: 40px 20px; /* Increase vertical padding for mobile */
     }
     
     .logo-box {

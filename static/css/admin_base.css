@@ -1,292 +1,183 @@
 /* static/css/admin_base.css */
 
-
-
 /* General Body and Font Styles */
-
 body {
-
     margin: 0;
-
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-
     background-color: #f8fafc;
-
     color: #1e293b;
-
 }
-
-
 
 .admin-dashboard-body {
-
     display: flex;
-
     min-height: 100vh;
-
 }
-
-
 
 .main-content {
-
     flex-grow: 1;
-
     display: flex;
-
     flex-direction: column;
-
 }
-
-
 
 .page-container {
-
     padding: 2rem;
-
     flex-grow: 1;
-
 }
-
-
 
 /* Header Styles */
-
 .admin-header {
-
     background: white;
-
     border-bottom: 1px solid #e2e8f0;
-
     display: flex;
-
     align-items: center;
-
     padding: 0 2rem;
-
     height: 70px;
-
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-
     position: sticky;
-
     top: 0;
-
     z-index: 1000;
-
 }
-
-
 
 .header-left .logo {
-
     display: flex;
-
     align-items: center;
-
     gap: 8px;
-
     font-weight: bold;
-
     color: #1e40af;
-
     font-size: 16px;
-
     text-decoration: none;
-
 }
-
-
 
 .logo-icon { font-size: 24px; }
 
-
-
 .admin-nav {
-
     display: flex;
-
     gap: 0;
-
     margin-left: 3rem;
-
     flex: 1;
-
 }
-
-
 
 .admin-nav .nav-btn {
-
     padding: 0 20px;
-
     height: 70px;
-
     display: flex;
-
     align-items: center;
-
     text-decoration: none;
-
     border: none;
-
     background: transparent;
-
     color: #64748b;
-
     font-weight: 500;
-
     cursor: pointer;
-
     border-bottom: 3px solid transparent;
-
     transition: all 0.2s;
-
     white-space: nowrap;
-
     font-size: 14px;
-
 }
-
-
 
 .admin-nav .nav-btn:hover {
-
     color: #1e40af;
-
     background-color: #f1f5f9;
-
 }
-
-
 
 .admin-nav .nav-btn.active {
-
     color: #1e40af;
-
     border-bottom-color: #1e40af;
-
 }
-
-
 
 .header-right {
-
     display: flex;
-
     align-items: center;
-
     gap: 12px;
-
 }
-
-
 
 .admin-name {
-
     width: 32px;
-
     height: 32px;
-
     border-radius: 50%;
-
     background: #e0e7ff;
-
     color: #3730a3;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
     font-weight: 600;
-
     font-size: 14px;
-
 }
-
-
 
 .logout-btn {
-
     padding: 8px 16px;
-
     border: 1px solid #e2e8f0;
-
     background: white;
-
     color: #475569;
-
     border-radius: 6px;
-
     cursor: pointer;
-
     font-weight: 500;
-
     transition: all 0.2s;
-
     text-decoration: none;
-
 }
-
-
 
 .logout-btn:hover {
-
     background-color: #fee2e2;
-
     border-color: #fca5a5;
-
     color: #dc2626;
-
 }
-
-
 
 /* Django Messages */
-
 .messages {
-
     list-style: none;
-
     padding: 0;
-
     margin: 0 0 1.5rem 0;
-
 }
-
 .messages li {
-
     padding: 1rem;
-
     margin-bottom: 1rem;
-
     border-radius: 8px;
-
     font-weight: 500;
-
 }
-
 .messages li.success { background-color: #dcfce7; color: #166534; }
-
 .messages li.error { background-color: #fee2e2; color: #991b1b; }
-
 .messages li.warning { background-color: #fef3c7; color: #92400e; }
 
-
-
-/* Responsive */
-
-@media (max-width: 768px) {
-
+/* --- ✅ MODIFIED: Responsive --- */
+@media (max-width: 992px) { /* Widen breakpoint for nav */
     .page-container { padding: 1rem; }
+    
+    .admin-header {
+        height: auto;
+        padding: 1rem;
+        flex-direction: column;
+        align-items: center; /* Center-align items */
+        gap: 1rem; /* Add space between logo, nav, and profile */
+    }
 
-    .admin-header { height: auto; padding: 1rem; flex-direction: column; }
+    .admin-nav {
+        margin: 0; /* Remove margin */
+        width: 100%;
+        justify-content: center; /* Center the buttons */
+        overflow-x: auto; /* Remove horizontal scroll */
+        flex-wrap: wrap; /* Allow buttons to wrap to next line */
+        gap: 0.5rem; /* Add gap between buttons */
+    }
 
-    .admin-nav { margin: 1rem 0 0 0; width: 100%; justify-content: flex-start; overflow-x: auto; }
+    .admin-nav .nav-btn {
+        height: auto; /* Let padding define height */
+        padding: 10px 14px; /* Smaller padding for mobile */
+        border-bottom: none; /* Remove border */
+        border-radius: 6px; /* Add radius */
+        font-size: 13px;
+    }
 
+    .admin-nav .nav-btn.active {
+        background-color: #1e40af; /* Active state background */
+        color: white;
+        border-bottom: none; /* Remove border */
+    }
+
+    .admin-nav .nav-btn:hover {
+        background-color: #f1f5f9; /* Keep hover */
+        color: #1e40af;
+    }
 }
+/* --- End of modifications --- */
 
 
 /* [admin_base.css] - ADD THESE MODAL STYLES */

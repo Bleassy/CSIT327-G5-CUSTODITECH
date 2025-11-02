@@ -7,7 +7,7 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
-    display: flex;
+    /* display: flex; <-- MODIFIED: Removed this */
     background-color: #f5f5f5;
 }
 
@@ -63,7 +63,7 @@ body {
 
 /* Right Side - Registration Form */
 .right-side {
-    flex: 1.5;
+    flex: 1.5; /* This is fine, it just gives it more width on desktop */
     min-width: 300px;
     padding: 40px;
     background-color: #f5f5f5;
@@ -233,14 +233,20 @@ input:valid:not(:placeholder-shown) {
     }
     
     .left-side {
-        min-height: 300px;
+        min-height: 300px; /* This is fine, gives the top banner a set height */
+    }
+
+    /* ✅ MODIFIED: This is the main fix */
+    .left-side, .right-side {
+        flex: 0 1 auto; /* Stop them from growing (0), let them shrink (1), and set base size to auto (auto) */
+        min-width: 100%; /* Override the 300px min-width */
     }
 }
 
 @media (max-width: 768px) {
     .left-side, .right-side {
-        min-width: 100%;
-        padding: 30px 20px;
+        /* min-width: 100%; <-- This is now redundant */
+        padding: 30px 20px; /* This is good */
     }
     
     .logo-box {

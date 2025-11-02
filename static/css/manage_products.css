@@ -430,3 +430,73 @@
     gap: 0.75rem;
     transition: opacity 0.5s ease;
 }
+
+/* --- ✅ NEW: Mobile Responsive Fixes --- */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+
+    .page-header .btn-add {
+        width: 100%; /* Make button full width */
+    }
+
+    .data-table {
+        font-size: 13px; /* Make table font smaller */
+    }
+
+    .data-table th, .data-table td {
+        padding: 12px 10px; /* Reduce padding */
+    }
+
+    .product-thumbnail {
+        width: 40px;
+        height: 40px;
+    }
+
+    .action-buttons {
+        flex-direction: column; /* Stack buttons */
+    }
+
+    .modal-content {
+        margin: 5% auto; /* Less vertical margin */
+        width: 95%; /* Use more of the screen */
+    }
+
+    .modal-lg {
+        max-width: 95%; /* Use more of the screen */
+    }
+
+    .details-layout {
+        flex-direction: column; /* Stack details in modal */
+    }
+
+    .details-image-container,
+    .details-info {
+        flex-basis: auto; /* Reset basis */
+    }
+
+    .details-image {
+        height: 200px; /* Reduce image height */
+    }
+
+    .batch-action-bar {
+        /* Dock to bottom */
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        max-width: 100%;
+        transform: none;
+        border-radius: 0;
+        padding: 1rem;
+        box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Animation for docked bar */
+    @keyframes slideUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+    }
+}
