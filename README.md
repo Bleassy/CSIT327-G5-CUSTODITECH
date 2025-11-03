@@ -353,9 +353,13 @@ http://127.0.0.1:8000/accounts/login/
 
 ## 🌐 Deployment
 
-### 🚧 **Status: In Development**
+### ✅ **Status: Live**
 
-The application is currently being developed for local use. Deployment instructions will be added in the future.
+The application is now live and accessible online.
+
+🔗 **Live Demo:** https://csit327-g5-custoditech.onrender.com
+
+Deployment is hosted on Render, and the latest version is automatically updated whenever new changes are pushed to the main branch.
 
 ---
 
