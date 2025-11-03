@@ -431,7 +431,7 @@
     transition: opacity 0.5s ease;
 }
 
-/* --- ✅ NEW: Mobile Responsive Fixes --- */
+/* --- ✅ MODIFIED: Mobile Responsive Fixes --- */
 @media (max-width: 768px) {
     .page-header {
         flex-direction: column;
@@ -458,6 +458,13 @@
 
     .action-buttons {
         flex-direction: column; /* Stack buttons */
+        align-items: flex-start; /* Align them left */
+        gap: 0.5rem; /* Reduce gap */
+    }
+    /* ✅ NEW: Make buttons in table full-width */
+    .action-buttons .btn {
+        width: 100%;
+        text-align: center;
     }
 
     .modal-content {
@@ -492,11 +499,102 @@
         border-radius: 0;
         padding: 1rem;
         box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+        flex-direction: column; /* ✅ Stack vertically */
+        gap: 1rem; /* ✅ Add gap */
     }
+    
+    /* ✅ NEW: Make button groups full width */
+    .batch-action-bar .batch-buttons {
+        display: flex;
+        width: 100%;
+        gap: 0.75rem;
+    }
+    /* ✅ NEW: Make buttons fill the space */
+    .batch-action-bar .batch-buttons .btn {
+        flex: 1;
+    }
+
 
     /* Animation for docked bar */
     @keyframes slideUp {
         from { transform: translateY(100%); }
         to { transform: translateY(0); }
+    }
+
+    /* ✅ NEW: Stack form rows in modal */
+    .modal-form .form-row {
+        flex-direction: column;
+        gap: 0; /* Remove gap, let form-group handle margin */
+    }
+}
+
+/* --- NEW: Search Filter Component (Admin) --- */
+
+.search-filter-container {
+    display: flex;
+    width: 100%;
+    margin-bottom: 2rem; /* Matches your old 'page-controls' margin */
+}
+
+/* Style the new dropdown */
+.category-filter-select {
+    width: 200px; 
+    padding: 14px 16px;
+    font-size: 16px;
+    border: 1px solid #e2e8f0; /* Admin border color */
+    border-right: none; 
+    
+    background-color: #fff;
+    color: #475569;
+    font-weight: 500;
+    
+    border-radius: 10px 0 0 10px;
+    
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3e%3cpath d='M5 8l5 5 5-5z' fill='%2364748b'/%3e%3c/svg%3e");    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.2em;
+    cursor: pointer;
+}
+
+/* Adjust the existing search input */
+.search-filter-container .search-input {
+    flex: 1; 
+    margin-bottom: 0; 
+    border-radius: 0 10px 10px 0;
+}
+
+/* Fix focus states (using admin blue) */
+.category-filter-select:focus,
+.search-filter-container .search-input:focus {
+    outline: none;
+    border-color: #1e40af; /* Admin blue */
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    z-index: 2;
+    position: relative;
+}
+
+/* --- NEW: Fix for Mobile Search Filter --- */
+@media (max-width: 768px) {
+    
+    .search-filter-container {
+        flex-direction: column;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .category-filter-select {
+        width: 100%;
+        border-right: 1px solid #e2e8f0; 
+        border-radius: 10px;
+        font-size: 16px; /* Prevents iOS zoom */
+    }
+
+    .search-filter-container .search-input {
+        width: 100%;
+        border-radius: 10px;
     }
 }

@@ -190,6 +190,13 @@
     gap: 0.5rem;
 }
 
+/* This rule must be separate, not nested */
+.action-buttons-group .btn {
+    width: auto;     /* This removes the 100% width */
+    flex: 1;         /* This tells each button to take up 1 equal share of the space */
+    margin-top: 0;   /* This removes the extra margin that .btn has */
+}
+
 .btn {
     margin-top: 1.5rem;
     width: 100%;
@@ -360,12 +367,93 @@
 
     /* ✅ NEW: Make modal footer buttons stack */
     .modal-footer {
-        flex-direction: column;
+        display: flex;
         gap: 0.75rem;
+        margin-top: 1rem; /* Add some space above the buttons */
+        margin-bottom: 1rem; /* Add some space below the buttons */
     }
     .modal-footer .btn {
-        width: 100%;
-        margin-top: 0; /* Remove top margin */
+        width: auto;  /* Remove 100% width */
+        flex: 1;      /* Make them share space equally */
+        margin-top: 0;
     }
+}
+
+/* --- NEW: Empty State Styles --- */
+
+/* This hides the old <p> tag just in case it's left over */
+p.no-items-message {
+    display: none !important; 
+}
+
+/* The new empty state card */
+.empty-state-container {
+    background-color: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+    margin-top: 1rem;
+    
+    /* This will be set to 'display: block' by your JS.
+       Because text-align is center, its children will be centered.
+    */
+}
+
+/* The icon circle */
+.empty-state-icon {
+    font-size: 3rem; /* 48px */
+    line-height: 1;
+    margin-bottom: 1.5rem;
+    background-color: #fde8e8; /* Light maroon */
+    color: #800000; /* Maroon */
+    width: 72px;
+    height: 72px;
+    display: inline-flex; /* Use inline-flex to center icon */
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.empty-state-container h3 {
+    font-size: 1.5rem; /* 24px */
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+}
+
+.empty-state-container p {
+    font-size: 1rem; /* 16px */
+    color: #64748b;
+    line-height: 1.6;
+    max-width: 400px; /* Keep text from getting too wide */
+    margin: 0 auto 1.5rem auto; /* Center the text block */
+}
+
+/* The new button style */
+.btn-primary-empty {
+    /* Base button styles */
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease-in-out;
+    font-size: 15px;
+    text-decoration: none;
+    
+    /* Colors */
+    background-color: #800000;
+    color: white;
+    
+    /* Sizing */
+    display: block; /* Make it a block element */
+    width: fit-content; /* Make its width fit its content */
+    margin: 0 auto; /* Center it horizontally */
+}
+
+.btn-primary-empty:hover {
+    background-color: #600000; /* Darker maroon */
 }
 

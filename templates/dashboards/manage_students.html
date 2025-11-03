@@ -62,6 +62,7 @@
                 <td>
                     <div class="action-buttons">
                         <button type="button" class="btn btn-primary btn-view-profile"
+                                data-user-id="{{ student.user_id }}"
                                 data-name="{{ student.full_name|default:'N/A' }}"
                                 data-email="{{ student.email }}"
                                 data-student-id="{{ student.student_id|default:'N/A' }}"
@@ -142,8 +143,33 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary cancel-btn">Close</button>
+            <button type="button" class="btn btn-secondary cancel-btn">Close</button>
+            <button type="button" class="btn btn-danger" id="modal-delete-student-btn">Delete Account</button>
+        </div>
+    </div>
+</div>
+
+<div id="delete-student-modal" class="modal" style="display: none;">
+    <div class="modal-content modal-sm">
+        <div class="modal-header">
+            <h2>Confirm Account Deletion</h2>
+            <span class="close-btn">&times;</span>
         </div>
+        <form id="delete-student-form" method="POST">
+            {% csrf_token %}
+            <div class="modal-body">
+                <p>Are you sure you want to permanently delete the account for:</p>
+                <div class="summary"> 
+                    <p><strong>Name:</strong> <span id="delete-student-name"></span></p>
+                    <p><strong>Email:</strong> <span id="delete-student-email"></span></p>
+                </div>
+                <p style="margin-top: 1rem;"><strong>This action cannot be undone.</strong> It will permanently delete the user's authentication record and their profile.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+                <button type="submit" class="btn btn-danger">Yes, Delete Account</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -165,6 +191,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ✅ ADDED: Get the stat card elements
     const blockedStudentsCountEl = document.getElementById('blocked-students-count');
     const totalStudentsCountEl = document.getElementById('total-students-count'); // (In case you add a "delete" feature later)
+    const modalDeleteStudentBtn = document.getElementById('modal-delete-student-btn');
+    const deleteStudentModal = document.getElementById('delete-student-modal');
+    const deleteStudentForm = document.getElementById('delete-student-form');
     
     // Global state
     let searchTimer;
@@ -213,6 +242,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             const initial = data.name.charAt(0).toUpperCase() || 'S';
             avatarContainer.innerHTML = `<span>${initial}</span>`;
+        }
+
+        if (modalDeleteStudentBtn) {
+            modalDeleteStudentBtn.dataset.userId = data.userId; // Make sure data-user-id is on the view button
+            modalDeleteStudentBtn.dataset.name = data.name;
+            modalDeleteStudentBtn.dataset.email = data.email;
         }
         openModal(profileModal);
     }
@@ -330,6 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${formattedDate}</td>
                     <td><div class="action-buttons">
                         <button type="button" class="btn btn-primary btn-view-profile"
+                                data-user-id="${student.user_id}"
                                 data-name="${student.full_name || 'N/A'}"
                                 data-email="${student.email || 'N/A'}"
                                 data-student-id="${student.student_id || 'N/A'}"
@@ -430,6 +466,115 @@ document.addEventListener('DOMContentLoaded', () => {
     // Attach listeners to the rows and pagination that loaded with the page
     attachListenersToRows();
     attachPaginationListeners();
+
+    // ==================================================================
+    // == 5. NEW: DELETE STUDENT LOGIC
+    // ==================================================================
+
+    // --- Helper: Make new modal closable ---
+    if (deleteStudentModal) {
+        const closeModalBtn = deleteStudentModal.querySelector('.close-btn');
+        const cancelModalBtn = deleteStudentModal.querySelector('.cancel-btn');
+        if (closeModalBtn) closeModalBtn.addEventListener('click', () => closeModal(deleteStudentModal));
+        if (cancelModalBtn) cancelModalBtn.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent form submission
+            closeModal(deleteStudentModal);
+        });
+        window.addEventListener('click', (e) => {
+            if (e.target == deleteStudentModal) closeModal(deleteStudentModal);
+        });
+    }
+
+    // --- 1. When "Delete Account" button in View Modal is clicked ---
+    if (modalDeleteStudentBtn) {
+        modalDeleteStudentBtn.addEventListener('click', (e) => {
+            const data = e.currentTarget.dataset;
+            
+            // Populate the confirmation modal
+            if (deleteStudentModal) {
+                deleteStudentModal.querySelector('#delete-student-name').textContent = data.name;
+                deleteStudentModal.querySelector('#delete-student-email').textContent = data.email;
+            }
+            
+            // Set the form's action URL
+            if (deleteStudentForm) {
+                deleteStudentForm.action = `/dashboard/admin/delete-student/${data.userId}/`;
+            }
+            
+            // Close the view modal and open the confirm modal
+            closeModal(profileModal);
+            openModal(deleteStudentModal);
+        });
+    }
+
+    // --- 2. When the final "Yes, Delete Account" form is submitted ---
+    if (deleteStudentForm) {
+        deleteStudentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.currentTarget;
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.textContent;
+            
+            submitButton.disabled = true;
+            submitButton.textContent = 'Deleting...';
+            
+            const url = form.action;
+            const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'An unknown error occurred.');
+                }
+
+                // --- Success! ---
+                closeModal(deleteStudentModal);
+                showDynamicMessage(data.message, 'success'); // Show success message
+
+                // Remove the row from the table
+                const rowToRemove = document.querySelector(`.btn-view-profile[data-user-id="${data.user_id}"]`).closest('tr');
+                if (rowToRemove) {
+                    rowToRemove.remove();
+                }
+
+                // Update total student count
+                if (totalStudentsCountEl) {
+                    let currentCount = parseInt(totalStudentsCountEl.textContent);
+                    if (currentCount > 0) {
+                        totalStudentsCountEl.textContent = currentCount - 1;
+                    }
+                }
+                
+                // Update blocked count (if the deleted user was blocked)
+                // This is a simple way to do it: just re-fetch the data.
+                // Or, we can check the badge, but this is safer:
+                if (blockedStudentsCountEl) {
+                    const rowBadge = rowToRemove.querySelector('.badge');
+                    if (rowBadge && rowBadge.classList.contains('badge-blocked')) {
+                        let currentBlockedCount = parseInt(blockedStudentsCountEl.textContent);
+                        if (currentBlockedCount > 0) {
+                            blockedStudentsCountEl.textContent = currentBlockedCount - 1;
+                        }
+                    }
+                }
+
+            } catch (error) {
+                showDynamicMessage(error.message, 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            }
+        });
+    }
 });
 </script>
 {% endblock %}

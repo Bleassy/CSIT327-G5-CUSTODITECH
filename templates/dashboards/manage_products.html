@@ -11,11 +11,15 @@
     <button class="btn btn-add" id="add-product-btn">📦 Add New Product</button>
 </div>
 
-<div class="page-controls">
-    <div class="search-form"> <input type="search" id="product-search-input" class="search-input" 
-               placeholder="Filter by name, category, or status (e.g., 'low stock', 'available')..." 
-               value=""> {# Removed server-side value #}
-    </div>
+<div class="search-filter-container">
+    <select id="category-filter" class="category-filter-select">
+        <option value="all">All Categories</option>
+        {% for category in categories %}
+            <option value="{{ category|lower }}">{{ category }}</option>
+        {% endfor %}
+    </select>
+    <input type="search" id="product-search-input" class="search-input" 
+           placeholder="Filter by name, category, or status...">
 </div>
 
 <form id="batch-action-form" method="POST" action="{% url 'batch_update_products' %}">
@@ -337,6 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const batchEditBtn = document.getElementById('batch-edit-btn');
     const confirmBatchDeleteBtn = document.getElementById('confirm-batch-delete-btn');
     const searchInput = document.getElementById('product-search-input');
+    const categoryFilter = document.getElementById('category-filter');
     const tableBody = document.getElementById('product-table-body');
     const noResultsRow = document.getElementById('no-results-row');
     const initialEmptyRow = document.getElementById('initial-empty-row');
@@ -620,25 +625,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function filterProducts() {
-        if (!searchInput || !noResultsRow) { return; }
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        let visibleRowCount = 0;
-        const currentProductRows = document.querySelectorAll('#product-table-body tr.product-row');
+        if (!searchInput || !noResultsRow || !categoryFilter) { return; }
+
+        // Get values from BOTH inputs
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedCategory = categoryFilter.value.toLowerCase();
+
+        let visibleRowCount = 0;
+        const currentProductRows = document.querySelectorAll('#product-table-body tr.product-row');
+        
         currentProductRows.forEach(row => {
-            const productName = row.dataset.name || '';
-            const category = row.dataset.category || '';
-            const status = row.dataset.status || '';
-            const rowMatches = productName.includes(searchTerm) || 
-                               category.includes(searchTerm) || 
-                               status.includes(searchTerm);
-            row.style.display = rowMatches ? '' : 'none';
-            if (rowMatches) visibleRowCount++;
-        });
-        if (noResultsRow) noResultsRow.style.display = (visibleRowCount === 0 && currentProductRows.length > 0) ? '' : 'none';
-        if (initialEmptyRow) {
-            initialEmptyRow.style.display = (searchTerm.length > 0 || currentProductRows.length > 0) ? 'none' : '';
-        }
-    }
+            const productName = row.dataset.name || '';
+            const category = row.dataset.category || '';
+            const status = row.dataset.status || '';
+
+            // Check 1: Category filter
+            const categoryMatch = (selectedCategory === 'all') || (category === selectedCategory);
+
+            // Check 2: Text search filter
+            const searchMatch = productName.includes(searchTerm) || 
+                               category.includes(searchTerm) || 
+                               status.includes(searchTerm);
+            
+            // Final: Must match BOTH
+            const rowMatches = categoryMatch && searchMatch;
+
+            row.style.display = rowMatches ? '' : 'none';
+            if (rowMatches) visibleRowCount++;
+        });
+
+        if (noResultsRow) noResultsRow.style.display = (visibleRowCount === 0 && currentProductRows.length > 0) ? '' : 'none';
+        if (initialEmptyRow) {
+            // Show initial empty row only if there are no products AND no search term
+            initialEmptyRow.style.display = (currentProductRows.length === 0 && searchTerm.length === 0) ? '' : 'none';
+        }
+    }
 
 
     // ==================================================================
@@ -646,9 +667,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==================================================================
 
     if (searchInput) {
-        searchInput.addEventListener('input', filterProducts);
-        filterProducts();
+        searchInput.addEventListener('input', filterProducts);
+    }
+    if (categoryFilter) { // Add this
+        categoryFilter.addEventListener('change', filterProducts);
     }
+
+    filterProducts(); // Run once on load
 
     document.querySelectorAll('.data-table tbody tr.product-row').forEach(row => {
         addListenersToRow(row);

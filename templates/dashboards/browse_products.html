@@ -6,12 +6,18 @@
 {% endblock %}
 
 {% block content %}
-<h1 class="welcome-title">Browse Products 🛒</h1>
+<h1 class="welcome-title">Browse Products 🛍️</h1>
              
 
 
-<div class="search-container">
-    <input type="search" id="product-search-input" class="search-input" placeholder="Search for a product..." value="{{ search_query }}">
+<div class="search-filter-container">
+    <select id="category-filter" class="category-filter-select">
+        <option value="all">All Categories</option>
+        {% for category in categorized_products.keys %}
+            <option value="{{ category|lower }}">{{ category }}</option>
+        {% endfor %}
+    </select>
+    <input type="search" id="product-search-input" class="search-input" placeholder="Search products in this category..." value="{{ search_query }}">
 </div>
 
 {% if categorized_products %}
@@ -168,22 +174,46 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- LIVE PRODUCT SEARCH/FILTER ---
     const searchInput = document.getElementById('product-search-input');
+    const categoryFilter = document.getElementById('category-filter'); // Get the new dropdown
     const productCards = document.querySelectorAll('.product-card');
     const categorySections = document.querySelectorAll('.category-section');
 
-    searchInput.addEventListener('input', () => {
+    function filterProducts() {
+        // 1. Get the values from BOTH inputs
         const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedCategory = categoryFilter.value.toLowerCase(); // 'all' or a category name
+
+        // 2. Loop through every product card
         productCards.forEach(card => {
             const productName = card.dataset.name.toLowerCase();
-            const categoryName = card.dataset.category.toLowerCase();
-            const cardShouldBeVisible = productName.includes(searchTerm) || categoryName.includes(searchTerm);
+            const cardCategory = card.dataset.category.toLowerCase();
+
+            // 3. Check for matches
+            // Category matches if "All" is selected OR if card's category matches
+            const categoryMatch = (selectedCategory === 'all') || (cardCategory === selectedCategory);
+            // Search matches if the product name includes the search term
+            const searchMatch = productName.includes(searchTerm);
+
+            // 4. Show card only if it matches BOTH filters
+            const cardShouldBeVisible = categoryMatch && searchMatch;
             card.style.display = cardShouldBeVisible ? 'flex' : 'none';
         });
+
+        // 5. Loop through category sections and hide them if they are now empty
         categorySections.forEach(section => {
+            // Find all visible cards within this section
             const visibleCards = section.querySelectorAll('.product-card[style*="display: flex"]');
+            // Hide the whole section (including title) if no cards are visible
             section.style.display = visibleCards.length > 0 ? 'block' : 'none';
         });
-    });
+    }
+
+    // 6. Add event listeners to BOTH inputs
+    searchInput.addEventListener('input', filterProducts);
+    categoryFilter.addEventListener('change', filterProducts);
+
+    // 7. Run the filter once on page load (to apply any initial search_query)
+    filterProducts();
 
     document.querySelectorAll('.product-card').forEach(card => {
         card.addEventListener('click', () => {

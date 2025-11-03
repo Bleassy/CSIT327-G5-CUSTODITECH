@@ -53,7 +53,14 @@
                      </div>
                      </div>
             </div>
-            {% empty %} <p class="no-items-message">You have no orders ready for pickup.</p> {% endfor %}
+        {% empty %}
+            <div class="empty-state-container no-items-message">
+                <div class="empty-state-icon">✅</div>
+                <h3>No orders ready for pickup</h3>
+                <p>Once your pending orders are approved, they will appear here.</p>
+                <a href="{% url 'browse_products' %}" class="btn btn-primary-empty">Browse Products</a>
+            </div>
+        {% endfor %}
         </div>
     </section>
 
@@ -75,7 +82,14 @@
                      </div>
                  </div>
             </div>
-            {% empty %} <p class="no-items-message">You have no pending orders.</p> {% endfor %}
+            {% empty %}
+                <div class="empty-state-container no-items-message">
+                    <div class="empty-state-icon">🛒</div>
+                    <h3>You have no pending orders</h3>
+                    <p>Looks like you haven't placed an order yet. Start browsing to find something!</p>
+                    <a href="{% url 'browse_products' %}" class="btn btn-primary-empty">Browse Products</a>
+                </div>
+            {% endfor %}
         </div>
     </section>
 
@@ -97,7 +111,14 @@
                      </div>
                  </div>
             </div>
-            {% empty %} <p class="no-items-message">You have no completed orders.</p> {% endfor %}
+            {% empty %}
+                <div class="empty-state-container no-items-message">
+                    <div class="empty-state-icon">🎉</div>
+                    <h3>No completed orders</h3>
+                    <p>After you pick up an approved order, it will appear in this section.</p>
+                    <a href="{% url 'browse_products' %}" class="btn btn-primary-empty">Browse Products</a>
+                </div>
+            {% endfor %}
         </div>
     </section>
 
@@ -126,7 +147,14 @@
                      </div>
                  </div>
             </div>
-            {% empty %} <p class="no-items-message">You have no cancelled or rejected orders.</p> {% endfor %}
+            {% empty %}
+                <div class="empty-state-container no-items-message">
+                    <div class="empty-state-icon">📦</div>
+                    <h3>No cancelled orders</h3>
+                    <p>All of your orders are active. Keep it up!</p>
+                    <a href="{% url 'browse_products' %}" class="btn btn-primary-empty">Browse Products</a>
+                </div>
+            {% endfor %}
         </div>
     </section>
 </form>

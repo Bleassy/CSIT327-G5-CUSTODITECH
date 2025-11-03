@@ -10,13 +10,18 @@
 </head>
 <body class="buyer-dashboard">
 
+    <div class="loader-overlay" id="page-loader">
+        <div class="loader-spinner"></div>
+    </div>
+
     <header class="dashboard-header">
-        <div class="header-left">
-            <a class="logo">
-                <span class="logo-icon">🐱</span>
-                <span class="logo-text">CIT Wildcats Store</span>
-            </a>
-        </div>
+    <div class="header-left">
+        <a class="logo" href="{% url 'student_dashboard' %}"> <span class="logo-icon">🐱</span>
+            <span class="logo-text">CIT Wildcats Store</span>
+        </a>
+    </div>
+
+    <div class="mobile-menu-wrapper">
         <nav class="main-nav">
             <a href="{% url 'student_dashboard' %}" class="nav-btn {% if active_page == 'dashboard' %}active{% endif %}">🏠 Dashboard</a>
             <a href="{% url 'browse_products' %}" class="nav-btn {% if active_page == 'browse' %}active{% endif %}">🛍️ Browse Products</a>
@@ -24,20 +29,26 @@
             <a href="{% url 'my_orders' %}" class="nav-btn {% if active_page == 'orders' %}active{% endif %}">📦 My Orders</a>
         </nav>
         <div class="header-right">
-            <!-- ✅ UPDATED: The student name is now a link to the profile page -->
             <a href="{% url 'student_profile' %}" class="student-name-link {% if active_page == 'profile' %}active{% endif %}">
-
-    {% if profile.avatar_url %}
-        <img src="{{ profile.avatar_url }}" alt="Profile" class="header-avatar">
-    {% else %}
-        <span class="header-avatar header-initials">
-            {{ profile.full_name|default:request.user.get_full_name|default:'U'|first|upper }}
-        </span>
-    {% endif %}
-    </a>
+                {% if profile.avatar_url %}
+                    <img src="{{ profile.avatar_url }}" alt="Profile" class="header-avatar">
+                {% else %}
+                    <span class="header-avatar header-initials">
+                        {{ profile.full_name|default:request.user.get_full_name|default:'U'|first|upper }}
+                    </span>
+                {% endif %}
+                <span class="student-name-text">
+                    Hello, <strong>{{ display_name|default:'Student' }}</strong>!
+                </span>
+            </a>
             <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
         </div>
-    </header>
+    </div>
+    
+    <button class="hamburger-btn" aria-label="Toggle menu" aria-expanded="false">
+        <span class="hamburger-icon">&equiv;</span>
+    </button>
+</header>
     <div class="container">
 
         <ul class="messages" id="messages-container">
@@ -50,6 +61,80 @@
         
         {% block content %}{% endblock %}
     </div>
+    
     {% block extra_js %}{% endblock %}
-</body>
+
+    <script>
+        // Wait for the document to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // 1. Find the button and the header
+            const hamburgerBtn = document.querySelector('.hamburger-btn');
+            const header = document.querySelector('.dashboard-header');
+            const body = document.body;
+
+            // 2. Check if the elements were found
+            if (hamburgerBtn && header && body) {
+                
+                // 3. Add a click event listener to the button
+                hamburgerBtn.addEventListener('click', function() {
+                    
+                    // 4. Toggle the '.menu-is-open' class on the header and body
+                    header.classList.toggle('menu-is-open');
+                    body.classList.toggle('menu-is-open');
+
+                    // 5. Update accessibility attribute
+                    const isExpanded = header.classList.contains('menu-is-open');
+                    hamburgerBtn.setAttribute('aria-expanded', isExpanded);
+
+                    // 6. Change hamburger icon to 'X' or '☰'
+                    const icon = hamburgerBtn.querySelector('.hamburger-icon');
+                    if (isExpanded) {
+                        icon.innerHTML = '&times;'; // 'X' icon
+                    } else {
+                        icon.innerHTML = '&equiv;'; // '☰' icon
+                    }
+                });
+            }
+
+            // ===== NEW: Page Loader Logic =====
+            
+            // 1. Find the loader element
+            const loader = document.getElementById('page-loader');
+
+            // 2. Hide loader on page "show" (for back/forward button)
+            window.addEventListener('pageshow', function() {
+                if (loader) {
+                    loader.classList.remove('visible');
+                }
+            });
+
+            // 3. Show loader on link clicks
+            document.addEventListener('click', function(e) {
+                // Check if the clicked element is a link (or inside one)
+                const link = e.target.closest('a');
+
+                if (link && loader) {
+                    // --- Filters: Don't show loader for... ---
+                    
+                    // (a) Links opening in a new tab
+                    if (link.target === '_blank') return;
+                    
+                    // (b) Simple hash/anchor links on the same page
+                    if (link.href.startsWith(window.location.href + '#')) return;
+
+                    // (c) Mail or Tel links
+                    if (link.href.startsWith('mailto:') || link.href.startsWith('tel:')) return;
+
+                    // (d) Links inside the pagination container
+                    if (link.closest('.pagination-container')) return;
+
+                    // --- Show the loader ---
+                    loader.classList.add('visible');
+                }
+            });
+            // ==================================
+        });
+    </script>
+    </body>
 </html>

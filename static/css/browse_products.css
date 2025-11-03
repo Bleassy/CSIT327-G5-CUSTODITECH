@@ -16,7 +16,20 @@
 .product-meta { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 1rem; }
 .product-price { font-size: 18px; font-weight: 700; color: #8B0000; }
 .product-stock { font-size: 12px; font-weight: 500; color: #475569; }
-.product-actions { padding: 0 1.25rem 1.25rem 1.25rem; display: flex; gap: 0.75rem; }
+
+.product-actions { 
+    padding: 0 1.25rem 1.25rem 1.25rem; 
+    display: flex; 
+    gap: 0.75rem; 
+}
+
+/* This rule must be separate, not nested */
+.product-actions .btn {
+    width: auto; /* Removes the 100% width */
+    flex: 1;     /* Tells each button to take up 1 equal share of the space */
+    margin-top: 0; /* Removes extra spacing */
+}
+
 .btn { width: 100%; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; transition: background-color 0.2s; font-size: 14px; }
 .btn-primary { background-color: #800000; color: white; }
 .btn-primary:hover { background-color: #600000; }
@@ -283,4 +296,110 @@
     align-items: center;
     gap: 0.75rem;
     transition: opacity 0.5s ease;
+}
+
+/* --- NEW: Mobile Modal Fix --- */
+@media (max-width: 768px) {
+    .details-layout {
+        flex-direction: column; /* Stack image on top of info */
+    }
+
+    .details-image-container,
+    .details-info {
+        flex-basis: auto; /* Remove the 40%/60% split */
+    }
+
+    /* Make modal buttons stack */
+    .modal-footer {
+        display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem; /* Add some space above the buttons */
+    margin-bottom: 1rem; /* Add some space below the buttons */
+    }
+    .modal-footer .btn {
+        width: auto;  /* Remove 100% width */
+    flex: 1;      /* Make them share space equally */
+    margin-top: 0;
+    }
+}
+
+/* --- NEW: Search Filter Component --- */
+
+.search-filter-container {
+    display: flex;
+    width: 100%;
+    margin-bottom: 2.5rem; /* Same margin as old search-container */
+}
+
+/* Style the new dropdown */
+.category-filter-select {
+    width: 200px; /* Give the category dropdown a set width */
+    padding: 14px 16px;
+    font-size: 16px;
+    border: 1px solid #e2e8f0;
+    border-right: none; /* Remove border between select and input */
+    
+    /* Make it match the input field */
+    background-color: #fff;
+    color: #475569;
+    font-weight: 500;
+    
+    /* Round the left corners */
+    border-radius: 10px 0 0 10px;
+    
+    /* Remove default arrow (optional, but cleaner) */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D'20'%20height%3D'20'%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%3E%3Cpath%20d%3D'M5%208l5%205%205-5z'%20fill%3D'%2364748b'%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.2em;
+    cursor: pointer;
+}
+
+/* Adjust the existing search input */
+.search-filter-container .search-input {
+    flex: 1; /* Make the search bar fill the remaining space */
+    margin-bottom: 0; /* Remove margin, as container has it */
+    
+    /* Round the right corners */
+    border-radius: 0 10px 10px 0;
+}
+
+/* Fix focus states */
+.category-filter-select:focus,
+.search-filter-container .search-input:focus {
+    outline: none;
+    border-color: #800000;
+    box-shadow: 0 0 0 3px rgba(128, 0, 0, 0.1);
+    z-index: 2;
+    position: relative;
+}
+
+/* --- NEW: Fix for Mobile Search Filter --- */
+@media (max-width: 768px) {
+    
+    /* 1. Stack the container */
+    .search-filter-container {
+        flex-direction: column;
+        gap: 0.75rem; /* Add a small gap between them */
+        position: relative; 
+        z-index: 2;
+    }
+
+    /* 2. Make the dropdown full-width */
+    .category-filter-select {
+        width: 100%;
+        /* Fix the borders that we removed for desktop */
+        border-right: 1px solid #e2e8f0; 
+        border-radius: 10px; /* Make all corners round */
+        font-size: 16px;
+    }
+
+    /* 3. Make the search input full-width */
+    .search-filter-container .search-input {
+        width: 100%;
+        border-radius: 10px; /* Make all corners round */
+    }
 }

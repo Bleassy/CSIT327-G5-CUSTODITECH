@@ -37,5 +37,6 @@ urlpatterns = [
     path('admin/batch-delete-orders/', views.admin_batch_delete_orders_view, name='admin_batch_delete_orders'),
     path('admin/manage-students/', views.manage_students_view, name='manage_students'),
     path('admin/block-student/<uuid:user_id>/', views.admin_block_student_view, name='admin_block_student'),
+    path('admin/delete-student/<uuid:user_id>/', views.admin_delete_student_view, name='admin_delete_student'),
 ]
 

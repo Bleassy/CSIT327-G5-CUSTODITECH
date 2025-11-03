@@ -9,6 +9,10 @@ import uuid
 from collections import defaultdict
 import math
 import requests
+from .utils import log_activity
+from supabase_client import supabase_service
+from .decorators import admin_required
+from django.views.decorators.http import require_POST
 
 # --- Decorators for Access Control ---
 def student_required(function):
@@ -153,8 +157,8 @@ def browse_products_view(request):
         query = supabase.table('products').select('*').order('created_at', desc=True)
 
         # If there's a search query, add the filter to the query
-        if search_query:
-            query = query.ilike('name', f'%{search_query}%')
+        # if search_query:
+            # query = query.ilike('name', f'%{search_query}%')
         
         # ✅ FIX: Execute the 'query' variable that you built.
         response = query.execute() 
@@ -715,8 +719,8 @@ def manage_products_view(request):
     
     try:
         query = supabase.table('products').select('*').order('created_at', desc=True)
-        if search_query:
-            query = query.or_(f'name.ilike.%{search_query}%,category.ilike.%{search_query}%')
+        #if search_query:
+            #query = query.or_(f'name.ilike.%{search_query}%,category.ilike.%{search_query}%')
         response = query.execute()
         products = response.data if response.data else []
 
@@ -728,11 +732,14 @@ def manage_products_view(request):
             )
         )
 
+        categories = sorted(list(set(p.get('category') for p in products if p.get('category'))))
+
     except Exception as e:
         messages.error(request, f"Error fetching products: {e}")
         products = []
     context = {
-        'products': products, 'search_query': search_query,
+        'products': products, 
+        'categories': categories,
         'active_page': 'manage_products',
     }
     return render(request, 'dashboards/manage_products.html', context)
@@ -1513,9 +1520,43 @@ def admin_block_student_view(request, user_id):
                 'STUDENT_STATUS_UPDATED',
                 {'student_user_id': str(user_id), 'action': action_text}
             )
-            return JsonResponse({'success': True, 'message': f'Student has been {action_text}.'})
+            return JsonResponse({'success': True, 'message': f'✅ Student has been {action_text}.'})
 
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+
+@require_POST
+@admin_required
+def admin_delete_student_view(request, user_id):
+    """
+    Handles the permanent deletion of a student account.
+    This view expects an AJAX request.
+    """
+    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
+
+    try:
+        # This will now work!
+        params = {'p_user_id': str(user_id)}
+        supabase_service.rpc('admin_delete_student', params).execute()
+
+        # Log this admin action
+        log_activity(
+            request.user, 
+            'STUDENT_DELETED',
+            {'student_user_id': str(user_id)}
+        )
+        
+        # Send a success response
+        return JsonResponse({
+            'success': True, 
+            'message': '🗑️ Student account has been permanently deleted.',
+            'user_id': str(user_id) # Send back the ID for the JS
+        })
+
+    except Exception as e:
+        # Handle any errors
+        print(f"--- Admin Delete Student Error: {e} ---")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

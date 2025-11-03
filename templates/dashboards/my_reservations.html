@@ -37,12 +37,22 @@
             </div>
         {% endfor %}
     </div>
-    {# ✅ Message is outside grid, hidden initially #}
-    <p class="no-items-message" id="no-pickup-message" style="display: none;">You have no items reserved for pickup.</p>
+    {# ✅ NEW: Improved Empty State (hidden) #}
+    <div class="empty-state-container no-items-message" id="no-pickup-message" style="display: none;">
+        <div class="empty-state-icon">📅</div>
+        <h3>You have no items for pickup</h3>
+        <p>Ready to get started? Browse our products to find items to reserve.</p>
+        <a href="{% url 'browse_products' %}" class="btn btn-primary-empty">Browse Products</a>
+    </div>
 {% else %}
-    {# ✅ List is empty on load, render empty grid and show message #}
-    <div class="reservations-grid" id="pickup-grid"></div> {# Empty grid for JS target #}
-    <p class="no-items-message" id="no-pickup-message">You have no items reserved for pickup.</p>
+    {# ✅ NEW: Improved Empty State (visible) #}
+    <div class="reservations-grid" id="pickup-grid"></div> {# Empty grid for JS target #}
+    <div class="empty-state-container no-items-message" id="no-pickup-message">
+        <div class="empty-state-icon">📅</div>
+        <h3>You have no items for pickup</h3>
+        <p>Ready to get started? Browse our products to find items to reserve.</p>
+        <a href="{% url 'browse_products' %}" class="btn btn-primary-empty">Browse Products</a>
+    </div>
 {% endif %}
 
 <h2 class="section-title">Pending Backorders</h2>
@@ -79,11 +89,21 @@
          {% endfor %}
     </div>
      {# ✅ Message is outside grid, hidden initially #}
-    <p class="no-items-message" id="no-backorder-message" style="display: none;">You have no pending backorders.</p>
+    <div class="empty-state-container no-items-message" id="no-backorder-message" style="display: none;">
+        <div class="empty-state-icon">📦</div>
+        <h3>You have no pending backorders</h3>
+        <p>You haven't reserved any out-of-stock items. All clear here!</p>
+        <a href="{% url 'browse_products' %}" class="btn btn-primary-empty">Browse Products</a>
+    </div>
 {% else %}
-    {# ✅ List is empty on load, render empty grid and show message #}
-    <div class="reservations-grid" id="backorder-grid"></div> {# Empty grid for JS target #}
-    <p class="no-items-message" id="no-backorder-message">You have no pending backorders.</p>
+    {# ✅ NEW: Improved Empty State (visible) #}
+    <div class="reservations-grid" id="backorder-grid"></div> {# Empty grid for JS target #}
+    <div class="empty-state-container no-items-message" id="no-backorder-message">
+        <div class="empty-state-icon">📦</div>
+        <h3>You have no pending backorders</h3>
+        <p>You haven't reserved any out-of-stock items. All clear here!</p>
+        <a href="{% url 'browse_products' %}" class="btn btn-primary-empty">Browse Products</a>
+    </div>
 {% endif %}
 
 <div id="reservation-details-modal" class="modal" style="display: none;">

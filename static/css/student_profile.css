@@ -332,5 +332,11 @@
     .profile-nav-link {
         padding: 0.75rem 1rem;
     }
+
+    .avatar-preview {
+    width: 96px;       /* Make avatar smaller */
+    height: 96px;
+    font-size: 2.5rem; /* Make initials text smaller */
+    }
 }
 

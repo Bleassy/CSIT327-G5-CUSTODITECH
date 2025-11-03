@@ -159,13 +159,70 @@
 }
 
 /* --- Student Profile Modal --- */
-.modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; animation: fadeIn 0.3s; }
-.modal-content { background-color: #fff; margin: 5% auto; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideIn 0.3s; }
-.modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding: 1.5rem; }
-.modal-header h2 { margin: 0; font-size: 20px; }
-.close-btn { font-size: 28px; cursor: pointer; color: #64748b; }
-.modal-body { padding: 1.5rem; }
-.modal-footer { display: flex; justify-content: flex-end; gap: 1rem; padding: 1.5rem; border-top: 1px solid #e2e8f0; background-color: #f8fafc; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+.modal { 
+    display: none; 
+    position: fixed; 
+    z-index: 2000; 
+    left: 0; 
+    top: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0,0,0,0.5); 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    animation: fadeIn 0.3s; 
+}
+
+.modal-content { 
+    background-color: #fff; 
+    margin: 5% auto;
+    border-radius: 12px;
+    width: 90%; 
+    max-width: 500px; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+    animation: slideIn 0.3s; 
+    overflow: hidden;
+}
+
+.modal-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    border-bottom: 1px solid #e2e8f0; 
+    padding: 1.5rem; 
+}
+
+.modal-header h2 { 
+    margin: 0; 
+    font-size: 20px; 
+}
+
+.close-btn { 
+    font-size: 28px; 
+    cursor: pointer; 
+    color: #64748b; 
+}
+
+.modal-body { 
+    padding: 1.5rem; 
+}
+
+.modal-footer { 
+    display: flex; 
+    justify-content: flex-end; 
+    gap: 1rem; 
+    padding: 1.5rem; 
+    border-top: 1px solid #e2e8f0; 
+    background-color: #f8fafc; 
+    border-bottom-left-radius: 12px; 
+    border-bottom-right-radius: 12px; 
+    
+}
+
+.modal-footer .btn {
+    margin: 0;
+}
 
 .profile-modal-avatar {
     width: 100px;
@@ -229,7 +286,7 @@
     to { transform: rotate(360deg); }
 }
 
-/* --- ✅ NEW: Mobile Responsive Fixes --- */
+/* --- ✅ MODIFIED: Mobile Responsive Fixes --- */
 @media (max-width: 768px) {
     .page-header {
         align-items: center; /* Center the title */
@@ -246,6 +303,7 @@
     .action-buttons {
         flex-direction: column; /* Stack buttons */
         align-items: flex-start;
+        gap: 0.5rem; /* ✅ ADDED: Reduce gap */
     }
     .action-buttons .btn {
         width: 100%; /* Make buttons full-width in the cell */
@@ -277,4 +335,22 @@
         flex-wrap: wrap; /* Allow links to wrap */
         justify-content: center;
     }
+}
+
+/* Style copied from my_orders.css for consistency */
+#delete-student-modal .summary {
+    text-align: left;
+    padding: 1rem;
+    background-color: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+#delete-student-modal .summary p {
+    margin: 0 0 0.5rem 0;
+}
+
+#delete-student-modal .summary p:last-child {
+    margin-bottom: 0;
 }
