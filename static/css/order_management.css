@@ -1,6 +1,5 @@
-/* static/css/order_management.css */
 
-/* ✅ UPDATED: Search Bar Styles */
+/* --- Search Bar Styles --- */
 .page-controls {
     margin-bottom: 2.5rem;
 }
@@ -49,6 +48,7 @@
     grid-template-columns: 1fr;
     gap: 1.5rem;
 }
+/* Message for when a section (e.g., "Pending") has no orders */
 .no-data-cell {
     text-align: center;
     padding: 40px;
@@ -56,7 +56,9 @@
     background-color: #f8fafc;
     border-radius: 8px;
 }
-.no-data-cell p { margin: 0; }
+.no-data-cell p {
+    margin: 0;
+}
 
 /* --- Order Card Styles --- */
 .order-card {
@@ -99,7 +101,7 @@
     font-size: 18px;
     font-weight: 600;
     margin: 0;
-    padding-right: 100px;
+    padding-right: 100px; /* Space for the status badge */
 }
 .details-grid {
     display: grid;
@@ -113,6 +115,8 @@
     font-weight: 600;
     color: #1e293b;
 }
+
+/* --- Status Badges --- */
 .status-badge {
     padding: 4px 12px;
     border-radius: 999px;
@@ -120,22 +124,32 @@
     font-weight: 600;
     display: inline-block;
     white-space: nowrap;
-    /* ✅ ADDED: Positioning for the corner */
     position: absolute;
-    top: 1rem;  /* 16px from the top */
+    top: 1rem;   /* 16px from the top */
     right: 1rem; /* 16px from the right */
     z-index: 10;   /* Ensure it's on top of other content */
 }
 .status-badge.status-pending {
-  color: #92400e; /* Dark orange text */
-  background-color: #fef3c7; /* Light yellow background */
-  border-color: #fcd34d;
+    color: #92400e; /* Dark orange text */
+    background-color: #fef3c7; /* Light yellow background */
+    border-color: #fcd34d;
 }
-
-.status-badge.status-approved { background-color: #dcfce7; color: #166534; }
-.status-badge.status-completed { background-color: #dbeafe; color: #1e40af; }
-.status-badge.status-rejected { background-color: #fee2e2; color: #991b1b; }
-.status-badge.status-cancelled { background-color: #e5e7eb; color: #4b5563; }
+.status-badge.status-approved {
+    background-color: #dcfce7;
+    color: #166534;
+}
+.status-badge.status-completed {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+.status-badge.status-rejected {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+.status-badge.status-cancelled {
+    background-color: #e5e7eb;
+    color: #4b5563;
+}
 
 /* --- Checkbox & Batch Action Styles --- */
 .order-checkbox {
@@ -163,6 +177,8 @@
     background-color: #eff6ff;
     border-color: #60a5fa;
 }
+
+/* Bar that appears at the bottom for batch actions */
 .batch-action-bar {
     position: fixed;
     bottom: 20px;
@@ -184,21 +200,21 @@
 .batch-action-bar > div {
     display: flex;
     align-items: center;
-    gap: 0.75rem; /* Space between the "Change status to:", dropdown, and Update button */
+    gap: 0.75rem; /* Space between label, dropdown, and button */
 }
 
 .batch-action-bar label {
-    margin-right: 0; /* Clear previous margin if any */
-    font-size: 15px; /* Consistent font size */
+    margin-right: 0;
+    font-size: 15px;
     font-weight: 500;
-    color: #e2e8f0; /* Light gray color to stand out on dark background */
+    color: #e2e8f0;
 }
 #batch-status-select,
 #batch-pending-status-select {
-    padding: 10px 14px; /* Consistent padding */
-    border: 1px solid #94a3b8; /* Border visible on dark background */
-    border-radius: 8px; /* Rounded corners */
-    background-color: #f8fafc; /* Light background */
+    padding: 10px 14px;
+    border: 1px solid #94a3b8;
+    border-radius: 8px;
+    background-color: #f8fafc;
     font-size: 15px;
     color: #1e293b;
     outline: none;
@@ -211,22 +227,22 @@
     background-position: right 10px center;
     background-size: 12px;
     padding-right: 30px;
-    height: 40px; /* Ensure consistent height with the button */
+    height: 40px; /* Ensure consistent height */
 }
 
-.batch-action-bar span { font-weight: 500; }
+.batch-action-bar span {
+    font-weight: 500;
+}
 .batch-action-bar .btn {
     width: auto;
     margin-top: 0;
-    padding: 10px 20px; /* Increased padding for better click area */
+    padding: 10px 20px;
     border: none;
-    font-size: 15px; /* Consistent font size */
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    border-radius: 8px; /* Consistent rounded corners */
+    border-radius: 8px;
     transition: background-color 0.2s ease, color 0.2s ease;
-    
-    /* New: Ensure button has a fixed minimum height */
     height: 40px; 
     line-height: 1; /* Center text vertically */
 }
@@ -241,227 +257,283 @@
     background-color: #173287;
 }
 
-.batch-action-bar .btn-danger { background-color: #dc2626; color: white; }
-.batch-action-bar .btn-danger:hover { background-color: #b91c1c; }
+.batch-action-bar .btn-danger {
+    background-color: #dc2626;
+    color: white;
+}
+.batch-action-bar .btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+/* Animation for batch action bar sliding up */
 @keyframes slideUp {
     from { opacity: 0; transform: translate(-50%, 20px); }
     to { opacity: 1; transform: translate(-50%, 0); }
 }
 
 /* --- Modal Styles --- */
-.modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; animation: fadeIn 0.3s; }
+/* Modal overlay */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s;
+}
+/* Modal content box */
 .modal-content {
     background-color: #fff;
     margin: 5% auto;
-    padding: 0; /* REMOVE padding: 24px; to let header/body/footer handle it */
+    padding: 0; /* Let header/body/footer handle padding */
     border-radius: 12px;
     width: 90%;
     max-width: 700px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     animation: slideIn 0.3s;
-    
-    /* 🔑 SCROLLING STEP 1: Set max height and flex layout */
-    max-height: 90vh; /* Limits the modal's total height to 90% of the screen */
+    max-height: 90vh; /* Max height */
     display: flex;
-    flex-direction: column; /* Stacks header, body, and footer vertically */
+    flex-direction: column; /* Stack header, body, footer */
 }
+/* Modal header */
 .modal-header { 
-    /* The existing styles: */
     display: flex; 
     justify-content: space-between; 
     align-items: center; 
     border-bottom: 1px solid #e2e8f0; 
     padding-bottom: 16px; 
-    margin-bottom: 0; /* REMOVE margin-bottom: 24px; */
-    
-    /* 🔑 SCROLLING STEP 2: Add vertical padding and fix size */
-    padding: 24px 24px 16px 24px; /* Top, Right, Bottom, Left. Apply 24px side padding here. */
+    margin-bottom: 0;
+    padding: 24px 24px 16px 24px;
     flex-shrink: 0; /* Prevents header from shrinking */
 }
-.modal-header h2 { margin: 0; font-size: 20px; }
-.close-btn { font-size: 28px; cursor: pointer; color: #64748b; }
-.modal-body { 
-    /* REMOVE padding-bottom: 1rem; */
-    
-    /* 🔑 SCROLLING STEP 4: Enable scrolling and flexible growth */
-    flex-grow: 1; /* Allows the body to take up all remaining space */
-    overflow-y: auto; /* Adds a scrollbar when content overflows vertically */
-    padding: 24px; /* Re-add the side padding here */
+.modal-header h2 {
+    margin: 0;
+    font-size: 20px;
 }
-modal-footer {
+.close-btn {
+    font-size: 28px;
+    cursor: pointer;
+    color: #64748b;
+}
+/* Modal body (scrollable) */
+.modal-body { 
+    flex-grow: 1; /* Allows body to take remaining space */
+    overflow-y: auto; /* Adds scrollbar if content overflows */
+    padding: 24px;
+}
+/* Modal footer */
+.modal-footer {
     display: flex;
-    /* Changed from flex-end to space-between or flex-start if you only have one group of elements */
-    /* To keep the label and select/button group together and push them to the end, 
-       we can use a wrapper or just adjust gap. */
-    justify-content: flex-end; /* Keep this if you want the form on the right */
-    align-items: center; /* Vertically align items in the footer */
-    gap: 1.5rem; /* Increase the gap between elements within the footer */
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
     padding: 16px 24px 24px 24px;
     flex-shrink: 0;
     border-top: 1px solid #e2e8f0;
 }
 
-.modal-footer {
-    display: flex;
-    /* REMOVE justify-content: flex-end; */
-    justify-content: flex-end; /* Ensures any potential left-side elements are separate from the form on the right */
-    align-items: center;
-    gap: 0.75rem;
-    padding: 16px 24px 24px 24px; /* Ensure 24px padding is applied on all sides */
-    flex-shrink: 0;
-    border-top: 1px solid #e2e8f0;
-}
-
+/* Form for single status update (in modal footer) */
 .modal-footer #single-status-form {
     display: flex;
     align-items: center;
     gap: 1rem;
     margin: 0;
-    /* 🔑 ADD THIS to push the form group to the right. */
-    /* If you keep justify-content: space-between on .modal-footer, 
-       this margin-left: auto isn't strictly needed, but it's a solid fix for flex containers. */
-    margin-left: auto; 
+    margin-left: auto; /* Push form to the right */
 }
 .modal-footer #single-status-form label {
-    font-size: 15px; /* Adjust font size */
-    color: #475569; /* Make the color slightly less prominent than strong text */
+    font-size: 15px;
+    color: #475569;
     font-weight: 500;
 }
 
-.modal-footer .status-select { /* Targeting the select specifically */
-    padding: 10px 14px; /* Adjust padding for a better feel */
-    border: 1px solid #cbd5e1; /* Softer border color */
-    border-radius: 8px; /* More rounded corners */
-    background-color: #f8fafc; /* Light background */
+/* Dropdown select in modal footer */
+.modal-footer .status-select {
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background-color: #f8fafc;
     font-size: 15px;
     color: #1e293b;
     outline: none;
     cursor: pointer;
-    -webkit-appearance: none; /* Removes default browser styling for dropdown */
+    -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.9%205.4s9.3-1.8%2012.9-5.4L287%2095.1c3.6-3.5%205.4-7.8%205.4-12.8.1-5-1.7-9.3-5.3-12.9z%22%2F%3E%3C%2Fsvg%3E'); /* Custom arrow */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.9%205.4s9.3-1.8%2012.9-5.4L287%2095.1c3.6-3.5%205.4-7.8%205.4-12.8.1-5-1.7-9.3-5.3-12.9z%22%2F%3E%3C%2Fsvg%3E');
     background-repeat: no-repeat;
     background-position: right 10px center;
     background-size: 12px;
-    padding-right: 30px; /* Make space for the custom arrow */
+    padding-right: 30px; /* Space for custom arrow */
 }
-
 .modal-footer .status-select:focus {
     border-color: #1e40af;
     box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
 }
 
-.modal-footer .btn-primary { /* Target the primary button */
-    padding: 10px 20px; /* Consistent padding with the select */
+/* Primary button in modal footer */
+.modal-footer .btn-primary {
+    padding: 10px 20px;
     font-size: 15px;
-    font-weight: 600; /* Slightly bolder text */
-    border-radius: 8px; /* Match border-radius with select */
-    background-color: #1e40af; /* Deeper blue */
+    font-weight: 600;
+    border-radius: 8px;
+    background-color: #1e40af;
     color: white;
     border: none;
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
-
 .modal-footer .btn-primary:hover {
-    background-color: #173287; /* Darker blue on hover */
+    background-color: #173287;
 }
-.details-layout { display: flex; gap: 2rem; }
-.details-image-container { flex-basis: 40%; flex-shrink: 0; }
-.details-image { width: 100%; height: auto; border-radius: 8px; }
-.details-info { flex-basis: 60%; }
-.details-name { font-size: 22px; font-weight: 700; margin: 0 0 1rem 0; }
-.details-description { font-size: 14px; color: #475569; line-height: 1.6; margin-bottom: 1rem; max-height: 120px; overflow-y: auto; padding-right: 10px; }
-.details-summary-grid { display: grid; grid-template-columns: auto 1fr; gap: 0.75rem 1.5rem; font-size: 14px; padding-top: 1rem; border-top: 1px solid #f1f5f9; }
-.details-summary-grid span { color: #64748b; }
-.details-summary-grid strong { font-weight: 600; color: #1e293b; }
-#details-claim-note { display: none; margin-top: 1.5rem; background-color: #fefce8; color: #a16207; padding: 0.75rem 1rem; border-radius: 8px; font-size: 13px; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); } }
+
+/* --- Modal Content Details --- */
+/* Layout for image + info in modal */
+.details-layout {
+    display: flex;
+    gap: 2rem;
+}
+.details-image-container {
+    flex-basis: 40%;
+    flex-shrink: 0;
+}
+.details-image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+.details-info {
+    flex-basis: 60%;
+}
+.details-name {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+}
+.details-description {
+    font-size: 14px;
+    color: #475569;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    max-height: 120px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+/* Grid for key-value pairs in modal */
+.details-summary-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.75rem 1.5rem;
+    font-size: 14px;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+}
+.details-summary-grid span {
+    color: #64748b;
+}
+.details-summary-grid strong {
+    font-weight: 600;
+    color: #1e293b;
+}
+/* Note for approved orders */
+#details-claim-note {
+    display: none;
+    margin-top: 1.5rem;
+    background-color: #fefce8;
+    color: #a16207;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+/* Modal Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); }
+}
 
 
 /* Wrapper for modal title and badge */
 .details-header-with-badge {
-display: flex;
-align-items: center; /* Vertically align title and badge */
-gap: 0.75rem; /* Space between title and badge */
-margin-bottom: 1rem; /* This margin was on the .details-name */
+    display: flex;
+    align-items: center; /* Vertically align title and badge */
+    gap: 0.75rem; /* Space between title and badge */
+    margin-bottom: 1rem; /* This margin was on the .details-name */
 }
 
 /* Remove margin from the h3, since it's on the wrapper now */
 .details-name {
-margin: 0;
+    margin: 0;
 }
 
 /* Override absolute positioning for the badge *inside* the modal */
 .details-header-with-badge .status-badge {
-position: relative;
-top: auto;
-right: auto;
-flex-shrink: 0; /* Prevents badge from shrinking if title is long */
+    position: relative;
+    top: auto;
+    right: auto;
+    flex-shrink: 0; /* Prevents badge from shrinking if title is long */
 }
 
+/* --- Modal Button Styles --- */
 /* Style for the secondary/cancel button */
 .modal-footer .btn-secondary,
 .modal-footer .cancel-modal-btn {
-    /* Subtle background and primary text color */
-    background-color: #f1f5f9; /* Very light gray/off-white background */
-    color: #475569; /* Darker gray text */
-    
-    /* Consistent padding, font, and border-radius */
+    background-color: #f1f5f9;
+    color: #475569;
     padding: 10px 20px;
     font-size: 15px;
     font-weight: 500;
     border-radius: 8px;
-    border: 1px solid #e2e8f0; /* Light border */
+    border: 1px solid #e2e8f0;
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
-
 .modal-footer .btn-secondary:hover,
 .modal-footer .cancel-modal-btn:hover {
-    background-color: #e2e8e7; /* Slightly darker on hover */
+    background-color: #e2e8e7;
 }
 
 /* Style for the destructive/danger button */
 .modal-footer .btn-danger {
-    /* Prominent red background for irreversible action */
-    background-color: #dc2626; /* Strong red */
-    color: white; /* White text for contrast */
-    
-    /* Consistent padding, font, and border-radius */
+    background-color: #dc2626;
+    color: white;
     padding: 10px 20px;
     font-size: 15px;
-    font-weight: 600; /* Bolder to emphasize the action */
+    font-weight: 600;
     border-radius: 8px;
     border: none;
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
-
 .modal-footer .btn-danger:hover {
-    background-color: #b91c1c; /* Darker red on hover */
+    background-color: #b91c1c;
 }
 
-/* ✅ NEW: Styles specifically for the Pending Status Form in the Modal */
+/* Form for updating "Pending" status in modal */
 .modal-footer #single-pending-status-form {
-    display: flex; /* Use flexbox */
-    align-items: center; /* Align items vertically */
-    gap: 1rem; /* Space between label, select, button */
-    margin: 0; /* Remove default form margin */
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0;
     margin-left: auto; /* Push this form group to the right */
 }
-
 .modal-footer #single-pending-status-form label {
     font-size: 15px;
     color: #475569;
     font-weight: 500;
 }
 
-/* Apply the existing .status-select styles also to the pending select */
+/* Select dropdown for "Pending" form */
 .modal-footer #single-pending-status-select {
-    /* Copy styles from .modal-footer .status-select */
     padding: 10px 14px;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
@@ -479,16 +551,13 @@ flex-shrink: 0; /* Prevents badge from shrinking if title is long */
     background-size: 12px;
     padding-right: 30px;
 }
-
 .modal-footer #single-pending-status-select:focus {
-    /* Copy styles from .modal-footer .status-select:focus */
     border-color: #1e40af;
     box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
 }
 
-/* Apply the existing .btn-primary styles also to the pending button */
+/* Button for "Pending" form */
 .modal-footer #single-pending-status-form .btn-primary {
-     /* Copy styles from .modal-footer .btn-primary */
     padding: 10px 20px;
     font-size: 15px;
     font-weight: 600;
@@ -499,31 +568,28 @@ flex-shrink: 0; /* Prevents badge from shrinking if title is long */
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
-
 .modal-footer #single-pending-status-form .btn-primary:hover {
-    /* Copy styles from .modal-footer .btn-primary:hover */
     background-color: #173287;
 }
-/* --- End of New Pending Form Styles --- */
 
-
-/* Animation for moving cards */
+/* --- Card Animation --- */
+/* Animation for moving/removing cards */
 .order-card.moving {
-  animation: fadeOut 0.3s ease-out forwards;
+    animation: fadeOut 0.3s ease-out forwards;
 }
 
 @keyframes fadeOut {
-  from {
-    opacity: 1;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.95);
-  }
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
 }
 
-/* --- Message Styling --- */
+/* --- Django Messages --- */
 .messages {
     list-style: none;
     padding: 0;
@@ -531,12 +597,12 @@ flex-shrink: 0; /* Prevents badge from shrinking if title is long */
 }
 
 .messages li.success {
-    color: #15803d; /* Dark green text */
-    background-color: #dcfce7; /* Light green background */
+    color: #15803d;
+    background-color: #dcfce7;
     padding: 1rem 1.5rem;
     margin-bottom: 1rem;
     border-radius: 8px;
-    border: 1px solid #86efac; /* Green border */
+    border: 1px solid #86efac;
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -545,12 +611,12 @@ flex-shrink: 0; /* Prevents badge from shrinking if title is long */
 }
 
 .messages li.error {
-    color: #991b1b; /* Dark red text */
-    background-color: #fee2e2; /* Light red background */
+    color: #991b1b;
+    background-color: #fee2e2;
     padding: 1rem 1.5rem;
     margin-bottom: 1rem;
     border-radius: 8px;
-    border: 1px solid #fca5a5; /* Red border */
+    border: 1px solid #fca5a5;
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -558,12 +624,12 @@ flex-shrink: 0; /* Prevents badge from shrinking if title is long */
     transition: opacity 0.5s ease;
 }
 
-/* Style for the container of the top search bar */
+/* Container for the top search bar */
 .global-search-container {
-    margin-bottom: 2rem; /* Consistent spacing */
+    margin-bottom: 2rem;
 }
 
-/* ADDED: Global No Results Message Style */
+/* Message for when all sections are empty after a search */
 .no-data-message {
     text-align: center;
     padding: 2rem;
@@ -571,5 +637,5 @@ flex-shrink: 0; /* Prevents badge from shrinking if title is long */
     background-color: #f8fafc;
     border-radius: 8px;
     border: 1px dashed #e2e8f0;
-    margin: 2rem 0; /* Add some margin */
+    margin: 2rem 0;
 }

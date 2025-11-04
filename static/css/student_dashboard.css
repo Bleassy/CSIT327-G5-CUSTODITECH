@@ -1,6 +1,4 @@
-/* static/css/student_dashboard.css */
 
-/* 1. Welcome Card */
 .welcome-card {
     background: linear-gradient(135deg, #800000 0%, #a04000 100%);
     color: white;
@@ -12,18 +10,19 @@
     flex-direction: column;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
 .welcome-card h1 {
     font-size: 40px;
     font-weight: 900;
     margin: 0 0 4px 0;
 }
+
 .welcome-card p {
     margin: 0;
     font-size: 18px;
     opacity: 0.9;
 }
 
-/* 2. Action Cards */
 .action-cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -48,11 +47,24 @@
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
-.card-icon { font-size: 40px; margin-bottom: 1rem; }
-.action-card h2 { color: #1e293b; margin: 0 0 12px 0; font-size: 20px; font-weight: 600; }
-.action-card p { color: #64748b; margin: 0; line-height: 1.5; }
+.card-icon {
+    font-size: 40px;
+    margin-bottom: 1rem;
+}
 
-/* 3. Summary Section */
+.action-card h2 {
+    color: #1e293b;
+    margin: 0 0 12px 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.action-card p {
+    color: #64748b;
+    margin: 0;
+    line-height: 1.5;
+}
+
 .summary-section .section-title {
     font-size: 24px;
     font-weight: 600;
@@ -61,6 +73,7 @@
     padding-bottom: 1rem;
     border-bottom: 1px solid #e2e8f0;
 }
+
 .summary-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -76,6 +89,7 @@
     display: flex;
     flex-direction: column;
 }
+
 .summary-card h3 {
     font-size: 18px;
     font-weight: 600;
@@ -87,6 +101,7 @@
     gap: 1.5rem;
     flex-grow: 1;
 }
+
 .item-image {
     width: 100px;
     height: 100px;
@@ -95,11 +110,13 @@
     background-color: #f8fafc;
     flex-shrink: 0;
 }
+
 .item-details h4 {
     margin: 0 0 1rem 0;
     font-size: 16px;
     font-weight: 600;
 }
+
 .details-grid {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -107,6 +124,7 @@
     font-size: 14px;
     color: #64748b;
 }
+
 .details-grid strong {
     font-weight: 600;
     color: #1e293b;
@@ -140,7 +158,11 @@
     text-align: center;
     display: block;
 }
-.view-all-btn:hover { background: #e2e8f0; border-color: #cbd5e1; }
+
+.view-all-btn:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+}
 
 @media (max-width: 992px) {
     .summary-grid {
@@ -148,74 +170,72 @@
     }
 }
 
-/* --- ✅ NEW: Mobile Responsive Fixes --- */
 @media (max-width: 768px) {
-    /* 1. Fix Welcome Card */
     .welcome-card {
-        height: auto; /* Remove fixed height */
+        height: auto;
         padding: 1.5rem;
-        text-align: center; /* Center text */
-    }
-    .welcome-card h1 {
-        font-size: 28px; /* Reduce font size */
-    }
-    .welcome-card p {
-        font-size: 16px; /* Reduce font size */
+        text-align: center;
     }
 
-    /* 2. Fix Summary Item Cards */
+    .welcome-card h1 {
+        font-size: 28px;
+    }
+
+    .welcome-card p {
+        font-size: 16px;
+    }
+
     .item-card {
-        flex-direction: column; /* Stack image on top of details */
-        gap: 1rem; /* Adjust gap for vertical stacking */
+        flex-direction: column;
+        gap: 1rem;
     }
+
     .item-image {
-        width: 100%; /* Make image full-width */
-        height: 180px; /* Give it a consistent height */
-        /* object-fit: cover; is already set */
+        width: 100%;
+        height: 180px;
     }
+
     .item-details h4 {
-        margin-bottom: 0.5rem; /* Tighter spacing */
+        margin-bottom: 0.5rem;
     }
 }
-/* --- End of New Fixes --- */
 
-
-/* --- Message/Alert Styling (New Design) --- */
 .message-container {
-    margin-bottom: 2rem; 
+    margin-bottom: 2rem;
 }
 
 .message {
     padding: 1rem 1.5rem;
-    border-radius: 10px; /* Creates the pill shape */
+    border-radius: 10px;
     font-size: 16px;
-    font-weight: 500; /* Use 400 for normal weight, 500 for slightly bolder */
+    font-weight: 500;
     border: 1px solid transparent;
 }
 
-/* Specific background/text colors for different message types */
 .message.warning {
-    background-color: #fef3c7; /* Light amber background */
-    color: #92400e; /* Dark amber text */
-    border-color: #fde68a; /* Slightly darker border for definition */
+    background-color: #fef3c7;
+    color: #92400e;
+    border-color: #fde68a;
 }
+
 .message.error {
-    background-color: #fee2e2; /* Light red background */
-    color: #991b1b; /* Dark red text */
+    background-color: #fee2e2;
+    color: #991b1b;
     border-color: #fecaca;
 }
+
 .message.success {
-    background-color: #dcfce7; /* Light green background */
-    color: #166534; /* Dark green text */
+    background-color: #dcfce7;
+    color: #166534;
     border-color: #bbf7d0;
 }
+
 .message.info {
-    background-color: #dbeafe; /* Light blue background */
-    color: #1e40af; /* Dark blue text */
+    background-color: #dbeafe;
+    color: #1e40af;
     border-color: #bfdbfe;
 }
 
-/* --- Message Styling --- */
 .messages {
     list-style: none;
     padding: 0;
@@ -223,12 +243,12 @@
 }
 
 .messages li.success {
-    color: #15803d; /* Dark green text */
-    background-color: #dcfce7; /* Light green background */
+    color: #15803d;
+    background-color: #dcfce7;
     padding: 1rem 1.5rem;
     margin-bottom: 1rem;
     border-radius: 8px;
-    border: 1px solid #86efac; /* Green border */
+    border: 1px solid #86efac;
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -237,12 +257,12 @@
 }
 
 .messages li.error {
-    color: #991b1b; /* Dark red text */
-    background-color: #fee2e2; /* Light red background */
+    color: #991b1b;
+    background-color: #fee2e2;
     padding: 1rem 1.5rem;
     margin-bottom: 1rem;
     border-radius: 8px;
-    border: 1px solid #fca5a5; /* Red border */
+    border: 1px solid #fca5a5;
     font-weight: 500;
     display: flex;
     align-items: center;

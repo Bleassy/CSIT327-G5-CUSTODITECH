@@ -1,8 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
 
-/* static/css/admin_base.css */
-
-/* General Body and Font Styles */
+/* --- General Body and Font Styles --- */
 body {
     margin: 0;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -12,14 +10,17 @@ body {
 
 .admin-dashboard-body {
     display: flex;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden; 
 }
 
 .main-content {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    overflow-x: hidden; /* ✅ --- THIS IS THE FIX --- */
+    overflow-x: hidden;
+    overflow-y: auto; 
+    -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
 }
 
 .page-container {
@@ -27,7 +28,7 @@ body {
     flex-grow: 1;
 }
 
-/* Header Styles */
+/* --- Header Styles --- */
 .admin-header {
     background: white;
     border-bottom: 1px solid #e2e8f0;
@@ -39,6 +40,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 1000;
+    flex-shrink: 0; /* Ensures header never collapses */
 }
 
 .header-left .logo {
@@ -49,7 +51,7 @@ body {
     color: #1e40af;
     font-size: 16px;
     text-decoration: none;
-    flex-shrink: 0; /* ✅ ADDED: Prevent logo from shrinking */
+    flex-shrink: 0;
 }
 
 .logo-icon { font-size: 24px; }
@@ -58,6 +60,7 @@ body {
     display: flex;
     gap: 0;
     margin-left: 3rem;
+    flex: 1;
 }
 
 .admin-nav .nav-btn {
@@ -76,7 +79,7 @@ body {
     transition: all 0.2s;
     white-space: nowrap;
     font-size: 14px;
-    flex-shrink: 0; /* ✅ ADDED: Prevent nav buttons from shrinking */
+    flex-shrink: 0;
 }
 
 .admin-nav .nav-btn:hover {
@@ -93,7 +96,7 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
-    flex-shrink: 0; /* ✅ ADDED: Prevent profile section from shrinking */
+    flex-shrink: 0;
 }
 
 .admin-name {
@@ -127,7 +130,7 @@ body {
     color: #dc2626;
 }
 
-/* Django Messages */
+/* --- Django Messages --- */
 .messages {
     list-style: none;
     padding: 0;
@@ -139,14 +142,22 @@ body {
     border-radius: 8px;
     font-weight: 500;
 }
-.messages li.success { background-color: #dcfce7; color: #166534; }
-.messages li.error { background-color: #fee2e2; color: #991b1b; }
-.messages li.warning { background-color: #fef3c7; color: #92400e; }
 
+.messages li.success { 
+    background-color: #dcfce7; 
+    color: #166534; 
+}
 
+.messages li.error { 
+    background-color: #fee2e2; 
+    color: #991b1b; 
+}
 
+.messages li.warning { 
+    background-color: #fef3c7; 
+    color: #92400e; 
+}
 
-/* [admin_base.css] - ADD THESE MODAL STYLES */
 
 /* --- Base Modal Styles --- */
 .modal {
@@ -178,7 +189,7 @@ body {
     animation: fadeIn 0.3s ease-out; /* Optional: Fade in */
 }
 
-/* Specific sizing classes (you might have these from manage_products.css) */
+/* Specific sizing classes */
 .modal-content.modal-sm { max-width: 450px; }
 .modal-content.modal-lg { max-width: 800px; }
 
@@ -242,7 +253,7 @@ body {
     outline: none;
 }
 
-/* Button styles (assuming you have .btn, .btn-danger, .btn-secondary defined elsewhere) */
+/* Button styles (assuming .btn, .btn-danger, .btn-secondary are defined elsewhere) */
 .modal-footer .btn {
     padding: 0.5rem 1rem;
     font-size: 0.875rem; /* 14px */
@@ -256,7 +267,7 @@ body {
 
 /* --- Header Avatar Styles --- */
 .admin-name-link {
-    display: flex; /* ✅ This is the main fix */
+    display: flex;
     align-items: center;
     gap: 0.75rem; 
     padding: 0.5rem;
@@ -289,9 +300,8 @@ body {
 }
 
 
-/* --- NEW: Hamburger Menu Styles (Admin) --- */
+/* --- Hamburger Menu Styles (Admin) --- */
 
-/* 1. Desktop Wrapper Fix */
 .mobile-menu-wrapper {
     display: flex;
     align-items: center;
@@ -299,7 +309,6 @@ body {
     justify-content: space-between;
 }
 
-/* 2. Hamburger Button */
 .hamburger-btn {
     display: none; /* Hidden on desktop */
     background: none;
@@ -311,7 +320,6 @@ body {
     z-index: 1001; 
 }
 
-/* 3. Profile Name (Global) */
 .admin-name-link {
     text-decoration: none; /* Removes underline everywhere */
 }
@@ -323,7 +331,7 @@ body {
     display: block; 
 }
 
-/* 4. Responsive Breakpoint */
+/* --- Responsive Breakpoint (992px) --- */
 @media (max-width: 992px) {
     
     .page-container { 
@@ -335,17 +343,23 @@ body {
         justify-content: space-between; /* Logo left, hamburger right */
     }
 
+    
+    .admin-header.horizontal-scroll {
+        overflow-x: auto;
+        justify-content: flex-start;
+        -webkit-overflow-scrolling: touch;
+    }
+
     /* Show hamburger */
     .hamburger-btn {
         display: block;
     }
 
-
-    /* --- Mobile Menu Wrapper (Dropdown) --- */
+    /* Mobile Menu Wrapper (Dropdown) */
     .mobile-menu-wrapper {
         display: none; 
-        position: absolute;  
-        top: 70px;         /* Header height */
+        position: absolute; 
+        top: 70px;     /* Header height */
         left: 0;
         right: 0;
         height: auto;
@@ -363,17 +377,18 @@ body {
         gap: 0;
     }
 
-    /* --- "Open" State --- */
+    /* Mobile Menu "Open" State */
     .admin-header.menu-is-open .mobile-menu-wrapper {
         display: flex; /* Show the menu */
     }
 
-    /* --- Mobile Menu Links --- */
+    /* Mobile Menu Links */
     .admin-nav {
         flex-direction: column;
         align-items: stretch;
         margin-left: 0;
         gap: 0;
+        flex: 1; 
     }
 
     .admin-nav .nav-btn {
@@ -398,7 +413,7 @@ body {
         font-weight: 600;
     }
 
-    /* --- Mobile Menu Profile/Logout --- */
+    /* Mobile Menu Profile/Logout */
     .header-right {
         flex-direction: column;
         align-items: stretch;
@@ -407,7 +422,6 @@ body {
         padding: 0.75rem 1.5rem;
         border-top: 1px solid #f1f5f9; /* Separator line */
     }
-
 
     .admin-name-link:hover {
         background-color: #f8f9fa;
@@ -453,7 +467,7 @@ body {
 /* The spinning circle */
 .loader-spinner {
     border: 8px solid #f3f3f3; /* Light grey base */
-    border-top: 8px solid #1e40af; /* ✅ Admin blue theme color */
+    border-top: 8px solid #1e40af; /* Admin blue theme color */
     border-radius: 50%;
     width: 60px;
     height: 60px;
@@ -466,38 +480,18 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-/* --- NEW: Accessibility Focus Styles --- */
-
-/* This rule targets any button, link, or input when 
-  the browser determines it's being focused via keyboard.
-*/
+/* --- Accessibility Focus Styles --- */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-    /* 'outline-offset' adds a little space so the ring
-      doesn't sit directly on the element.
-    */
     outline-offset: 2px;
-
-    /* This is the outline itself. We'll use your blue
-      theme color to make it match your brand.
-    */
     outline: 2px solid #1e40af;
-    
-    /* Optional: A subtle box-shadow for extra visibility */
     box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
-
-    /* Make sure buttons with rounded corners also have
-       a rounded outline in all browsers.
-    */
     border-radius: 4px; 
 }
-
-/* Special fix for your circular avatar link so the 
-  focus outline is also a circle.
-*/
 .admin-name-link:focus-visible {
     border-radius: 50%;
 }
+

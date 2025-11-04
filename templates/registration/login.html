@@ -116,7 +116,7 @@
             }, 3000); // 3 seconds
         }
 
-        // ✅ --- NEW: Check for Registration Success Message ---
+        // --- NEW: Check for Registration Success Message ---
         const urlParams = new URLSearchParams(window.location.search);
         const successMessage = urlParams.get('message');
 
@@ -151,7 +151,7 @@
                 }
             }
         }
-        // ✅ --- END NEW SCRIPT ---
+        // --- END NEW SCRIPT ---
 
         // --- Auto-hide Initial Django Messages (Keep As Is) ---
         const initialMessages = document.querySelectorAll('.error-message:not(#ajax-error-message), .success-message');

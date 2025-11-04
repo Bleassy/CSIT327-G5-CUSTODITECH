@@ -1,13 +1,15 @@
 {% extends 'dashboards/admin_base.html' %}
 {% load static %}
 
+<!-- Block for page-specific CSS -->
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}?v=1.1">
 {% endblock %}
 
+<!-- Main content block that overrides the one in admin_base.html -->
 {% block content %}
 
-
+<!-- Welcome banner -->
 <div class="welcome-section">
     <h1 class="welcome-title">{{ greeting }}, {{ display_name }}! 👑</h1>
     <p class="welcome-subtitle">
@@ -15,7 +17,9 @@
     </p>
 </div>
 
+<!-- Statistics Card Grid -->
 <div class="stats-grid">
+    <!-- Stat Card: Total Products -->
     <div class="stat-card">
         <div class="stat-icon products">📦</div>
         <div class="stat-content">
@@ -23,6 +27,7 @@
             <div class="stat-number">{{ stats.total_products }}</div>
         </div>
     </div>
+    <!-- Stat Card: Total Orders -->
     <div class="stat-card">
         <div class="stat-icon orders">🛍️</div>
         <div class="stat-content">
@@ -30,6 +35,7 @@
             <div class="stat-number">{{ stats.total_orders }}</div>
         </div>
     </div>
+    <!-- Stat Card: Active Products -->
     <div class="stat-card">
         <div class="stat-icon active-products">✔️</div>
         <div class="stat-content">
@@ -37,6 +43,7 @@
             <div class="stat-number">{{ stats.active_products }}</div>
         </div>
     </div>
+    <!-- Stat Card: Pending Orders -->
     <div class="stat-card">
         <div class="stat-icon pending-orders">⏳</div>
         <div class="stat-content">
@@ -46,8 +53,10 @@
     </div>
 </div>
 
+<!-- Quick Actions Section -->
 <div class="quick-actions">
     <h2 class="section-title">Quick Actions</h2>
+    <!-- Grid of links to other admin pages -->
     <div class="actions-grid">
         <a href="{% url 'manage_products' %}" class="action-btn">📦 Add/View Products</a>
         <a href="{% url 'order_management' %}" class="action-btn">📋 View New Orders</a>

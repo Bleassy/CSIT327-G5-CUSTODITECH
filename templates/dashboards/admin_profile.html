@@ -1,39 +1,48 @@
 {% extends 'dashboards/admin_base.html' %}
 {% load static %}
 
+<!-- Block for page-specific CSS -->
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/admin_profile.css' %}?v=1.2">
 {% endblock %}
 
+<!-- Main content block -->
 {% block content %}
 <div class="page-header">
     <h1>Admin Profile</h1>
 </div>
 
+<!-- Main 2-column layout for profile page -->
 <div class="profile-layout-tabbed">
 
+    <!-- Left-side navigation for switching between profile and password cards -->
     <nav class="profile-nav">
         <a href="#personal-info" class="profile-nav-link active" data-tab-target="#personal-info-card">My Profile</a>
         <a href="#password" class="profile-nav-link" data-tab-target="#password-card">Change Password</a>
     </nav>
 
+    <!-- Right-side content area that holds the different cards -->
     <div class="profile-content">
 
-        {# ✅ UPDATED: Added view-mode class and all new fields/buttons #}
+        <!-- Personal Information Card -->
         <div class="profile-card view-mode active" id="personal-info-card">
             <h2>Personal Information</h2>
 
+            <!-- Container for server-side errors (e.g., "An error occurred") -->
             <div id="details-server-errors" class="form-errors" style="display: none;"></div>
 
+            <!-- Form for updating personal details -->
             <form id="details-form" action="{% url 'admin_profile' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <input type="hidden" name="form_type" value="details">
 
-                {# Avatar Uploader #}
+                <!-- Avatar Upload Section -->
                 <div class="avatar-upload-container">
                     <div class="avatar-preview" id="avatar-preview">
+                        <!-- Display existing avatar image -->
                         {% if profile.avatar_url %}
                             <img src="{{ profile.avatar_url }}" alt="Profile Picture">
+                        <!-- Or display initials as a fallback -->
                         {% else %}
                             <span id="avatar-initials">{{ request.user.get_full_name|default:'A'|first|upper }}</span>
                         {% endif %}
@@ -42,7 +51,7 @@
                     <label for="avatar_image" class="avatar-edit-label">Change Photo</label>
                 </div>
 
-                {# ✅ UPDATED: Fields now have error <p> tags #}
+                <!-- Form Fields -->
                 <div class="form-group">
                     <label for="full_name">Full Name</label>
                     <input type="text" id="full_name" name="full_name" value="{{ profile.full_name|default:'' }}" required>
@@ -72,7 +81,7 @@
                     <p class="form-error-message" id="address-error"></p>
                 </div>
                 
-                {# Form footer with new buttons #}
+                <!-- Form footer with view/edit mode buttons -->
                 <div class="form-footer">
                     <button type="button" class="btn btn-secondary" id="cancel-edit-btn">Cancel</button>
                     <button type="submit" class="btn btn-primary" id="save-details-btn">Save Changes</button>
@@ -81,13 +90,15 @@
             </form>
         </div>
 
-        {# Password form #}
+        <!-- Change Password Card -->
         <div class="profile-card" id="password-card">
             <h2>Change Password</h2>
+            <!-- Form for updating password -->
             <form id="password-form" action="{% url 'admin_profile' %}" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="form_type" value="password">
 
+                <!-- Container for password-related errors -->
                 <div id="password-errors" class="form-errors" style="display: none;"></div>
 
                 <div class="form-group">
@@ -110,14 +121,13 @@
 {% endblock %}
 
 
-{# ✅ UPDATED: Entire JavaScript block replaced with the new version #}
+<!-- Block for page-specific JavaScript -->
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- Helper function to show dynamic success/error messages ---
+    // --- Helper function to show dynamic success/error messages at the top of the page ---
     function showDynamicMessage(message, className = 'success') {
-        // ✅ MODIFIED: Uses your admin's 'message-container' (singular)
         const messageContainer = document.getElementById('message-container');
         if (!messageContainer) return;
 
@@ -127,6 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
         messageContainer.prepend(li);
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
+        // Auto-fade out the message
         setTimeout(() => {
             li.style.opacity = '0';
             li.style.transition = 'opacity 0.5s ease';
@@ -134,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 5000);
     }
 
-    // ✅ NEW: Helpers for DETAILS server errors (not validation)
+    // --- Helpers for Personal Details form server errors ---
     const detailsServerErrorContainer = document.getElementById('details-server-errors');
     function showDetailsServerError(error) {
         if (!detailsServerErrorContainer) return;
@@ -148,14 +159,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ✅ NEW: Helper to clear all individual field errors
+    // --- Helper to clear all individual field validation errors ---
     function clearAllFieldErrors() {
         document.querySelectorAll('#details-form .form-error-message').forEach(el => {
             el.textContent = '';
         });
     }
 
-    // --- Helper function for PASSWORD validation errors ---
+    // --- Helpers for Password form validation errors ---
     const passwordErrorContainer = document.getElementById('password-errors');
     function showPasswordErrors(errors) {
         if (!passwordErrorContainer) return;
@@ -173,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (passwordErrorContainer) passwordErrorContainer.style.display = 'none';
     }
 
-    // ✅ NEW: Phone Number Formatter
+    // --- Formats "09123456789" to "+63 912 345 6789" ---
     function formatPhoneNumber(value) {
         const unformattedRegex = /^09\d{9}$/; // 11 digits total, starting with "09"
         if (unformattedRegex.test(value)) {
@@ -185,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return value; // Return original if no match
     }
 
-    // ✅ NEW: Individual Validation Functions
+    // --- Individual Client-Side Validation Functions ---
     const fullNameInput = document.getElementById('full_name');
     const phoneInput = document.getElementById('phone_number');
     const addressInput = document.getElementById('address');
@@ -204,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function validatePhoneNumber() {
-        // First, format the number
+        // First, format the number on blur
         phoneInput.value = formatPhoneNumber(phoneInput.value.trim());
         const phoneNumber = phoneInput.value;
         const errorEl = document.getElementById('phone_number-error');
@@ -230,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     }
     
-    // --- Main function to handle AJAX form submission ---
+    // --- Main function to handle AJAX form submission for both forms ---
     function handleAjaxFormSubmit(form) {
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -257,8 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return; // Stop the submission
                 }
             }
-
-            // ✅ NEW: Details Validation Logic
+            // --- Details Form Validation Logic ---
             else if (form.id === 'details-form') {
                 clearDetailsServerError(); // Clear *only* server errors
 
@@ -273,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // --- This part runs if validation passes ---
+            // --- AJAX Submission (if validation passes) ---
             const submitButton = form.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.textContent;
             submitButton.disabled = true;
@@ -297,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
                 if (!response.ok) { throw new Error(data.error || 'An unknown error occurred.'); }
 
-                // --- Success ---
+                // --- Handle Success ---
                 showDynamicMessage(data.message, 'success');
                 
                 if (form.id === 'password-form') {
@@ -306,25 +316,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (form.id === 'details-form') {
-                    // Update view-mode text
+                    // Update view-mode text with new data
                     form.querySelector('.form-view-text[data-field="full_name"]').textContent = formData.get('full_name') || 'Not set';
                     form.querySelector('.form-view-text[data-field="phone_number"]').textContent = formData.get('phone_number') || 'Not set';
                     form.querySelector('.form-view-text[data-field="address"]').textContent = formData.get('address') || 'Not set';
                     
-                    // Update avatar
+                    // Update avatar in preview
                     if (data.avatar_url) {
                         document.getElementById('avatar-preview').innerHTML = `<img src="${data.avatar_url}" alt="Profile Picture">`;
                     }
                     
                     // Switch back to view mode
                     document.getElementById('personal-info-card').classList.add('view-mode');
-                    clearAllFieldErrors(); // ✅ Clear field errors on success
-                    clearDetailsServerError(); // ✅ Clear server errors on success
+                    clearAllFieldErrors();
+                    clearDetailsServerError();
                 }
             } catch (error) {
+                // --- Handle Failure ---
                 console.error('Form submission error:', error);
                 
-                // ✅ MODIFIED: Route errors to correct box
+                // Route errors to the correct error box
                 if (form.id === 'password-form') {
                     showPasswordErrors([error.message]);
                 } else if (form.id === 'details-form') {
@@ -333,24 +344,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     showDynamicMessage(`Error: ${error.message}`, 'error');
                 }
             } finally {
+                // Re-enable submit button
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
             }
         });
     }
 
-    // Attach AJAX handlers
+    // Attach AJAX submit handlers to the forms
     const detailsForm = document.getElementById('details-form');
     const passwordForm = document.getElementById('password-form');
     if (detailsForm) handleAjaxFormSubmit(detailsForm);
     if (passwordForm) handleAjaxFormSubmit(passwordForm);
 
-    // ✅ NEW: Add 'blur' listeners for instant validation
+    // Add 'blur' listeners for instant validation on details form
     if (fullNameInput) {
         fullNameInput.addEventListener('blur', validateFullName);
     }
     if (phoneInput) {
-        // We just need to run the phone validator, which also formats
         phoneInput.addEventListener('blur', validatePhoneNumber);
     }
     if (addressInput) {
@@ -363,20 +374,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelBtn = document.getElementById('cancel-edit-btn');
 
     if (infoCard && editBtn && cancelBtn) {
-        // Click "Edit"
+        // Click "Edit" -> remove 'view-mode'
         editBtn.addEventListener('click', () => { infoCard.classList.remove('view-mode'); });
         
-        // Click "Cancel"
+        // Click "Cancel" -> add 'view-mode' and reset form
         cancelBtn.addEventListener('click', () => {
             infoCard.classList.add('view-mode');
 
-            // ✅ NEW: Clear all errors on cancel
+            // Clear all errors on cancel
             clearAllFieldErrors();
             clearDetailsServerError();
 
+            // Reset the form fields and image preview
             if (detailsForm) {
                 detailsForm.reset();
-                // Reset image preview
                 const avatarInput = document.getElementById('avatar_image');
                 if (avatarInput) avatarInput.value = '';
                 const previewEl = document.getElementById('avatar-preview');
@@ -391,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Avatar Image Preview ---
+    // --- Avatar Image Preview Logic ---
     const avatarInput = document.getElementById('avatar_image');
     const avatarPreview = document.getElementById('avatar-preview');
 
@@ -411,18 +422,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Tabbed Navigation Logic ---
     const navLinks = document.querySelectorAll('.profile-nav-link');
     const contentCards = document.querySelectorAll('.profile-content .profile-card');
+    
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault(); 
             const targetId = link.dataset.tabTarget;
             const targetCard = document.querySelector(targetId);
+            
             if (targetCard) {
+                // Update active link
                 navLinks.forEach(nav => nav.classList.remove('active'));
-                contentCards.forEach(card => card.classList.remove('active'));
                 link.classList.add('active');
+                
+                // Update active card
+                contentCards.forEach(card => card.classList.remove('active'));
                 targetCard.classList.add('active');
                 
-                // ✅ NEW: Clear all errors when switching tabs
+                // Clear all errors when switching tabs
                 clearPasswordErrors();
                 clearAllFieldErrors();
                 clearDetailsServerError();

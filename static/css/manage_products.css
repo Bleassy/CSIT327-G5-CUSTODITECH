@@ -1,6 +1,5 @@
-/* static/css/manage_products.css */
 
-/* --- New Search Bar Styles (from student side, adapted) --- */
+/* --- Search and Page Controls --- */
 .page-controls {
     margin-bottom: 2.5rem; /* Increased margin */
 }
@@ -19,7 +18,7 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     outline: none;
     -webkit-appearance: none;
-       -moz-appearance: none;
+        -moz-appearance: none;
             appearance: none;
 }
 
@@ -31,7 +30,6 @@
     position: relative;
 }
 
-/* Hide the old search button as it's no longer needed for live filtering */
 .search-btn {
     display: none;
 }
@@ -431,7 +429,7 @@
     transition: opacity 0.5s ease;
 }
 
-/* --- ✅ MODIFIED: Mobile Responsive Fixes --- */
+/* --- Mobile Responsive Fixes --- */
 @media (max-width: 768px) {
     .page-header {
         flex-direction: column;
@@ -461,7 +459,7 @@
         align-items: flex-start; /* Align them left */
         gap: 0.5rem; /* Reduce gap */
     }
-    /* ✅ NEW: Make buttons in table full-width */
+    
     .action-buttons .btn {
         width: 100%;
         text-align: center;
@@ -499,21 +497,19 @@
         border-radius: 0;
         padding: 1rem;
         box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
-        flex-direction: column; /* ✅ Stack vertically */
-        gap: 1rem; /* ✅ Add gap */
+        flex-direction: column; /* Stack vertically */
+        gap: 1rem; /* Add gap */
     }
     
-    /* ✅ NEW: Make button groups full width */
     .batch-action-bar .batch-buttons {
         display: flex;
         width: 100%;
         gap: 0.75rem;
     }
-    /* ✅ NEW: Make buttons fill the space */
+    
     .batch-action-bar .batch-buttons .btn {
         flex: 1;
     }
-
 
     /* Animation for docked bar */
     @keyframes slideUp {
@@ -521,15 +517,13 @@
         to { transform: translateY(0); }
     }
 
-    /* ✅ NEW: Stack form rows in modal */
     .modal-form .form-row {
         flex-direction: column;
         gap: 0; /* Remove gap, let form-group handle margin */
     }
 }
 
-/* --- NEW: Search Filter Component (Admin) --- */
-
+/* --- Search Filter Component --- */
 .search-filter-container {
     display: flex;
     width: 100%;
@@ -553,7 +547,8 @@
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3e%3cpath d='M5 8l5 5 5-5z' fill='%2364748b'/%3e%3c/svg%3e");    background-repeat: no-repeat;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3e%3cpath d='M5 8l5 5 5-5z' fill='%2364748b'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
     background-position: right 1rem center;
     background-size: 1.2em;
     cursor: pointer;
@@ -576,7 +571,7 @@
     position: relative;
 }
 
-/* --- NEW: Fix for Mobile Search Filter --- */
+/* --- Mobile Search Filter --- */
 @media (max-width: 768px) {
     
     .search-filter-container {

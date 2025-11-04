@@ -10,7 +10,7 @@
             <span>Student:</span><strong>{{ order.student_name|default:'N/A' }}</strong>
             <span>Student ID:</span><strong>{{ order.student_id|default:'N/A' }}</strong>
             <span>Date:</span><strong>{{ order.created_at|date:"M d, Y, P" }}</strong>
-            <span>Quantity:</span><strong>{{ order.quantity }} pc(s)</strong> <!-- ✅ ADDED -->
+            <span>Quantity:</span><strong>{{ order.quantity }} pc(s)</strong>
             <span>Payment:</span><strong>{{ order.payment_method|default:'Cash'|title }}</strong>
         </div>
     </div>

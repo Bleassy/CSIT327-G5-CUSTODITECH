@@ -109,7 +109,7 @@
 </div>
 {% endblock %}
 
-{# ✅ --- REFACTORED JAVASCRIPT BLOCK --- #}
+{#  --- REFACTORED JAVASCRIPT BLOCK --- #}
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return value; // Return original if no match
     }
 
-    // ✅ --- NEW: Individual Validation Functions ---
+    //  --- NEW: Individual Validation Functions ---
     const fullNameInput = document.getElementById('full_name');
     const phoneInput = document.getElementById('phone_number');
     const addressInput = document.getElementById('address');
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         errorEl.textContent = ''; // Clear error
         return true;
     }
-    // ✅ --- END: Individual Validation Functions ---
+    //  --- END: Individual Validation Functions ---
 
     // --- Main function to handle AJAX form submission ---
     function handleAjaxFormSubmit(form) {
@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } 
             
-            // ✅ --- MODIFIED: Details Validation Logic ---
+            //  --- MODIFIED: Details Validation Logic ---
             else if (form.id === 'details-form') {
                 clearDetailsServerError(); // Clear *only* server errors
 
@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
             }
-            // ✅ --- End of Modified Details Validation ---
+            //  --- End of Modified Details Validation ---
             
             // --- This part runs if validation passes ---
             const submitButton = form.querySelector('button[type="submit"]');
@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (detailsForm) handleAjaxFormSubmit(detailsForm);
     if (passwordForm) handleAjaxFormSubmit(passwordForm);
 
-    // ✅ --- MODIFIED: Add 'blur' listeners for instant validation ---
+    //  --- MODIFIED: Add 'blur' listeners for instant validation ---
     if (fullNameInput) {
         fullNameInput.addEventListener('blur', validateFullName);
     }
@@ -347,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (addressInput) {
         addressInput.addEventListener('blur', validateAddress);
     }
-    // ✅ --- END of new listeners ---
+    //  --- END of new listeners ---
 
 
     // --- View/Edit Mode Toggle Logic ---

@@ -9,7 +9,6 @@
 body {
     font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
-    /* display: flex;  <-- MODIFIED: This is not needed and can complicate stacking */
     background-color: #f5f5f5;
 }
 
@@ -214,7 +213,6 @@ body {
     }
     
     .left-side, .right-side {
-        /* ✅ MODIFIED: This is the main fix */
         flex: 0 1 auto; /* Stop them from growing (0), let them shrink (1), and set base size to auto (auto) */
         width: 100%;   /* Make them full width */
         min-width: 100%; /* Override the 300px min-width */
@@ -265,10 +263,10 @@ body {
 }
 
 .error-message, .success-message {
-  transition: opacity 0.5s ease-out;
+    transition: opacity 0.5s ease-out;
 }
 .error-message.fade-out, .success-message.fade-out {
-  opacity: 0;
+    opacity: 0;
 }
 /* Style for the AJAX container */
 #ajax-error-container .error-message {

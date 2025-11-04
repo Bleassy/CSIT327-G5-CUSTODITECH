@@ -1,33 +1,31 @@
 {% load static %}
-
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>{{ page_title|default:'Admin Dashboard' }} - CIT Shop</title>
-
+    
+    <!-- Main base stylesheet for the admin panel -->
     <link rel="stylesheet" href="{% static 'css/admin_base.css' %}?v=1.1">
-
+    
+    <!-- Django block for extra CSS files on specific pages -->
     {% block extra_css %}{% endblock %}
-
 </head>
-
 <body class="admin-dashboard-body">
 
+    <!-- Page Loader Overlay -->
     <div class="loader-overlay" id="page-loader">
         <div class="loader-spinner"></div>
     </div>
 
+    <!-- Main content wrapper -->
     <div class="main-content">
 
+    <!-- Sticky Header -->
     <header class="admin-header">
-
+        
+        <!-- Header Left: Logo -->
         <div class="header-left">
             <a href="{% url 'admin_dashboard' %}" class="logo">
                 <span class="logo-icon">🐱</span>
@@ -35,7 +33,10 @@
             </a>
         </div>
 
+        <!-- Wrapper for navigation and profile, used for mobile menu -->
         <div class="mobile-menu-wrapper">
+            
+            <!-- Main Navigation Bar -->
             <nav class="admin-nav">
                 <a href="{% url 'admin_dashboard' %}" class="nav-btn {% if active_page == 'dashboard' %}active{% endif %}">🏠 Dashboard</a>
                 <a href="{% url 'manage_products' %}" class="nav-btn {% if active_page == 'manage_products' %}active{% endif %}">📦 Manage Products</a>
@@ -43,10 +44,15 @@
                 <a href="{% url 'manage_students' %}" class="nav-btn {% if active_page == 'manage_students' %}active{% endif %}">👥 Manage Students</a>
                 <a href="{% url 'reports' %}" class="nav-btn {% if active_page == 'reports' %}active{% endif %}">📊 Reports</a>
             </nav>
+            
+            <!-- Header Right: Profile & Logout -->
             <div class="header-right">
                 <a href="{% url 'admin_profile' %}" class="admin-name-link {% if active_page == 'profile' %}active{% endif %}">
+                    
+                    <!-- Display profile avatar if it exists -->
                     {% if profile.avatar_url %}
                         <img src="{{ profile.avatar_url }}" alt="Profile" class="header-avatar">
+                    <!-- Otherwise, display initials -->
                     {% else %}
                         <span class="header-avatar header-initials-admin">
                             {{ profile.full_name|default:'A'|first|upper }}
@@ -61,57 +67,54 @@
             </div>
         </div>
         
+        <!-- Hamburger Menu Button (visible on mobile) -->
         <button class="hamburger-btn" aria-label="Toggle menu" aria-expanded="false">
             <span class="hamburger-icon">&equiv;</span>
         </button>
     </header>
 
-        <main class="page-container">
+    <!-- Main Page Content Area -->
+    <main class="page-container">
 
-                        <ul class="messages" id="message-container">
-
+            <!-- Container for Django messages (success, error, etc.) -->
+            <ul class="messages" id="message-container">
                 {% if messages %}
-
                     {% for message in messages %}
-
                         <li class="{{ message.tags }}">{{ message }}</li>
-
                     {% endfor %}
-
                 {% endif %}
-
             </ul>
-
-           
-
+            
+            <!-- Django block where child templates will inject their content -->
             {% block content %}{% endblock %}
 
-</main>
+    </main>
 </div>
 
+<!-- Django block for extra JavaScript files on specific pages -->
 {% block extra_js %}{% endblock %}
 
+<!-- Base JavaScript for all admin pages -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         
-        // 1. Find the button and the ADMIN header
+        // --- Hamburger Menu Logic ---
         const hamburgerBtn = document.querySelector('.hamburger-btn');
-        const header = document.querySelector('.admin-header'); // ✅ Changed to admin-header
+        const header = document.querySelector('.admin-header');
         const body = document.body;
 
         if (hamburgerBtn && header && body) {
             
-            // 3. Add a click event listener
             hamburgerBtn.addEventListener('click', function() {
                 
-                // 4. Toggle the '.menu-is-open' class
+                // Toggle the '.menu-is-open' class on the header
                 header.classList.toggle('menu-is-open');
                 
-                // 5. Update accessibility
+                // Update accessibility attribute
                 const isExpanded = header.classList.contains('menu-is-open');
                 hamburgerBtn.setAttribute('aria-expanded', isExpanded);
 
-                // 6. Change hamburger icon to 'X' or '☰'
+                // Change hamburger icon to 'X' or '☰'
                 const icon = hamburgerBtn.querySelector('.hamburger-icon');
                 if (isExpanded) {
                     icon.innerHTML = '&times;'; // 'X' icon
@@ -121,25 +124,22 @@
             });
         }
 
-        // ===== NEW: Page Loader Logic =====
-        
-        // 1. Find the loader element
+        // --- Page Loader Logic ---
         const loader = document.getElementById('page-loader');
 
-        // 2. Hide loader on page "show" (for back/forward button)
+        // Hide loader on page "show" (handles back/forward button navigation)
         window.addEventListener('pageshow', function() {
             if (loader) {
                 loader.classList.remove('visible');
             }
         });
 
-        // 3. Show loader on link clicks
+        // Show loader on link clicks
         document.addEventListener('click', function(e) {
-            // Check if the clicked element is a link (or inside one)
             const link = e.target.closest('a');
 
             if (link && loader) {
-                // --- Filters: Don't show loader for... ---
+                // Filters: Don't show loader for...
                 
                 // (a) Links opening in a new tab
                 if (link.target === '_blank') return;
@@ -153,11 +153,10 @@
                 // (d) Links inside the pagination container
                 if (link.closest('.pagination-container')) return;
 
-                // --- Show the loader ---
+                // If no filters match, show the loader
                 loader.classList.add('visible');
             }
         });
-        // ==================================
     });
 </script>
 </body>

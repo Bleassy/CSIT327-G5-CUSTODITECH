@@ -129,6 +129,10 @@
                     // (d) Links inside the pagination container
                     if (link.closest('.pagination-container')) return;
 
+                    if (e.ctrlKey || e.metaKey) return;
+
+                    
+
                     // --- Show the loader ---
                     loader.classList.add('visible');
                 }

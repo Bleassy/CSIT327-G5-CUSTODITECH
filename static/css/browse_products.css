@@ -1,26 +1,111 @@
-/* static/css/browse_products.css */
-
 /* --- Product Grid and Card Styles --- */
-.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; }
-.product-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); border: 1px solid #f1f5f9; display: flex; flex-direction: column; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; }
-.product-card:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1); }
-.product-image-container { position: relative; height: 200px; background-color: #f1f5f9; overflow: hidden; }
-.product-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
-.product-card:hover .product-image { transform: scale(1.05); }
-.stock-overlay { position: absolute; top: 1rem; right: 1rem; padding: 0.3rem 0.8rem; border-radius: 999px; font-size: 12px; font-weight: 600; color: white; z-index: 2; }
-.stock-overlay.out-of-stock { background-color: #be123c; }
-.stock-overlay.low-stock { background-color: #f59e0b; }
-.product-info { padding: 1.25rem; flex-grow: 1; display: flex; flex-direction: column; }
-.product-name { font-size: 18px; font-weight: 600; margin: 0 0 0.5rem 0; color: #1e293b; }
-.product-description { font-size: 14px; line-height: 1.5; margin: 0 0 1rem 0; color: #64748b; min-height: 42px; flex-grow: 1; }
-.product-meta { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 1rem; }
-.product-price { font-size: 18px; font-weight: 700; color: #8B0000; }
-.product-stock { font-size: 12px; font-weight: 500; color: #475569; }
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+}
 
-.product-actions { 
-    padding: 0 1.25rem 1.25rem 1.25rem; 
-    display: flex; 
-    gap: 0.75rem; 
+.product-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.product-image-container {
+    position: relative;
+    height: 200px;
+    background-color: #f1f5f9;
+    overflow: hidden;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image {
+    transform: scale(1.05);
+}
+
+.stock-overlay {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    z-index: 2;
+}
+
+.stock-overlay.out-of-stock {
+    background-color: #be123c;
+}
+
+.stock-overlay.low-stock {
+    background-color: #f59e0b;
+}
+
+.product-info {
+    padding: 1.25rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    color: #1e293b;
+}
+
+.product-description {
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 1rem 0;
+    color: #64748b;
+    min-height: 42px;
+    flex-grow: 1;
+}
+
+.product-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 1rem;
+}
+
+.product-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #8B0000;
+}
+
+.product-stock {
+    font-size: 12px;
+    font-weight: 500;
+    color: #475569;
+}
+
+.product-actions {
+    padding: 0 1.25rem 1.25rem 1.25rem;
+    display: flex;
+    gap: 0.75rem;
 }
 
 /* This rule must be separate, not nested */
@@ -30,40 +115,97 @@
     margin-top: 0; /* Removes extra spacing */
 }
 
-.btn { width: 100%; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; transition: background-color 0.2s; font-size: 14px; }
-.btn-primary { background-color: #800000; color: white; }
-.btn-primary:hover { background-color: #600000; }
-.btn-secondary { background-color: #e2e8f0; color: #475569; }
-.btn-secondary:hover { background-color: #cbd5e1; }
-.btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
-.no-products-message p { font-size: 1.2rem; color: #64748b; margin: 0; }
+.btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background-color: #800000;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #600000;
+}
+
+.btn-secondary {
+    background-color: #e2e8f0;
+    color: #475569;
+}
+
+.btn-secondary:hover {
+    background-color: #cbd5e1;
+}
+
+.btn:disabled {
+    background-color: #94a3b8;
+    cursor: not-allowed;
+}
+
+.no-products-message p {
+    font-size: 1.2rem;
+    color: #64748b;
+    margin: 0;
+}
 
 /* === General Modal Styles === */
 .modal {
-    position: fixed; z-index: 1000; left: 0; top: 0;
-    width: 100%; height: 100%;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    display: flex; align-items: center; justify-content: center;
-    padding: 1rem; box-sizing: border-box; animation: fadeIn 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    box-sizing: border-box;
+    animation: fadeIn 0.3s;
 }
+
 .modal-content {
-    background-color: #ffffff; border-radius: 12px;
-    width: 100%; 
-    max-width: 500px; 
+    background-color: #ffffff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     animation: slideIn 0.3s;
-    display: flex; flex-direction: column;
-    max-height: 90vh; 
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
 }
-.modal-header {
-    padding: 24px; border-bottom: 1px solid #e2e8f0;
-    flex-shrink: 0; 
-    display: flex; justify-content: space-between; align-items: center;
-}
-.modal-header h2 { margin: 0; font-size: 20px; font-weight: 600; }
-.close-btn { font-size: 28px; font-weight: bold; color: #64748b; cursor: pointer; }
 
-/* ✅ NEW RULE: Makes the form a flex container */
+.modal-header {
+    padding: 24px;
+    border-bottom: 1px solid #e2e8f0;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.close-btn {
+    font-size: 28px;
+    font-weight: bold;
+    color: #64748b;
+    cursor: pointer;
+}
+
 .modal-form {
     display: flex;
     flex-direction: column;
@@ -71,7 +213,6 @@
     min-height: 0; /* Prevents flexbox overflow issues */
 }
 
-/* ✅ UPDATED RULE: Makes the body scroll inside the form */
 .modal-body {
     padding: 24px;
     overflow-y: auto; /* Adds a scrollbar ONLY when content is too tall */
@@ -80,10 +221,15 @@
 }
 
 .modal-footer {
-    padding: 24px; display: flex; justify-content: flex-end; gap: 1rem;
-    border-top: 1px solid #e2e8f0; background-color: #f8fafc;
-    border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;
-    flex-shrink: 0; 
+    padding: 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    border-top: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    flex-shrink: 0;
 }
 
 .modal-product-description {
@@ -108,15 +254,64 @@
     background-color: #f8fafc;
     border: 1px solid #e2e8f0;
 }
-.modal-form .form-group { margin-bottom: 1.2rem; }
-.modal-form label { display: block; font-weight: 500; margin-bottom: 8px; font-size: 14px; }
-.modal-form input, .modal-form select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
-.item-name-modal { margin-top: 0; font-size: 16px; color: #475569;}
-.item-name-modal strong { font-weight: 600; color: #1e293b; }
-.price-summary { display: flex; justify-content: space-between; font-size: 18px; padding: 1rem; background-color: #f8fafc; border-radius: 8px; margin-bottom: 1rem; }
-.price-summary strong { color: #800000; }
-.payment-options { display: flex; gap: 1.5rem; margin-top: 0.5rem; }
-.payment-options label { display: flex; align-items: center; gap: 0.5rem; }
+
+.modal-form .form-group {
+    margin-bottom: 1.2rem;
+}
+
+.modal-form label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.modal-form input,
+.modal-form select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.item-name-modal {
+    margin-top: 0;
+    font-size: 16px;
+    color: #475569;
+}
+
+.item-name-modal strong {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.price-summary {
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+    padding: 1rem;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.price-summary strong {
+    color: #800000;
+}
+
+.payment-options {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.payment-options label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
 
 .info-note {
     background-color: #eff6ff;
@@ -126,7 +321,10 @@
     font-size: 14px;
     margin-top: 1rem;
 }
-.info-note p { margin: 0; }
+
+.info-note p {
+    margin: 0;
+}
 
 .date-info {
     background-color: #f8fafc;
@@ -136,8 +334,16 @@
     margin-top: 1rem;
     font-size: 14px;
 }
-.date-info p { margin: 0; display: flex; justify-content: space-between; }
-.date-info p:first-child { margin-bottom: 0.5rem; }
+
+.date-info p {
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.date-info p:first-child {
+    margin-bottom: 0.5rem;
+}
 
 .checkbox-group {
     display: flex;
@@ -145,12 +351,37 @@
     gap: 0.5rem;
     margin-top: 1rem;
 }
-.checkbox-group input { width: auto; }
-.instructions { font-size: 14px; color: #475569; margin: 0 0 1rem 0; text-align: center; }
 
+.checkbox-group input {
+    width: auto;
+}
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.instructions {
+    font-size: 14px;
+    color: #475569;
+    margin: 0 0 1rem 0;
+    text-align: center;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
 
 .success-message {
     color: #155724; /* Dark green text */
@@ -163,13 +394,11 @@
     text-align: center;
 }
 
-
-/* Add these new styles to your static/css/browse_products.css file */
-
 /* --- Search Bar --- */
 .search-container {
     margin-bottom: 2.5rem;
 }
+
 .search-input {
     width: 100%;
     padding: 14px 20px;
@@ -178,6 +407,7 @@
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
+
 .search-input:focus {
     outline: none;
     border-color: #800000;
@@ -201,17 +431,18 @@
 }
 
 .product-card.moving {
-  animation: fadeOut 0.3s ease-out forwards;
+    animation: fadeOut 0.3s ease-out forwards;
 }
+
 @keyframes fadeOut {
-  from {
-    opacity: 1;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.95);
-  }
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
 }
 
 /* --- Product Details Modal --- */
@@ -219,10 +450,12 @@
     display: flex;
     gap: 2rem;
 }
+
 .details-image-container {
     flex-basis: 40%;
     flex-shrink: 0;
 }
+
 .details-image {
     width: 100%;
     height: auto;
@@ -230,14 +463,17 @@
     background-color: #f8fafc;
     border: 1px solid #e2e8f0;
 }
+
 .details-info {
     flex-basis: 60%;
 }
+
 .details-name {
     font-size: 24px;
     font-weight: 700;
     margin: 0 0 0.5rem 0;
 }
+
 .details-meta {
     display: flex;
     align-items: center;
@@ -246,11 +482,13 @@
     padding-top: 1rem;
     border-top: 1px solid #f1f5f9;
 }
+
 .details-price {
     font-size: 22px;
     font-weight: 700;
     color: #8B0000;
 }
+
 .details-stock {
     font-size: 14px;
     background-color: #f1f5f9;
@@ -298,7 +536,7 @@
     transition: opacity 0.5s ease;
 }
 
-/* --- NEW: Mobile Modal Fix --- */
+/* --- Mobile Modal Fix --- */
 @media (max-width: 768px) {
     .details-layout {
         flex-direction: column; /* Stack image on top of info */
@@ -312,18 +550,18 @@
     /* Make modal buttons stack */
     .modal-footer {
         display: flex;
-    gap: 0.75rem;
-    margin-top: 1rem; /* Add some space above the buttons */
-    margin-bottom: 1rem; /* Add some space below the buttons */
+        gap: 0.75rem;
+        margin-top: 1rem; /* Add some space above the buttons */
+        margin-bottom: 1rem; /* Add some space below the buttons */
     }
     .modal-footer .btn {
         width: auto;  /* Remove 100% width */
-    flex: 1;      /* Make them share space equally */
-    margin-top: 0;
+        flex: 1;      /* Make them share space equally */
+        margin-top: 0;
     }
 }
 
-/* --- NEW: Search Filter Component --- */
+/* --- Search Filter Component --- */
 
 .search-filter-container {
     display: flex;
@@ -377,14 +615,14 @@
     position: relative;
 }
 
-/* --- NEW: Fix for Mobile Search Filter --- */
+/* --- Fix for Mobile Search Filter --- */
 @media (max-width: 768px) {
     
     /* 1. Stack the container */
     .search-filter-container {
         flex-direction: column;
         gap: 0.75rem; /* Add a small gap between them */
-        position: relative; 
+        position: relative;
         z-index: 2;
     }
 
@@ -392,7 +630,7 @@
     .category-filter-select {
         width: 100%;
         /* Fix the borders that we removed for desktop */
-        border-right: 1px solid #e2e8f0; 
+        border-right: 1px solid #e2e8f0;
         border-radius: 10px; /* Make all corners round */
         font-size: 16px;
     }

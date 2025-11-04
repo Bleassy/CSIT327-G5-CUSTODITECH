@@ -1,19 +1,19 @@
 {% extends 'dashboards/admin_base.html' %}
 {% load static %}
-{% load humanize %} {# Load humanize template tags for formatting numbers #}
+{% load humanize %} 
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/reports.css' %}?v=1.8"> {# Version Bump #}
+    <link rel="stylesheet" href="{% static 'css/reports.css' %}?v=1.8">
 {% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1>System Reports & KPIs</h1> {# Updated Title #}
+    <h1>System Reports & KPIs</h1>
 </div>
 
 <div class="global-search-container search-container">
     <input type="search" id="global-report-search" class="search-input"
-           placeholder="Search all reports (KPIs, categories, products, logs...).">
+           placeholder="Search all reports (Inventory Overview, Reservation Statistics, Sales Performance, Unavailable Products, Low-stock, Activity Log...).">
 </div>
 <div class="searchable-section">
     <div class="kpi-grid">
@@ -25,7 +25,7 @@
             </div>
         </div>
         <div class="kpi-card">
-            <div class="kpi-icon inventory"> V </div>
+            <div class="kpi-icon inventory"> 📈 </div>
             <div class="kpi-content">
                 <h3>Current Inventory Value</h3>
                 <div class="kpi-number">₱{{ kpi.inventory_value|default:0|floatformat:2|intcomma }}</div>
@@ -65,7 +65,7 @@
     </div>
 </div> <div class="report-section searchable-section">
     <h2>Inventory Overview</h2>
-    <div class="overview-grid"> {# Use a grid for multiple tables #}
+    <div class="overview-grid"> 
         <div class="table-container">
             <h3>Stock by Category</h3>
             <table class="data-table small-text">
@@ -95,7 +95,7 @@
                     {% for item in inventory_overview.most_stocked|default_if_none:"[]" %}
                     <tr>
                         <td>{{ item.product_name }}</td>
-                        <td>{{ item.metric_value|floatformat:0|intcomma }} pcs</td> {# metric_value is stock count #}
+                        <td>{{ item.metric_value|floatformat:0|intcomma }} pcs</td> 
                     </tr>
                     {% empty %}
                      <tr><td colspan="2" class="no-data-cell"><p>No data.</p></td></tr>
@@ -113,7 +113,7 @@
                      {% for item in inventory_overview.highest_value|default_if_none:"[]" %}
                     <tr>
                         <td>{{ item.product_name }}</td>
-                        <td>₱{{ item.metric_value|floatformat:2|intcomma }}</td> {# metric_value is total stock value #}
+                        <td>₱{{ item.metric_value|floatformat:2|intcomma }}</td> 
                     </tr>
                     {% empty %}
                      <tr><td colspan="2" class="no-data-cell"><p>No data.</p></td></tr>
@@ -126,7 +126,7 @@
 
 <div class="report-section searchable-section">
     <h2>Reservation Statistics</h2>
-     <div class="overview-grid single-col"> {# Single column grid for now #}
+     <div class="overview-grid single-col"> 
          <div class="table-container">
             <h3>Most Reserved Items (Top 5)</h3>
             <table class="data-table small-text">
@@ -137,22 +137,20 @@
                     {% for item in reservation_stats.most_reserved|default_if_none:"[]" %}
                     <tr>
                         <td>{{ item.product_name }}</td>
-                        <td>{{ item.metric_value|floatformat:0|intcomma }} times</td> {# metric_value is reservation count #}
+                        <td>{{ item.metric_value|floatformat:0|intcomma }} times</td> 
                     </tr>
                     {% empty %}
                      <tr><td colspan="2" class="no-data-cell"><p>No reservation data available.</p></td></tr>
                     {% endfor %}
                 </tbody>
             </table>
-            {# Add more reservation stats here if needed, e.g., expiring soon count #}
-            {# <p>Reservations Expiring Soon (24h): {{ reservation_stats.expiring_soon_count|default:0 }}</p> #}
-        </div>
+         </div>
     </div>
 </div>
 
 <div class="report-section searchable-section">
     <h2>Sales Performance</h2>
-    <div class="overview-grid"> {# Use grid again #}
+    <div class="overview-grid"> 
         <div class="table-container">
             <h3>Sales by Category</h3>
             <table class="data-table small-text">
@@ -181,7 +179,7 @@
                     {% for item in sales_performance.best_selling|default_if_none:"[]" %}
                     <tr>
                         <td>{{ item.product_name }}</td>
-                        <td>{{ item.metric_value|floatformat:0|intcomma }} pcs</td> {# metric_value is quantity #}
+                        <td>{{ item.metric_value|floatformat:0|intcomma }} pcs</td> 
                     </tr>
                     {% empty %}
                      <tr><td colspan="2" class="no-data-cell"><p>No data.</p></td></tr>
@@ -199,7 +197,7 @@
                     {% for item in sales_performance.highest_revenue|default_if_none:"[]" %}
                     <tr>
                         <td>{{ item.product_name }}</td>
-                        <td>₱{{ item.metric_value|floatformat:2|intcomma }}</td> {# metric_value is revenue #}
+                        <td>₱{{ item.metric_value|floatformat:2|intcomma }}</td> 
                     </tr>
                     {% empty %}
                      <tr><td colspan="2" class="no-data-cell"><p>No data.</p></td></tr>
@@ -243,93 +241,163 @@
 </div>
 
 <div id="log-section-content">
-<div class="report-section searchable-section activity-log-section"> {# Also added activity-log-section class #}
-    <div class="page-header"><h2>System Activity Log</h2></div>
-    <div class="page-controls">
-        <form class="search-form log-search-form" onsubmit="return false;"> {# Added log-search-form class #}
-            <input type="search" id="log-search-input" name="search" class="search-input" placeholder="Search logs by action or user..." value="">
+    <div class="report-section searchable-section activity-log-section"> 
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0; border: none; padding: 0;">System Activity Log</h2>
+            <button type="button" class="btn btn-danger" id="clear-all-logs-btn">
+                Clear All Logs
+            </button>
+        </div>
+        <div class="page-controls">
+            <form class="search-form log-search-form" onsubmit="return false;"> 
+                <input type="search" id="log-search-input" name="search" class="search-input" placeholder="Search logs by action or user..." value="">
+            </form>
+        </div>
+        <form id="batch-log-delete-form" method="POST" action="{% url 'batch_delete_logs' %}">
+            {% csrf_token %} <input type="hidden" name="log_ids" id="batch-log-ids-input">
         </form>
-    </div>
-    <form id="batch-log-delete-form" method="POST" action="{% url 'batch_delete_logs' %}">
-        {% csrf_token %} <input type="hidden" name="log_ids" id="batch-log-ids-input">
-    </form>
-    <div class="table-container">
-        <table class="data-table log-table">
-            <thead><tr><th class="checkbox-col"><input type="checkbox" id="select-all-logs-checkbox"></th><th>Timestamp</th><th>User</th><th>Action</th><th>Details</th></tr></thead>
-            <tbody id="log-table-body">
-                {% for entry in log_entries %}
-                <tr data-log-id="{{ entry.id }}" data-user="{{ entry.user_full_name|default:'System'|lower }}" data-action="{{ entry.action_display|lower }}">
-                    <td><input type="checkbox" class="log-checkbox" value="{{ entry.id }}"></td>
-                    <td>{{ entry.created_at|date:"M d, Y, P" }}</td>
-                    <td>{{ entry.user_full_name|default:'System' }}</td>
-                    <td><span class="badge">{{ entry.action_display }}</span></td>
-                    <td> {% if entry.details.product_name %}Product: {{ entry.details.product_name }} (ID: {{ entry.details.product_id }}){% endif %} {% if entry.details.order_id %}Order ID: #{{ entry.details.order_id }}{% endif %} {% if entry.details.new_status %} → Status: {{ entry.details.new_status|title }}{% endif %} </td>
-                </tr>
-                {% empty %}
-                <tr id="no-logs-row"><td colspan="5" class="no-data-cell"><p>No system activity has been recorded yet.</p></td></tr>
-                {% endfor %}
-                <tr id="no-log-results-row" style="display: none;"><td colspan="5" class="no-data-cell"><p>No log entries found matching your search.</p></td></tr>
-            </tbody>
-        </table>
-    </div>
-    <div class="pagination-container">
-        {% if log_pagination.total_pages > 1 %}
-            <nav aria-label="Log page navigation">
-                <ul class="pagination">
-                    {# Previous Button #}
-                    {% if log_pagination.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?{{ log_pagination.param_name }}={{ log_pagination.previous_page_number }}" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link" aria-hidden="true">&laquo;</span>
-                        </li>
-                    {% endif %}
+        <div class="table-container">
+            <table class="data-table log-table">
+                <thead><tr><th class="checkbox-col"><input type="checkbox" id="select-all-logs-checkbox"></th><th>Timestamp</th><th>User</th><th>Action</th><th>Details</th></tr></thead>
+                <tbody id="log-table-body">
+                    {% for entry in log_entries %}
+                    <tr data-log-id="{{ entry.id }}" data-user="{{ entry.user_full_name|default:'System'|lower }}" data-action="{{ entry.action|lower }}"> 
+                        <td><input type="checkbox" class="log-checkbox" value="{{ entry.id }}"></td>
+                        <td>{{ entry.created_at|date:"M d, Y, P" }}</td>
+                        <td>{{ entry.user_full_name|default:'System' }}</td>
+                        <td><span class="badge">{{ entry.action_display }}</span></td>
+                        
+                        <td>
+                            {% if entry.action == 'STUDENT_STATUS_UPDATED' %}
+                                Student: <strong>{{ entry.details.student_name }}</strong> ({{ entry.details.student_id_num }})
+                                - Action: <strong>{{ entry.details.action_taken|title }}</strong>
+                            
+                            {% elif entry.action == 'STUDENT_DELETED' %}
+                                Student: <strong>{{ entry.details.student_name }}</strong> ({{ entry.details.student_id_num }})
+                                - <strong style="color: #991b1b;">Deleted</strong>
+                            
+                            {% elif entry.action == 'ORDER_STATUS_UPDATED' %}
+                                Order: <strong>#{{ entry.details.order_id }}</strong>
+                                - Product: <strong>{{ entry.details.product_name }}</strong>
+                                - Student: <strong>{{ entry.details.student_name }}</strong>
+                                - Status: <strong>{{ entry.details.new_status|title }}</strong>
 
-                    {# Page Numbers #}
-                    {% for page_num in log_pagination.page_range %}
-                        {% if page_num == log_pagination.current_page %}
-                            <li class="page-item active" aria-current="page"><span class="page-link">{{ page_num }}</span></li>
-                        {% else %}
-                            <li class="page-item"><a class="page-link" href="?{{ log_pagination.param_name }}={{ page_num }}">{{ page_num }}</a></li>
-                        {% endif %}
+                            {% elif entry.action == 'ORDER_STATUS_BATCH_UPDATED' %}
+                                {{ entry.details.count }} Order(s) updated
+                                - Status: <strong>{{ entry.details.new_status|title }}</strong>
+                                - (IDs: {{ entry.details.order_ids|join:", " }})
+
+                            {% elif entry.action == 'ORDER_DELETED' %}
+                                Order: <strong>#{{ entry.details.order_id }}</strong>
+                                - Product: <strong>{{ entry.details.product_name }}</strong>
+                                - Student: <strong>{{ entry.details.student_name }}</strong>
+                                - <strong style="color: #991b1b;">Deleted</strong>
+
+                            {% elif entry.action == 'ORDER_BATCH_DELETED' %}
+                                Deleted <strong>{{ entry.details.count }}</strong> order(s)
+                                - (IDs: {{ entry.details.order_ids|join:", " }})
+                                - <strong style="color: #991b1b;">Deleted</strong>
+                            
+                            {% elif entry.action == 'PRODUCT_EDITED' %}
+                                Product: <strong>{{ entry.details.product_name }}</strong> (ID: {{ entry.details.product_id }})
+                                - Changes: <strong>{{ entry.details.changes }}</strong>
+                            
+                            {% elif entry.action == 'PRODUCT_BATCH_DELETE' %}
+                                Deleted <strong>{{ entry.details.count }}</strong> product(s)
+                                - (IDs: {{ entry.details.product_ids|join:", " }})
+                                - <strong style="color: #991b1b;">Deleted</strong>
+
+                            {% elif entry.details.product_name %}
+                                Product: {{ entry.details.product_name }} (ID: {{ entry.details.product_id }})
+                            
+                            {% elif entry.details.order_id %}
+                                Order ID: #{{ entry.details.order_id }}
+                                {% if entry.details.new_status %} → Status: {{ entry.details.new_status|title }}{% endif %}
+                            
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        
+                    </tr>
+                    {% empty %}
+                    <tr id="no-logs-row"><td colspan="5" class="no-data-cell"><p>No system activity has been recorded yet.</p></td></tr>
                     {% endfor %}
+                    <tr id="no-log-results-row" style="display: none;"><td colspan="5" class="no-data-cell"><p>No log entries found matching your search.</p></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination-container">
+            {% if log_pagination.total_pages > 1 %}
+                <nav aria-label="Log page navigation">
+                    <ul class="pagination">
+                        {# Previous Button #}
+                        {% if log_pagination.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{{ log_pagination.param_name }}={{ log_pagination.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&laquo;</span>
+                            </li>
+                        {% endif %}
 
-                    {# Next Button #}
-                    {% if log_pagination.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?{{ log_pagination.param_name }}={{ log_pagination.next_page_number }}" aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link" aria-hidden="true">&raquo;</span>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-            <div class="pagination-info">
-                Page {{ log_pagination.current_page }} of {{ log_pagination.total_pages }} ({{ total_log_count }} total logs)
-            </div>
-        {% elif total_log_count > 0 %}
-             <div class="pagination-info">
-                 {{ total_log_count }} log entr{{ total_log_count|pluralize:"y,ies" }} found.
-             </div>
-        {% endif %}
-    </div>
-</div> 
+                        {# Page Numbers #}
+                        {% for page_num in log_pagination.page_range %}
+                            {% if page_num == log_pagination.current_page %}
+                                <li class="page-item active" aria-current="page"><span class="page-link">{{ page_num }}</span></li>
+                            {% else %}
+                                <li class="page-item"><a class="page-link" href="?{{ log_pagination.param_name }}={{ page_num }}">{{ page_num }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {# Next Button #}
+                        {% if log_pagination.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{{ log_pagination.param_name }}={{ log_pagination.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&raquo;</span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                <div class="pagination-info">
+                    Page {{ log_pagination.current_page }} of {{ log_pagination.total_pages }} ({{ total_log_count }} total logs)
+                </div>
+            {% elif total_log_count > 0 %}
+                 <div class="pagination-info">
+                     {{ total_log_count }} log entr{{ total_log_count|pluralize:"y,ies" }} found.
+                 </div>
+            {% endif %}
+        </div>
+    </div> 
 </div>
-<div id="log-section-content">
-
 <div id="global-no-results" class="no-data-message" style="display: none; margin-top: 2rem;">
     <p>No report sections found matching your search.</p>
 </div>
 <div id="log-delete-bar" class="batch-action-bar" style="display: none;"> <span id="log-selected-count">0 items selected</span> <button type="button" class="btn btn-danger" id="batch-log-delete-btn">Delete Selected</button> </div>
 <div id="log-delete-confirm-modal" class="modal" style="display: none;"> <div class="modal-content" style="max-width: 450px;"> <div class="modal-header"><h2>Confirm Log Deletion</h2><span class="close-btn">&times;</span></div> <div class="modal-body"> <p>Are you sure you want to permanently delete <strong id="log-delete-count">0</strong> log(s)?</p> <p>This action cannot be undone.</p> </div> <div class="modal-footer"> <button type="button" class="btn btn-secondary cancel-modal-btn">Cancel</button> <button type="button" class="btn btn-danger" id="confirm-log-delete-btn">Yes, Delete Selected</button> </div> </div> </div>
+
+<div id="clear-all-logs-confirm-modal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 450px;">
+        <div class="modal-header"><h2>Confirm Clear All Logs</h2><span class="close-btn">&times;</span></div>
+        <div class="modal-body">
+            <p>Are you sure you want to permanently delete <strong>ALL</strong> log entries?</p>
+            <p>This action cannot be undone and will reset the log.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary cancel-modal-btn">Cancel</button>
+            <button type="button" class="btn btn-danger" id="confirm-clear-all-logs-btn">Yes, Clear All</button>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 
@@ -359,9 +427,13 @@ function showMessage(message, type = 'success') {
 }
 
 function getCsrfToken() {
-    // Ensure the form exists before trying to get the token
-    const form = document.getElementById('batch-log-delete-form');
-    const tokenInput = form ? form.querySelector('[name=csrfmiddlewaretoken]') : null;
+    // Check both forms now, starting with the batch delete form
+    let form = document.getElementById('batch-log-delete-form');
+    let tokenInput = form ? form.querySelector('[name=csrfmiddlewaretoken]') : null;
+    
+    // Fallback to the clear-all form (though it doesn't exist, this is good practice if it did)
+    // Or just rely on the one form that *does* have a token.
+    
     return tokenInput ? tokenInput.value : '';
 }
 
@@ -376,29 +448,17 @@ function closeModal(modal) {
 document.addEventListener('DOMContentLoaded', () => {
 
     // ==================================================================
-    // == 2. CHART LOGIC
+    // == 2. CHART LOGIC (Unchanged)
     // ==================================================================
-    console.log("Attempting to initialize chart...");
-
     const dataElement = document.getElementById('chart-data');
     const chartCanvas = document.getElementById('orderStatusChart');
-
     if (dataElement && chartCanvas) {
-        console.log("Found chart data element and canvas element.");
         try {
-            const statusDataString = dataElement.textContent;
-            console.log("Raw chart data string:", statusDataString);
-
-            const statusData = JSON.parse(statusDataString);
-            console.log("Parsed chart data object:", statusData);
-
-            // Check if there's any data to display
+            const statusData = JSON.parse(dataElement.textContent);
             const hasData = Object.values(statusData).some(count => count > 0);
-
-            if (hasData) { // Only create chart if there is data
+            if (hasData) { 
                 const ctx = chartCanvas.getContext('2d');
                 if (ctx) {
-                    console.log("Got 2D context, attempting to create chart...");
                     new Chart(ctx, {
                         type: 'doughnut',
                         data: {
@@ -419,25 +479,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         },
                         options: {
                             responsive: true,
-                            maintainAspectRatio: true, // Keep aspect ratio
-                            layout: {
-                                padding: { left: 5, right: 5, top: 5, bottom: 5 }
-                            },
+                            maintainAspectRatio: true, 
+                            layout: { padding: { left: 5, right: 5, top: 5, bottom: 5 } },
                             plugins: {
                                 legend: {
-                                    position: 'right', // Or 'left', 'bottom'
-                                    labels: { boxWidth: 15, padding: 10, font: { size: 12 } } // Adjusted size
+                                    position: 'right', 
+                                    labels: { boxWidth: 15, padding: 10, font: { size: 12 } }
                                 }
                             }
                         }
                     });
-                    console.log("Chart created successfully!");
-                } else {
-                    console.error("Failed to get 2D context for the chart canvas.");
                 }
             } else {
-                 console.log("No data available for the chart. Skipping chart creation.");
-                 // Optionally display a message in the chart container
                  const container = chartCanvas.parentElement;
                  if (container) {
                      container.innerHTML = '<p style="text-align: center; color: #64748b; margin-top: 50px;">No order data available to display chart.</p>';
@@ -446,48 +499,37 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             console.error("ERROR during chart initialization:", e);
         }
-    } else {
-        if (!dataElement) console.error("Chart data element ('chart-data') not found.");
-        if (!chartCanvas) console.error("Chart canvas element ('orderStatusChart') not found.");
     }
-
 
     // ==================================================================
     // == 3. LOG DELETION LOGIC
     // ==================================================================
-    console.log("Setting up log deletion logic...");
-
-    // --- Get Elements ---
     const logDeleteForm = document.getElementById('batch-log-delete-form');
     const logDeleteBar = document.getElementById('log-delete-bar');
     const logSelectedCount = document.getElementById('log-selected-count');
     const selectAllLogsCheckbox = document.getElementById('select-all-logs-checkbox');
-    // We get logCheckboxes dynamically inside functions now
     const batchLogDeleteBtn = document.getElementById('batch-log-delete-btn');
     const logDeleteModal = document.getElementById('log-delete-confirm-modal');
     const confirmLogDeleteBtn = document.getElementById('confirm-log-delete-btn');
     const logTableBody = document.getElementById('log-table-body');
-    const noLogsRow = document.getElementById('no-logs-row');
+    let noLogsRow = document.getElementById('no-logs-row'); // Use let
     const noLogResultsRow = document.getElementById('no-log-results-row');
+    
+    // NEW: "Clear All" Elements
+    const clearAllLogsBtn = document.getElementById('clear-all-logs-btn');
+    const clearAllLogsModal = document.getElementById('clear-all-logs-confirm-modal');
+    const confirmClearAllLogsBtn = document.getElementById('confirm-clear-all-logs-btn');
 
-    /**
-     * Updates the log delete bar, considering only VISIBLE rows.
-     */
     function updateLogDeleteBar() {
-        // console.log("updateLogDeleteBar called"); // Optional: Keep for debugging if needed
         if (!logDeleteBar || !logSelectedCount) return;
-
         const selectedVisible = document.querySelectorAll('#log-table-body tr:not([style*="display: none"]) .log-checkbox:checked');
         const totalVisibleCheckboxes = document.querySelectorAll('#log-table-body tr:not([style*="display: none"]) .log-checkbox');
         const count = selectedVisible.length;
-        // console.log(`Visible checkboxes selected: ${count}`); // Optional
 
         if (count > 0) {
-            // console.log("Showing delete bar."); // Optional
             logDeleteBar.style.display = 'flex';
             logSelectedCount.textContent = `${count} item${count > 1 ? 's' : ''} selected`;
         } else {
-            // console.log("Hiding delete bar."); // Optional
             logDeleteBar.style.display = 'none';
         }
 
@@ -506,74 +548,47 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Attach Listeners ---
-
-    // Select All
     if (selectAllLogsCheckbox) {
-        // console.log("Attaching listener to 'Select All' checkbox."); // Optional
         selectAllLogsCheckbox.addEventListener('change', () => {
-            // console.log("'Select All' changed, state:", selectAllLogsCheckbox.checked); // Optional
             const isChecked = selectAllLogsCheckbox.checked;
             document.querySelectorAll('#log-table-body tr:not([style*="display: none"]) .log-checkbox').forEach(cb => {
                 cb.checked = isChecked;
             });
             updateLogDeleteBar();
         });
-    } else { console.warn("'Select All' checkbox not found."); }
+    } 
 
-    // Individual Checkboxes
     const logCheckboxesInitial = document.querySelectorAll('.log-checkbox');
-    if (logCheckboxesInitial.length > 0) {
-        // console.log(`Attaching listeners to ${logCheckboxesInitial.length} individual log checkboxes.`); // Optional
-        logCheckboxesInitial.forEach(cb => {
-            cb.addEventListener('change', (event) => {
-                // console.log(`Individual checkbox ${event.target.value} changed, state: ${event.target.checked}`); // Optional
-                updateLogDeleteBar();
-            });
+    logCheckboxesInitial.forEach(cb => {
+        cb.addEventListener('change', (event) => {
+            updateLogDeleteBar();
         });
-    } else { console.warn("No individual log checkboxes found."); }
+    });
 
-    // "Delete Selected" button (opens modal)
     if (batchLogDeleteBtn) {
-        // console.log("Attaching listener to 'Delete Selected' button (batchLogDeleteBtn)."); // Optional
         batchLogDeleteBtn.addEventListener('click', () => {
-            // console.log("--- 'Delete Selected' button CLICKED ---"); // Optional
             const selectedVisible = document.querySelectorAll('#log-table-body tr:not([style*="display: none"]) .log-checkbox:checked');
             const count = selectedVisible.length;
-            // console.log(`Items selected: ${count}`); // Optional
-            // console.log("logDeleteModal variable:", logDeleteModal); // Optional
             if (count > 0 && logDeleteModal) {
-                //  console.log(`Attempting to open modal for ${count} items.`); // Optional
                 const countSpan = logDeleteModal.querySelector('#log-delete-count');
                 if (countSpan) { countSpan.textContent = count; }
-                else { console.error("Could not find '#log-delete-count' span inside modal!"); }
                 openModal(logDeleteModal);
-                //  console.log("Called openModal. Modal display style set to:", logDeleteModal.style.display); // Optional
-            } else {
-                 console.warn("Modal not opened.");
-                 if (count === 0) console.log("Reason: No items selected.");
-                 if (!logDeleteModal) console.error("Reason: logDeleteModal variable is null or undefined!");
             }
         });
-    } else { console.warn("'Delete Selected' button (batchLogDeleteBtn) not found."); }
+    } 
 
-    // Modal "Cancel" buttons & Close behavior
     document.querySelectorAll('.cancel-modal-btn, .close-btn').forEach(btn => {
         btn.addEventListener('click', () => closeModal(btn.closest('.modal')));
     });
      window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) closeModal(e.target);
-    });
+         if (e.target.classList.contains('modal')) closeModal(e.target);
+     });
 
-    // "Confirm Delete" button (performs fetch)
     if (confirmLogDeleteBtn && logDeleteForm) {
-        // console.log("Attaching listener to 'Confirm Delete' button."); // Optional
         confirmLogDeleteBtn.addEventListener('click', () => {
-            // console.log("'Confirm Delete' button clicked."); // Optional
             const selectedVisibleCheckboxes = document.querySelectorAll('#log-table-body tr:not([style*="display: none"]) .log-checkbox:checked');
             const ids = Array.from(selectedVisibleCheckboxes).map(cb => cb.value);
-            if (ids.length === 0) { /* console.log("No IDs selected..."); */ closeModal(logDeleteModal); return; }
-            // console.log(`Attempting to delete log IDs: ${ids.join(', ')}`); // Optional
+            if (ids.length === 0) { closeModal(logDeleteModal); return; }
 
             const formData = new FormData(logDeleteForm);
             formData.set('log_ids', ids.join(','));
@@ -606,24 +621,84 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(error => {
                 showMessage(`A network error occurred: ${error.message}`, 'error');
-                console.error('Fetch error:', error);
             })
             .finally(() => {
                 button.disabled = false;
                 button.textContent = originalText;
             });
         });
-    } else { console.warn("'Confirm Delete' button or log delete form not found."); }
+    }
+
+    // --- NEW: "CLEAR ALL LOGS" LOGIC ---
+    if (clearAllLogsBtn && confirmClearAllLogsBtn && clearAllLogsModal) {
+        // 1. Open the confirm modal
+        clearAllLogsBtn.addEventListener('click', () => {
+            openModal(clearAllLogsModal);
+        });
+
+        // 2. Handle the final confirmation
+        confirmClearAllLogsBtn.addEventListener('click', () => {
+            const button = confirmClearAllLogsBtn;
+            const originalText = button.textContent;
+            button.disabled = true;
+            button.textContent = 'Clearing...';
+
+            fetch("{% url 'clear_all_logs' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(), // Use the same CSRF token
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    closeModal(clearAllLogsModal);
+                    
+                    // Clear the UI
+                    logTableBody.innerHTML = ''; // Remove all rows
+                    
+                    // Re-create or find the 'noLogsRow'
+                    if (!noLogsRow) {
+                        // If it was removed, create it
+                        noLogsRow = document.createElement('tr');
+                        noLogsRow.id = 'no-logs-row';
+                        noLogsRow.innerHTML = '<td colspan="5" class="no-data-cell"><p></p></td>';
+                        logTableBody.appendChild(noLogsRow);
+                    }
+                    
+                    noLogsRow.querySelector('p').textContent = "Log cleared. New log for this action will appear on next refresh.";
+                    noLogsRow.style.display = ''; 
+                    
+                    if (noLogResultsRow) noLogResultsRow.style.display = 'none'; // Hide no results row
+                    if (selectAllLogsCheckbox) selectAllLogsCheckbox.checked = false;
+                    updateLogDeleteBar(); // This will hide the bar
+                } else {
+                    showMessage(data.error || 'An unknown error occurred.', 'error');
+                }
+            })
+            .catch(error => {
+                showMessage(`A network error occurred: ${error.message}`, 'error');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.textContent = originalText;
+            });
+        });
+    }
+    //END: "CLEAR ALL LOGS" LOGIC
+
 
     // ==================================================================
     // == 4. LIVE SEARCH FILTER FOR LOGS
     // ==================================================================
-    // console.log("Setting up live search for logs..."); // Optional
-
     const logSearchInput = document.getElementById('log-search-input');
 
     function filterLogs() {
-        // console.log("filterLogs called"); // Optional
         if (!logSearchInput || !logTableBody) return;
 
         const searchTerm = logSearchInput.value.toLowerCase().trim();
@@ -643,176 +718,118 @@ document.addEventListener('DOMContentLoaded', () => {
                  if (cb) cb.checked = false;
             }
         });
-
-        // console.log(`Search term: "${searchTerm}", Visible rows: ${visibleRowCount}`); // Optional
-
-        // --- Handle "No Results" ---
-        const hasLogsInitially = logRows.length > 0 || (noLogsRow && noLogsRow.style.display === 'none');
+        
+        const hasLogsNow = logTableBody.querySelectorAll('tr[data-log-id]').length > 0;
 
         if (noLogResultsRow) {
-            noLogResultsRow.style.display = (visibleRowCount === 0 && hasLogsInitially && searchTerm) ? '' : 'none';
+            noLogResultsRow.style.display = (visibleRowCount === 0 && hasLogsNow && searchTerm) ? '' : 'none';
         }
         if (noLogsRow) {
-            noLogsRow.style.display = (!hasLogsInitially && !searchTerm) ? '' : 'none';
+            // Show 'no logs' row only if there are no logs at all AND no search term
+            noLogsRow.style.display = (!hasLogsNow && !searchTerm) ? '' : 'none';
         }
 
          updateLogDeleteBar();
     }
 
-    // --- Attach Search Listener ---
     if (logSearchInput) {
         logSearchInput.addEventListener('input', filterLogs);
-        // console.log("Attached listener to log search input."); // Optional
-        filterLogs(); // Initial filter on load
-    } else { console.warn("Log search input not found."); }
-
-    // console.log("DOMContentLoaded complete."); // Optional
+        filterLogs(); 
+    } 
 
     // ==================================================================
     // == 5. GLOBAL REPORT SEARCH (NEW)
     // ==================================================================
-    console.log("Setting up global report search...");
-
     const globalSearchInput = document.getElementById('global-report-search');
-    const allSearchableSections = document.querySelectorAll('.searchable-section'); // Use the new class
+    const allSearchableSections = document.querySelectorAll('.searchable-section'); 
     const globalNoResults = document.getElementById('global-no-results');
-
-    // --- Debug Checks ---
-    console.log("Global Search Input:", globalSearchInput ? "✅ Found" : "❌ NOT FOUND");
-    console.log("Searchable Sections Found:", allSearchableSections.length);
-    console.log("Global No Results Div:", globalNoResults ? "✅ Found" : "❌ NOT FOUND");
-    // --- End Debug ---
 
     function filterGlobalReports() {
         if (!globalSearchInput || !allSearchableSections.length || !globalNoResults) {
             console.warn("Global search elements missing. Search will not work.");
             return;
         }
-
         const searchTerm = globalSearchInput.value.toLowerCase().trim();
         let visibleSections = 0;
         
-        console.log(`Filtering global reports for: "${searchTerm}"`); // Debug log
-
         allSearchableSections.forEach(section => {
-            // Get all text content within the section, including table data
             const sectionText = section.textContent.toLowerCase();
             const isMatch = sectionText.includes(searchTerm);
-            
             section.style.display = isMatch ? '' : 'none';
             
             if (isMatch) {
                 visibleSections++;
-                // If the log section becomes visible due to global search, re-filter logs
                 if (section.classList.contains('activity-log-section') && typeof filterLogs === 'function') {
-                    // Make sure filterLogs function exists before calling
                     filterLogs();
                 }
             }
         });
-
         globalNoResults.style.display = (visibleSections === 0 && searchTerm) ? 'block' : 'none';
-        
-        console.log(`Visible searchable sections: ${visibleSections}`); // Debug log
     }
 
-    // --- Attach Global Search Listener ---
     if (globalSearchInput) {
         globalSearchInput.addEventListener('input', filterGlobalReports);
-        console.log("Attached listener to global report search input.");
-        filterGlobalReports(); // Initial run in case there's a pre-filled value (e.g., browser back button)
-    } else {
-        console.warn("Global report search input ('global-report-search') not found.");
+        filterGlobalReports(); 
     }
 
     // ==================================================================
     // == 6. AJAX PAGINATION FOR LOGS (NEW)
     // ==================================================================
-    console.log("Setting up AJAX pagination for logs...");
-
     const logSectionContent = document.getElementById('log-section-content');
 
     function handleAjaxPagination(event) {
-        // Only act on clicks within the pagination container that are links
         const targetLink = event.target.closest('a.page-link');
         if (!targetLink || !logSectionContent) {
             return;
         }
-
-        // Prevent default page reload
         event.preventDefault();
 
         const url = targetLink.href;
         if (!url) return;
 
-        console.log(`AJAX Pagination: Fetching ${url}`);
-
-        // Optional: Show a loading indicator
-        logSectionContent.style.opacity = '0.5'; // Dim the section
-        // You could add a dedicated spinner element here too
+        logSectionContent.style.opacity = '0.5'; 
 
         fetch(url, {
             method: 'GET',
             headers: {
-                'X-Requested-With': 'XMLHttpRequest' // Identify as AJAX request (optional for backend)
+                'X-Requested-With': 'XMLHttpRequest' 
             }
         })
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            return response.text(); // Get the HTML response as text
+            return response.text(); 
         })
         .then(html => {
-            // Parse the fetched HTML
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
-
-            // Find the new content in the parsed HTML
             const newLogContent = doc.getElementById('log-section-content');
 
             if (newLogContent) {
-                // Replace the current content with the new content
                 logSectionContent.innerHTML = newLogContent.innerHTML;
-
-                // Update browser URL without reloading
                 history.pushState({}, '', url);
 
                 // --- Re-attach Listeners for the new content ---
-                // Re-find elements within the newly injected content
                 const newLogSearchInput = logSectionContent.querySelector('#log-search-input');
                 const newSelectAllCheckbox = logSectionContent.querySelector('#select-all-logs-checkbox');
                 const newLogCheckboxes = logSectionContent.querySelectorAll('.log-checkbox');
-                const newPaginationContainer = logSectionContent.querySelector('.pagination-container'); // Re-target pagination
+                const newPaginationContainer = logSectionContent.querySelector('.pagination-container'); 
 
-                // Re-attach log search listener
                 if (newLogSearchInput) {
                     newLogSearchInput.addEventListener('input', filterLogs);
-                    // No need to call filterLogs() here unless the search input might have a value from the server
                 }
-
-                // Re-attach select-all listener
                 if (newSelectAllCheckbox) {
-                    newSelectAllCheckbox.addEventListener('change', handleSelectAllChange); // Use a named function if needed
+                    newSelectAllCheckbox.addEventListener('change', handleSelectAllChange); 
                 }
-
-                // Re-attach individual checkbox listeners
                 newLogCheckboxes.forEach(cb => {
-                    cb.addEventListener('change', updateLogDeleteBar); // Re-attach update bar listener
+                    cb.addEventListener('change', updateLogDeleteBar); 
                 });
-
-                // Re-attach the main pagination click listener to the *new* pagination container
                  if (newPaginationContainer) {
-                    newPaginationContainer.addEventListener('click', handleAjaxPagination);
+                      newPaginationContainer.addEventListener('click', handleAjaxPagination);
                  }
-
-
-                // Re-run filter and update bar for the new content
-                filterLogs(); // Filter based on current search input value
-                updateLogDeleteBar(); // Update bar based on new checkboxes
-                console.log("AJAX Pagination: Content updated and listeners re-attached.");
-
-
+                filterLogs(); 
+                updateLogDeleteBar(); 
             } else {
                 console.error("AJAX Pagination: Could not find '#log-section-content' in fetched HTML.");
                 throw new Error("Invalid response content.");
@@ -821,32 +838,24 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => {
             console.error('AJAX Pagination Error:', error);
             showMessage(`Failed to load page: ${error.message}`, 'error');
-            // Optionally, reload the page as a fallback
-            // window.location.href = url;
         })
         .finally(() => {
-            // Optional: Hide loading indicator
-            logSectionContent.style.opacity = '1'; // Restore opacity
+            logSectionContent.style.opacity = '1'; 
         });
     }
 
-    // --- Initial Attachment ---
-    // Find the initial pagination container and attach the listener
     const initialPaginationContainer = logSectionContent?.querySelector('.pagination-container');
     if (initialPaginationContainer) {
         initialPaginationContainer.addEventListener('click', handleAjaxPagination);
         console.log("Attached initial AJAX pagination listener.");
-    } else if (logSectionContent){ // Check if logSectionContent exists but pagination doesn't (maybe only 1 page)
+    } else if (logSectionContent){ 
          console.log("Log pagination container not found initially (likely only one page).");
     } else {
          console.warn("Log section content container ('#log-section-content') not found.");
     }
 
-    // --- Helper for Re-attaching Select All ---
-    // (Ensure you have a named function for the select-all logic if you don't already)
-    // Example: assuming your previous select-all logic was inline:
     function handleSelectAllChange() {
-       const selectAllCheckbox = logSectionContent.querySelector('#select-all-logs-checkbox'); // Target within current content
+       const selectAllCheckbox = logSectionContent.querySelector('#select-all-logs-checkbox'); 
        if (!selectAllCheckbox) return;
         const isChecked = selectAllCheckbox.checked;
         logSectionContent.querySelectorAll('#log-table-body tr:not([style*="display: none"]) .log-checkbox').forEach(cb => {
@@ -854,7 +863,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         updateLogDeleteBar();
     }
-    // Make sure the initial select-all listener also uses this named function:
      const initialSelectAll = logSectionContent?.querySelector('#select-all-logs-checkbox');
      if (initialSelectAll) {
          initialSelectAll.addEventListener('change', handleSelectAllChange);

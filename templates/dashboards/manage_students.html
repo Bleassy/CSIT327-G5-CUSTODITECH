@@ -13,12 +13,12 @@
 <div class="stats-grid">
     <div class="stat-card">
         <h3>Total Student Accounts</h3>
-        {# ✅ ADDED: ID for total students count #}
+        {#ID for total students count #}
         <div class="stat-card-value" id="total-students-count">{{ stats.total_students }}</div>
     </div>
     <div class="stat-card">
         <h3>Blocked Accounts</h3>
-        {# ✅ ADDED: ID for blocked students count #}
+        {#ID for blocked students count #}
         <div class="stat-card-value" id="blocked-students-count">{{ stats.blocked_students }}</div>
     </div>
 </div>
@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const paginationContainer = document.getElementById('pagination-container');
     const loadingRow = document.getElementById('loading-row');
     
-    // ✅ ADDED: Get the stat card elements
+    //Get the stat card elements
     const blockedStudentsCountEl = document.getElementById('blocked-students-count');
     const totalStudentsCountEl = document.getElementById('total-students-count'); // (In case you add a "delete" feature later)
     const modalDeleteStudentBtn = document.getElementById('modal-delete-student-btn');
@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // --- Success! ---
             showDynamicMessage(data.message, 'success');
 
-            // ✅ ADDED: Live Stat Card Update
+            //Live Stat Card Update
             if (blockedStudentsCountEl) {
                 let currentCount = parseInt(blockedStudentsCountEl.textContent);
                 if (isBlocked === 'true') {
@@ -568,7 +568,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
             } catch (error) {
-                showDynamicMessage(error.message, 'error');
+                closeModal(deleteStudentModal);
+
+                let errorMessage = error.message; // Get the ugly error string
+                try {
+                    // This regex finds the text inside "message': '...'"
+                    const match = errorMessage.match(/message': '([^']*)'/);
+                    if (match && match[1]) {
+                        errorMessage = match[1]; // Get just the clean message
+                    }
+                } catch (parseError) {
+                    // If parsing fails, just use the original error
+                }
+                
+                showDynamicMessage(errorMessage, 'error'); // Show the clean message
+
             } finally {
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;

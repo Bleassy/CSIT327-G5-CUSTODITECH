@@ -1,12 +1,9 @@
-/* static/css/admin_profile.css */
-
 .page-header h1 {
     font-size: 28px;
     font-weight: 700;
     margin-bottom: 2rem;
 }
 
-/* ✅ UPDATED: Replaced .profile-layout with .profile-layout-tabbed */
 .profile-layout-tabbed {
     display: grid;
     grid-template-columns: 1fr 3fr; /* 1 part for nav, 3 parts for content */
@@ -14,7 +11,7 @@
     align-items: flex-start;
 }
 
-/* ✅ NEW: Left-Side Navigation Menu */
+/* Left-Side Navigation Menu */
 .profile-nav {
     background: white;
     border-radius: 12px;
@@ -38,12 +35,12 @@
 }
 
 .profile-nav-link.active {
-    background-color: #1e40af; /* ✅ Admin primary color */
+    background-color: #1e40af; /* Admin primary color */
     color: white;
     font-weight: 600;
 }
 
-/* ✅ NEW: Content Area Styling */
+/* Content Area Styling */
 .profile-content .profile-card {
     display: none; /* Hide all content cards by default */
 }
@@ -122,14 +119,13 @@
     background-color: #1c3d90;
 }
 
-/* ✅ UPDATED: Responsive layout */
+/* Responsive layout */
 @media (max-width: 992px) {
     .profile-layout-tabbed {
         grid-template-columns: 1fr;
     }
 }
 
-/* ✅ ADDED: .success-message from your existing code */
 .success-message {
     color: #155724; /* Dark green text */
     background-color: #d4edda; /* Light green background */
@@ -261,7 +257,7 @@
     min-height: 1em; /* Prevents layout shift when text appears */
 }
 
-/* --- ✅ NEW: Mobile Responsive Fixes --- */
+/* --- Mobile Responsive Fixes --- */
 @media (max-width: 768px) {
     .profile-card {
         padding: 1.5rem; /* Reduce padding on mobile */

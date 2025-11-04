@@ -1,6 +1,5 @@
-/* static/css/my_orders.css */
 
-/* ✅ START: ADDED GENERAL MODAL STYLES */
+/* --- General Modal Styles --- */
 .modal {
     display: none; /* Hidden by default - JS will change this to 'flex' to show */
     position: fixed;
@@ -10,7 +9,6 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    /* 'display: flex;' was removed from here. It should be applied by JS. */
     align-items: center;
     justify-content: center;
     padding: 1rem;
@@ -37,8 +35,17 @@
     justify-content: space-between;
     align-items: center;
 }
-.modal-header h2 { margin: 0; font-size: 20px; font-weight: 600; }
-.close-btn { font-size: 28px; font-weight: bold; color: #64748b; cursor: pointer; }
+.modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+.close-btn {
+    font-size: 28px;
+    font-weight: bold;
+    color: #64748b;
+    cursor: pointer;
+}
 
 .modal-body {
     padding: 24px;
@@ -59,10 +66,15 @@
     flex-shrink: 0;
 }
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-/* ✅ END: ADDED GENERAL MODAL STYLES */
-
+/* Modal Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
 
 /* --- Search Bar --- */
 .search-container {
@@ -83,6 +95,7 @@
 }
 
 /* --- Section and Card Styles --- */
+/* Title for sections like "Pending", "Approved" */
 .section-title {
     font-size: 24px;
     font-weight: 600;
@@ -92,12 +105,14 @@
     border-bottom: 1px solid #e2e8f0;
 }
 
+/* Grid container for the order cards */
 .orders-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1.5rem;
 }
 
+/* Individual order card */
 .order-card {
     background: white;
     border-radius: 12px;
@@ -113,6 +128,7 @@
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 }
 
+/* Image on the left of the card */
 .product-image {
     width: 200px;
     height: auto;
@@ -121,6 +137,7 @@
     border-right: 1px solid #f1f5f9;
 }
 
+/* Main content area on the right of the card */
 .card-body {
     padding: 1.5rem;
     display: flex;
@@ -128,6 +145,7 @@
     width: 100%;
 }
 
+/* Header inside the card body */
 .card-header {
     display: flex;
     justify-content: space-between;
@@ -141,6 +159,7 @@
     margin: 0;
 }
 
+/* Grid for details like "Order ID", "Quantity" */
 .details-grid {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -154,6 +173,7 @@
     color: #1e293b;
 }
 
+/* Status badge (e.g., "Pending", "Approved") */
 .status-badge {
     padding: 4px 12px;
     border-radius: 999px;
@@ -163,6 +183,7 @@
     white-space: nowrap;
 }
 
+/* Small info box at the bottom of some cards */
 .info-note {
     background-color: #fefce8; /* Light yellow background */
     color: #a16207; /* Dark yellow text */
@@ -171,17 +192,38 @@
     font-size: 13px;
     margin-top: auto; /* Pushes the note to the bottom on the card */
 }
-.info-note p { margin: 0; }
+.info-note p {
+    margin: 0;
+}
 
-.status-badge.status-pending { background-color: #fef3c7; color: #92400e; }
-.status-badge.status-approved { background-color: #dcfce7; color: #166534; }
-.status-badge.status-completed { background-color: #dbeafe; color: #1e40af; }
-.status-badge.status-rejected { background-color: #fee2e2; color: #991b1b; }
-.status-badge.status-cancelled { background-color: #e5e7eb; color: #4b5563; }
+/* Color variations for status badges */
+.status-badge.status-pending {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+.status-badge.status-approved {
+    background-color: #dcfce7;
+    color: #166534;
+}
+.status-badge.status-completed {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+.status-badge.status-rejected {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+.status-badge.status-cancelled {
+    background-color: #e5e7eb;
+    color: #4b5563;
+}
 
-.order-card.history { opacity: 0.8; }
+/* Style for completed/cancelled orders */
+.order-card.history {
+    opacity: 0.8;
+}
 
-/* --- Old Empty State (now hidden by new styles) --- */
+/* Message shown when no orders are found */
 .no-items-message { 
     color: #64748b; 
     padding: 2rem; 
@@ -191,6 +233,7 @@
 }
 
 /* --- Order Details Modal --- */
+/* Specific styling for the order details popup */
 #order-details-modal .modal-content {
     max-width: 1000px;
 }
@@ -234,11 +277,19 @@
     padding-top: 1rem;
     border-top: 1px solid #f1f5f9;
 }
-.details-summary-grid span { color: #64748b; }
-.details-summary-grid strong { font-weight: 600; color: #1e293b; }
+.details-summary-grid span {
+    color: #64748b;
+}
+.details-summary-grid strong {
+    font-weight: 600;
+    color: #1e293b;
+}
 
-#order-details-modal .status-badge { margin-left: 10px; }
+#order-details-modal .status-badge {
+    margin-left: 10px;
+}
 
+/* Info note inside the details modal */
 #order-details-modal .info-note {
     display: none;
     margin-top: 1.5rem;
@@ -249,6 +300,7 @@
     font-size: 13px;
 }
 
+/* Cancel button inside the modal footer */
 .modal-footer .cancel-modal-btn {
     background-color: #e2e8f0; /* Light gray background */
     color: #475569; /* Dark gray text */
@@ -267,20 +319,21 @@
     background-color: #cbd5e1; /* Slightly darker gray on hover */
 }
 
-/* --- Confirmation Modal Sizing (Make them small) --- */
+/* --- Confirmation Modals (Cancel/Delete) --- */
+/* Sizing for the smaller confirmation popups */
 #cancel-confirm-modal .modal-content,
 #delete-confirm-modal .modal-content,
 #batch-delete-confirm-modal .modal-content {
     max-width: 600px;
 }
 
-/* Optional: Make the text center-aligned for confirmation */
 #cancel-confirm-modal .modal-body,
 #delete-confirm-modal .modal-body,
 #batch-delete-confirm-modal .modal-body {
     text-align: center;
 }
 
+/* Summary box inside confirmation modals */
 #cancel-confirm-modal .summary,
 #delete-confirm-modal .summary {
     text-align: left; /* Keep the summary part left-aligned */
@@ -291,7 +344,7 @@
     margin-top: 1rem;
 }
 
-/* --- Checkbox Styles --- */
+/* --- Checkbox Styles (for Batch Actions) --- */
 .order-card {
     position: relative; /* Needed for absolute positioning of checkbox */
     padding-left: 3rem; /* Make space for the checkbox */
@@ -320,13 +373,14 @@
     cursor: pointer;
 }
 
-/* --- Selected Card Visual --- */
+/* Visual feedback for selected cards */
 .order-card.selected {
     background-color: #eff6ff; /* Light blue background */
     border-color: #60a5fa; /* Blue border */
 }
 
 /* --- Batch Action Bar --- */
+/* The bar that slides up from the bottom when items are selected */
 .batch-action-bar {
     position: fixed;
     bottom: 0;
@@ -336,7 +390,7 @@
     color: white;
     padding: 1rem 3rem 1rem 2rem;
     box-sizing: border-box; 
-    display: none;
+    display: none; /* Hidden by default */
     align-items: center;
     justify-content: space-between;
     box-shadow: 0 -4px 10px rgba(0,0,0,0.2);
@@ -353,6 +407,7 @@
     font-weight: 500;
 }
 
+/* Buttons inside the batch action bar */
 .batch-action-bar .btn {
     width: auto; /* Allow button to size naturally */
     margin-top: 0; /* Override default button margin */
@@ -378,6 +433,7 @@
     font-size: 14px;
 }
 
+/* Delete button inside the details modal */
 #details-delete-btn {
     background-color: #dc2626; /* Red */
     color: white;
@@ -396,25 +452,8 @@
     background-color: #b91c1c; /* Darker red on hover */
 }
 
-/* Danger button specific styles */
-.btn-danger {
-    background-color: #dc2626; /* Red background */
-    color: white; /* White text */
-}
-
-.btn-danger:hover {
-    background-color: #b91c1c; /* Darker red on hover */
-}
-
-/* Secondary button styles (for the Cancel button) */
-.btn-secondary {
-    background-color: #e2e8f0;
-    color: #475569;
-}
-.btn-secondary:hover {
-     background-color: #cbd5e1;
-}
-
+/* --- General Button Color Styles --- */
+/* Base button style */
 .btn {
     padding: 0.75rem 1rem;
     border-radius: 8px;
@@ -427,11 +466,43 @@
     margin-top: 0; /* Override default button margin */
 }
 
+/* Danger button (e.g., Delete) */
+.btn-danger {
+    background-color: #dc2626; /* Red background */
+    color: white; /* White text */
+}
 
-.messages { list-style: none; padding: 0; margin-bottom: 1.5rem; }
-.messages li { padding: 1rem; margin-bottom: 1rem; border-radius: 8px; font-weight: 500; }
+.btn-danger:hover {
+    background-color: #b91c1c; /* Darker red on hover */
+}
 
-.messages li.error { background-color: #fee2e2; color: #991b1b; }
+/* Secondary button (e.g., Cancel) */
+.btn-secondary {
+    background-color: #e2e8f0;
+    color: #475569;
+}
+.btn-secondary:hover {
+     background-color: #cbd5e1;
+}
+
+/* --- Django Messages --- */
+/* Container for success/error messages */
+.messages {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+}
+.messages li {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.messages li.error {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
 
 .messages li.success {
     color: #15803d; /* Darker green text */
@@ -447,7 +518,7 @@
     transition: opacity 0.5s ease;
 }
 
-/* --- ✅ NEW: Mobile Responsive Fixes --- */
+/* --- Mobile Responsive Fixes --- */
 @media (max-width: 768px) {
     /* 1. Fix Order Card layout */
     .order-card {
@@ -504,16 +575,15 @@
     .card-header {
         flex-direction: column;
         gap: 0.75rem;
-    } /* <-- Removed stray 's' from here */
+    }
 
     .status-badge {
         align-self: flex-start; /* Align badge to the left */
     }
 }
 
-/* --- NEW: Empty State Styles --- */
-
-/* This hides the old <p> tag, which we replaced */
+/* --- Empty State Styles --- */
+/* Hides the old <p> tag, which we replaced */
 p.no-items-message {
     color: #64748b; 
     padding: 2rem; 
@@ -565,7 +635,7 @@ p.no-items-message {
     margin: 0 auto 1.5rem auto; /* Center the text block */
 }
 
-/* The new button style */
+/* The new button style for the empty state */
 .btn-primary-empty {
     /* Base button styles */
     padding: 0.75rem 1.5rem;

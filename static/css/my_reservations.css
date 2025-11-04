@@ -1,5 +1,5 @@
-/* static/css/my_reservations.css */
 
+/* --- Page & Section --- */
 .section-title {
     font-size: 24px;
     font-weight: 600;
@@ -9,12 +9,14 @@
     border-bottom: 1px solid #e2e8f0;
 }
 
+/* --- Card Grid --- */
 .reservations-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 2rem;
 }
 
+/* --- Reservation Card --- */
 .reservation-card {
     background: white;
     border-radius: 12px;
@@ -30,7 +32,7 @@
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 }
 
-
+/* Style for backordered items */
 .reservation-card.backorder {
     opacity: 1; /* Make it fully opaque to match other cards */
     background-color: #f8fafc; /* A slightly different background */
@@ -56,6 +58,7 @@
     margin: 0 0 1rem 0;
 }
 
+/* Grid for details inside the card */
 .details-grid {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -68,6 +71,7 @@
     color: #1e293b; /* Dark gray */
 }
 
+/* Status text colors within the card grid */
 .details-grid .status-available { 
     color: #16a34a; /* Green */
 }
@@ -76,18 +80,7 @@
     color: #f59e0b; /* Yellow/Orange */
 }
 
-.btn.checkout-btn {
-    margin-top: 1.5rem;
-    width: 100%;
-    padding: 10px;
-    background-color: #800000;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
+/* Message shown when no items are found */
 .no-items-message {
     color: #64748b;
     padding: 2rem;
@@ -95,6 +88,7 @@
     border-radius: 8px;
 }
 
+/* Small italicized text */
 .instructions {
     font-size: 13px;
     color: #16a34a;
@@ -102,7 +96,7 @@
     margin-top: 1rem;
 }
 
-/* --- ✅ MODIFIED: Modal Styles --- */
+/* --- General Modal Styles --- */
 .modal { 
     display: none; 
     position: fixed; 
@@ -118,11 +112,9 @@
 }
 .modal-content { 
     background-color: #fff; 
-    /* REMOVED: padding: 24px; */
     border-radius: 12px; 
     width: 90%; 
     max-width: 500px; 
-    /* ADDED: */
     display: flex;
     flex-direction: column;
     max-height: 90vh; /* Don't allow modal to be taller than 90% of screen */
@@ -135,15 +127,18 @@
     align-items: center; 
     border-bottom: 1px solid #e2e8f0; 
     padding-bottom: 16px; 
-    /* REMOVED: margin-bottom: 24px; */
-    /* ADDED: */
     padding: 24px 24px 16px 24px;
     flex-shrink: 0;
 }
-.modal-header h2 { margin: 0; font-size: 20px; }
-.close-btn { font-size: 28px; cursor: pointer; }
+.modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+.close-btn {
+    font-size: 28px;
+    cursor: pointer;
+}
 
-/* ✅ NEW: Modal Body Style */
 .modal-body {
     padding: 24px;
     overflow-y: auto; /* This makes *only* the body scroll */
@@ -151,16 +146,22 @@
     min-height: 0; /* Flexbox fix */
 }
 
-.summary { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
-.summary p { margin: 0 0 0.5rem 0; }
+/* Summary box inside modals */
+.summary {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+.summary p {
+    margin: 0 0 0.5rem 0;
+}
 
 .modal-footer { 
     display: flex; 
     justify-content: flex-end; 
     gap: 1rem; 
-    /* REMOVED: margin-top: 24px; */
-    /* REMOVED: padding-top: 24px; */
-    /* ADDED: */
     padding: 16px 24px 24px 24px;
     border-top: 1px solid #e2e8f0; 
     flex-shrink: 0;
@@ -168,9 +169,8 @@
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;
 }
-/* --- End of Modal Fixes --- */
 
-
+/* --- Django Messages --- */
 .success-message {
     color: #155724; /* Dark green text */
     background-color: #d4edda; /* Light green background */
@@ -182,21 +182,53 @@
     text-align: center;
 }
 
+.messages {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+}
+.messages li {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.messages li.error {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.messages li.success {
+    color: #15803d; /* Darker green text */
+    background-color: #dcfce7; /* Light green background */
+    padding: 1rem 1.5rem; /* Padding around text */
+    margin-bottom: 1rem; /* Space if multiple messages appear */
+    border-radius: 8px; /* Rounded corners */
+    border: 1px solid #86efac; /* Slightly darker green border */
+    font-weight: 500;
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Center icon and text vertically */
+    gap: 0.75rem; /* Space between icon and text */
+    transition: opacity 0.5s ease;
+}
 
 
+/* --- Buttons --- */
 .action-buttons-group {
     margin-top: 1.5rem;
     display: flex;
     gap: 0.5rem;
 }
 
-/* This rule must be separate, not nested */
+/* Targets buttons inside the group */
 .action-buttons-group .btn {
-    width: auto;     /* This removes the 100% width */
-    flex: 1;         /* This tells each button to take up 1 equal share of the space */
-    margin-top: 0;   /* This removes the extra margin that .btn has */
+    width: auto;      /* This removes the 100% width */
+    flex: 1;          /* This tells each button to take up 1 equal share of the space */
+    margin-top: 0;    /* This removes the extra margin that .btn has */
 }
 
+/* Base button style */
 .btn {
     margin-top: 1.5rem;
     width: 100%;
@@ -208,7 +240,18 @@
     font-size: 14px;
 }
 
-
+/* Button color variations */
+.btn.checkout-btn {
+    margin-top: 1.5rem;
+    width: 100%;
+    padding: 10px;
+    background-color: #800000;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
 
 .btn-primary {
     background-color: #800000;
@@ -229,9 +272,10 @@
     background-color: #b91c1c;
 }
 
-/* --- Reservation Details Modal --- */
-#reservation-details-modal .modal-content {
-    max-width: 600px; /* Make this modal a bit wider */
+/* --- Reservation Details Modals --- */
+#reservation-details-modal .modal-content,
+#backorder-details-modal .modal-content {
+    max-width: 600px; /* Make these modals a bit wider */
 }
 .details-layout {
     display: flex;
@@ -280,11 +324,7 @@
     color: #1e293b;
 }
 
-#backorder-details-modal .modal-content {
-    max-width: 600px; /* Make this modal a bit wider */
-}
-
-/* Style the status text in the modal */
+/* Status text inside the backorder modal */
 #backorder-details-modal .status-available {
     color: #16a34a;
     font-weight: 700;
@@ -294,47 +334,28 @@
     font-weight: 700;
 }
 
-.messages { list-style: none; padding: 0; margin-bottom: 1.5rem; }
-.messages li { padding: 1rem; margin-bottom: 1rem; border-radius: 8px; font-weight: 500; }
-
-.messages li.error { background-color: #fee2e2; color: #991b1b; }
-
-.messages li.success {
-    color: #15803d; /* Darker green text */
-    background-color: #dcfce7; /* Light green background */
-    padding: 1rem 1.5rem; /* Padding around text */
-    margin-bottom: 1rem; /* Space if multiple messages appear */
-    border-radius: 8px; /* Rounded corners */
-    border: 1px solid #86efac; /* Slightly darker green border */
-    font-weight: 500;
-    display: flex; /* Use flexbox for alignment */
-    align-items: center; /* Center icon and text vertically */
-    gap: 0.75rem; /* Space between icon and text */
-    transition: opacity 0.5s ease;
-}
-
-
+/* --- Card Removal Animation --- */
 .reservation-card.removing {
- /* Animate these properties over 0.4 seconds */
-  transition:
-      opacity 0.4s ease-out,
-      max-height 0.4s ease-out,
-      margin-top 0.4s ease-out,
-      margin-bottom 0.4s ease-out,
-      padding-top 0.4s ease-out,
-      padding-bottom 0.4s ease-out,
-      border-width 0.4s ease-out; /* Smoothly collapse border */
+    /* Animate these properties over 0.4 seconds */
+    transition:
+        opacity 0.4s ease-out,
+        max-height 0.4s ease-out,
+        margin-top 0.4s ease-out,
+        margin-bottom 0.4s ease-out,
+        padding-top 0.4s ease-out,
+        padding-bottom 0.4s ease-out,
+        border-width 0.4s ease-out; /* Smoothly collapse border */
 
- /* Target state */
-  opacity: 0;
-  max-height: 0;        /* Collapse the height */
-  margin-top: 0;
-  margin-bottom: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  border-top-width: 0;  /* Collapse borders */
-  border-bottom-width: 0;
-  overflow: hidden;     /* Crucial: Prevent content spill during collapse */
+    /* Target state */
+    opacity: 0;
+    max-height: 0;        /* Collapse the height */
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-top-width: 0;  /* Collapse borders */
+    border-bottom-width: 0;
+    overflow: hidden;     /* Crucial: Prevent content spill during collapse */
 }
 
 /* --- Mobile Responsive Fixes --- */
@@ -365,7 +386,7 @@
         flex-basis: auto; 
     }
 
-    /* ✅ NEW: Make modal footer buttons stack */
+    /* 3. Make modal footer buttons stack */
     .modal-footer {
         display: flex;
         gap: 0.75rem;
@@ -379,9 +400,8 @@
     }
 }
 
-/* --- NEW: Empty State Styles --- */
-
-/* This hides the old <p> tag just in case it's left over */
+/* --- Empty State Styles --- */
+/* Hides the old <p> tag just in case it's left over */
 p.no-items-message {
     display: none !important; 
 }
@@ -431,7 +451,7 @@ p.no-items-message {
     margin: 0 auto 1.5rem auto; /* Center the text block */
 }
 
-/* The new button style */
+/* The new button style for the empty state */
 .btn-primary-empty {
     /* Base button styles */
     padding: 0.75rem 1.5rem;
@@ -456,4 +476,3 @@ p.no-items-message {
 .btn-primary-empty:hover {
     background-color: #600000; /* Darker maroon */
 }
-

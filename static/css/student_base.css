@@ -2,6 +2,7 @@
 
 /* static/css/student_base.css */
 
+/* --- General Styles --- */
 .buyer-dashboard {
     min-height: 100vh;
     background-color: #f5f7fa;
@@ -9,7 +10,7 @@
     margin: 0;
 }
 
-/* Header Styles */
+/* --- Header Styles --- */
 .dashboard-header {
     background: white;
     border-bottom: 1px solid #e1e5e9;
@@ -31,13 +32,14 @@
     color: #800000;
     font-size: 16px;
     text-decoration: none;
-    flex-shrink: 0; /* ✅ ADDED: Prevent logo from shrinking */
+    flex-shrink: 0;
 }
 
 .logo-icon {
     font-size: 24px;
 }
 
+/* --- Main Navigation --- */
 .main-nav {
     display: flex;
     gap: 0;
@@ -54,8 +56,7 @@
     cursor: pointer;
     border-bottom: 3px solid transparent;
     transition: all 0.2s ease-in-out;
-    text-decoration: none; /* For <a> tags */
-    /* ✅ NEW: Ensure buttons don't shrink or wrap their text */
+    text-decoration: none;
     white-space: nowrap; 
     flex-shrink: 0;
 }
@@ -70,11 +71,12 @@
     border-bottom-color: #800000;
 }
 
+/* --- Header Right Side (Profile/Logout) --- */
 .header-right {
     display: flex;
     align-items: center;
     gap: 12px;
-    flex-shrink: 0; /* ✅ ADDED: Prevent profile section from shrinking */
+    flex-shrink: 0;
 }
 .student-name {
     width: 32px;
@@ -99,7 +101,6 @@
     font-weight: 500;
     transition: all 0.2s ease-in-out;
     text-decoration: none;
-    /* ✅ NEW: Ensure button doesn't shrink */
     flex-shrink: 0;
 }
 
@@ -109,6 +110,7 @@
     color: #dc2626;
 }
 
+/* --- Main Page Container --- */
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -122,16 +124,14 @@
     margin: 0 0 3rem 0;
 }
 
-/* ✅ ADD THIS: Desktop styles for the new wrapper */
+/* Desktop styles for the mobile menu wrapper */
 .mobile-menu-wrapper {
     display: flex;
     align-items: center;
-    flex: 1; /* This makes it take up the available space */
+    flex: 1;
 }
 
-/* --- NEW: Hamburger Menu Styles --- */
-
-/* 1. Hamburger Button Styles */
+/* --- Hamburger Menu Styles --- */
 .hamburger-btn {
     display: none; /* Hidden on desktop */
     background: none;
@@ -139,106 +139,97 @@
     font-size: 28px;
     color: #800000;
     cursor: pointer;
-    padding: 0 1rem; /* Add padding for mobile */
-    z-index: 1001; /* Make sure it's on top */
+    padding: 0 1rem;
+    z-index: 1001;
 }
 
-/* 2. Responsive Breakpoint (992px) */
+/* --- Responsive Breakpoint (992px) --- */
 @media (max-width: 992px) {
     
-    /* Make header position relative to contain the overlay */
     .dashboard-header {
-        padding: 0 1rem; /* Use smaller padding on mobile */
-        justify-content: space-between; /* Puts logo on left, hamburger on right */
+        padding: 0 1rem;
+        justify-content: space-between;
     }
 
-    /* Show the hamburger button */
     .hamburger-btn {
         display: block;
     }
 
     .mobile-menu-wrapper {
-    display: none;
-    position: absolute;   /* Changed from fixed */
-    top: 70px;          /* Position it 70px from the top (your header height) */
-    left: 0;
-    right: 0;
-    height: auto;       /* Let content decide the height */
-    
-    background: #ffffff;  /* Solid white background */
-    z-index: 1000;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1); /* Add a nice shadow */
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
+        display: none;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        right: 0;
+        height: auto;
+        
+        background: #ffffff;
+        z-index: 1000;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
 
-    flex-direction: column;
-    justify-content: flex-start; /* Align items to the top */
-    align-items: stretch;        /* Make items full-width */
-    padding: 0.5rem 0;           /* Add some top/bottom padding */
-    gap: 0;                      /* Remove the gap */
-}
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        padding: 0.5rem 0;
+        gap: 0;
+    }
 
-    /* 3. The "Open" State */
+    /* "Open" State */
     .dashboard-header.menu-is-open .mobile-menu-wrapper {
-        display: flex; /* Show the menu when header has the class */
+        display: flex; /* Show the menu */
     }
     
     /* Change hamburger icon to an "X" when open */
     .dashboard-header.menu-is-open .hamburger-icon {
-        font-family: monospace; /* Use a font where 'x' looks good */
+        font-family: monospace;
         font-weight: bold;
-        content: "X"; /* This is a simple way, but see note */
+        content: "X";
     }
     .dashboard-header.menu-is-open .hamburger-btn {
         color: #333; /* Make X icon darker */
     }
-    /* Note: A better 'X' is done with CSS transforms, but this is simplest */
-
 
     .main-nav {
-    flex-direction: column;
-    align-items: stretch; /* Make links full-width */
-    margin-left: 0;
-    gap: 0;
-}
+        flex-direction: column;
+        align-items: stretch;
+        margin-left: 0;
+        gap: 0;
+    }
 
-.nav-btn {
-    font-size: 16px;    /* Back to a more standard size */
-    padding: 14px 1.5rem; /* Adjust padding */
-    border-bottom: none;
-    border-radius: 0;   /* Remove radius */
-}
-.nav-btn.active {
-    border-bottom: none;
-    background: #fde8e8;
-    border-radius: 0;   /* Remove radius */
-}
+    .nav-btn {
+        font-size: 16px;
+        padding: 14px 1.5rem;
+        border-bottom: none;
+        border-radius: 0;
+    }
+    .nav-btn.active {
+        border-bottom: none;
+        background: #fde8e8;
+        border-radius: 0;
+    }
 
     .header-right {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-    margin-top: 0.5rem; /* Small space above */
-    padding: 0.75rem 1.5rem; /* Pad the section */
-    border-top: 1px solid #f1f5f9; /* Add a separator line */
-}
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-top: 1px solid #f1f5f9;
+    }
 
-    
-
-    /* Don't forget to restore container padding */
     .container {
         padding: 1rem;
     }
 
-    /* ✅ ADD THESE NEW RULES BELOW IT */
     .logout-btn {
-    font-size: 15px;
-    padding: 10px 16px;
-    background: #f8f9fa;
-    color: #dc2626; /* Red text */
-    border: 1px solid #e1e5e9;
-    min-width: auto; /* Remove min-width */
-    text-align: center;
+        font-size: 15px;
+        padding: 10px 16px;
+        background: #f8f9fa;
+        color: #dc2626; /* Red text */
+        border: 1px solid #e1e5e9;
+        text-align: center;
     }
 
     .logout-btn:hover {
@@ -247,58 +238,50 @@
         color: #dc2626;
     }
 }
-/* --- End of modifications --- */
 
-
-/* Container for messages */
+/* --- Django Messages --- */
 .messages {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 1.5rem 0; /* Space below messages, before content */
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem 0;
 }
 
-/* Base style for all message list items */
 .messages li {
-  padding: 1rem 1.5rem;
-  margin-bottom: 1rem;
-  border-radius: 8px;
-  border: 1px solid transparent; /* Base border */
-  font-weight: 500;
-  display: flex; /* Optional: for aligning icon if you add one */
-  align-items: center; /* Optional */
-  gap: 0.75rem; /* Optional: space for icon */
-  transition: opacity 0.5s ease-out; /* For smooth fade-out if using JS */
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: opacity 0.5s ease-out;
 }
 
-/* Style specifically for ERROR messages */
 .messages li.error {
-  color: #991b1b; /* Dark red text */
-  background-color: #fee2e2; /* Light red background */
-  border-color: #fca5a5; /* Red border */
+    color: #991b1b;
+    background-color: #fee2e2;
+    border-color: #fca5a5;
 }
 
-/* Style specifically for SUCCESS messages */
 .messages li.success {
-  color: #15803d; /* Dark green text */
-  background-color: #dcfce7; /* Light green background */
-  border-color: #86efac; /* Green border */
+    color: #15803d;
+    background-color: #dcfce7;
+    border-color: #86efac;
 }
 
-/* Style specifically for WARNING messages (if you use them) */
 .messages li.warning {
-  color: #92400e; /* Dark yellow/orange text */
-  background-color: #fef3c7; /* Light yellow background */
-  border-color: #fde68a; /* Yellow border */
+    color: #92400e;
+    background-color: #fef3c7;
+    border-color: #fde68a;
 }
 
-/* Optional: Style for INFO messages (if you use them) */
 .messages li.info {
-  color: #1e40af; /* Dark blue text */
-  background-color: #dbeafe; /* Light blue background */
-  border-color: #93c5fd; /* Blue border */
+    color: #1e40af;
+    background-color: #dbeafe;
+    border-color: #93c5fd;
 }
 
-/* Fade-out class for JS */
 .messages li.fade-out {
     opacity: 0;
 }
@@ -311,15 +294,15 @@
     padding: 0.5rem;
     border-radius: 6px;
     transition: background-color 0.2s ease-in-out;
-    text-decoration: none; /* ✅ Removes the underline */
+    text-decoration: none;
 }
 
 .student-name-link:hover {
-    background-color: #f8f9fa; /* Adds a clean hover effect */
+    background-color: #f8f9fa;
 }
 
 .student-name-text {
-    font-weight: 400; /* ✅ Makes the name semi-bold */
+    font-weight: 400;
     color: #1e293b;
     font-size: 15px;
     display: block;
@@ -336,12 +319,12 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    object-fit: cover; /* For img */
+    object-fit: cover;
 }
 
 .header-initials {
-    background-color: #fde8e8; /* Lighter maroon */
-    color: #800000; /* Maroon */
+    background-color: #fde8e8;
+    color: #800000;
     font-weight: 600;
     font-size: 14px;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -350,77 +333,49 @@
 
 /* --- Page Loader Styles --- */
 .loader-overlay {
-    display: none; /* Hidden by default */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(255, 255, 255, 0.7); /* White, slightly see-through */
-    backdrop-filter: blur(2px); /* Optional: blur content behind it */
-    z-index: 2000; /* On top of everything */
-    
-    /* Center the spinner */
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(2px);
+    z-index: 2000;
     justify-content: center;
     align-items: center;
 }
 
-/* This is the class our JS will add */
 .loader-overlay.visible {
     display: flex;
 }
 
-/* The spinning circle */
 .loader-spinner {
-    border: 8px solid #f3f3f3; /* Light grey base */
-    border-top: 8px solid #800000; /* Your maroon theme color */
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #800000;
     border-radius: 50%;
     width: 60px;
     height: 60px;
     animation: spin 1s linear infinite;
 }
 
-/* The spinning animation */
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
 
-/* --- NEW: Accessibility Focus Styles --- */
-
-/* This rule targets any button, link, or input when 
-  the browser determines it's being focused via keyboard.
-*/
+/* --- Accessibility Focus Styles --- */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-    /* 'outline-offset' adds a little space so the ring
-      doesn't sit directly on the element.
-    */
     outline-offset: 2px;
-
-    /* This is the outline itself. We'll use your maroon
-      theme color to make it match your brand.
-    */
     outline: 2px solid #800000;
-    
-    /* Optional: A subtle box-shadow for extra visibility */
     box-shadow: 0 0 0 4px rgba(128, 0, 0, 0.1);
-
-    /* Make sure buttons with rounded corners also have
-       a rounded outline in all browsers.
-    */
     border-radius: 4px; 
 }
 
-/* Special fix for your circular avatar link so the 
-  focus outline is also a circle.
-*/
 .student-name-link:focus-visible {
     border-radius: 50%;
 }
-
-
-

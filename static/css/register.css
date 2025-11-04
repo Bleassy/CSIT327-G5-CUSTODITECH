@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
 
-
+/* --- General Styles --- */
 * {
     margin: 0;
     padding: 0;
@@ -10,10 +10,10 @@
 body {
     font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
-    /* display: flex; <-- MODIFIED: Removed this */
     background-color: #f5f5f5;
 }
 
+/* --- Main Layout Container --- */
 .container {
     display: flex;
     width: 100%;
@@ -21,7 +21,7 @@ body {
     flex-wrap: wrap;
 }
 
-/* Left Side - Branding */
+/* --- Left Side - Branding --- */
 .left-side {
     flex: 1;
     min-width: 300px;
@@ -64,13 +64,13 @@ body {
     font-weight: 500;
 }
 
-/* Right Side - Registration Form */
+/* --- Right Side - Registration Form --- */
 .right-side {
-    flex: 1.5; /* This is fine, it just gives it more width on desktop */
+    flex: 1.5; /* Give the form side more width on desktop */
     min-width: 300px;
     padding: 40px;
     background-color: #f5f5f5;
-    overflow-y: auto;
+    overflow-y: auto; /* Allow form to scroll on short screens */
 }
 
 .form-container {
@@ -84,7 +84,7 @@ body {
     margin-bottom: 20px;
 }
 
-/* Tabs */
+/* --- Tab Styles (if used) --- */
 .tabs {
     display: flex;
     margin-bottom: 30px;
@@ -117,7 +117,7 @@ body {
     opacity: 0.8;
 }
 
-/* Form Styles */
+/* --- Form Group & Input Styles --- */
 .form-group {
     margin-bottom: 18px;
 }
@@ -158,6 +158,13 @@ body {
     display: block;
 }
 
+/* Required field indicator */
+label .required {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* --- Form Message & Error Styles --- */
 .error-message {
     color: #dc3545;
     background-color: #f8d7da;
@@ -180,12 +187,21 @@ body {
     margin-top: 3px;
 }
 
-/* Required field indicator */
-label .required {
-    color: #dc3545;
-    font-weight: bold;
+/* Container for AJAX errors */
+#ajax-error-container .error-message {
+    margin-bottom: 1rem;
 }
 
+/* Success/Error message fade-out animation */
+.error-message, .success-message {
+    transition: opacity 0.5s ease-out;
+}
+.error-message.fade-out, .success-message.fade-out {
+    opacity: 0;
+}
+
+
+/* --- Button & Link Styles --- */
 .btn-register {
     width: 100%;
     padding: 14px;
@@ -220,7 +236,7 @@ label .required {
     text-decoration: underline;
 }
 
-/* Input validation styling */
+/* --- Input Validation --- */
 input:invalid:not(:placeholder-shown) {
     border-color: #dc3545;
 }
@@ -229,27 +245,25 @@ input:valid:not(:placeholder-shown) {
     border-color: #28a745;
 }
 
-/* Responsive Design */
+/* --- Responsive Design --- */
 @media (max-width: 968px) {
     .container {
         flex-direction: column;
     }
     
     .left-side {
-        min-height: 300px; /* This is fine, gives the top banner a set height */
+        min-height: 300px; /* Gives the top banner a set height */
     }
 
-    /* ✅ MODIFIED: This is the main fix */
     .left-side, .right-side {
-        flex: 0 1 auto; /* Stop them from growing (0), let them shrink (1), and set base size to auto (auto) */
+        flex: 0 1 auto; /* Stop them from growing, let them shrink, base size auto */
         min-width: 100%; /* Override the 300px min-width */
     }
 }
 
 @media (max-width: 768px) {
     .left-side, .right-side {
-        /* min-width: 100%; <-- This is now redundant */
-        padding: 30px 20px; /* This is good */
+        padding: 30px 20px;
     }
     
     .logo-box {
@@ -301,17 +315,4 @@ input:valid:not(:placeholder-shown) {
     .form-group {
         margin-bottom: 14px;
     }
-}
-
-/* [register.css] - Add if missing */
-.error-message, .success-message {
-  transition: opacity 0.5s ease-out;
-}
-.error-message.fade-out, .success-message.fade-out {
-  opacity: 0;
-}
-/* Style for the AJAX container */
-#ajax-error-container .error-message {
-    /* Inherit or add specific styles here */
-    margin-bottom: 1rem; /* Example */
 }

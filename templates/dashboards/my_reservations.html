@@ -12,7 +12,7 @@
 <h2 class="section-title">Available for Pickup</h2>
 {# Check if the list is NOT empty to show the grid #}
 {% if reservations %}
-    <div class="reservations-grid" id="pickup-grid"> {# ✅ Added ID #}
+    <div class="reservations-grid" id="pickup-grid">
         {% for item in reservations %}
             <div class="reservation-card"
                  data-id="{{ item.id }}"
@@ -37,7 +37,7 @@
             </div>
         {% endfor %}
     </div>
-    {# ✅ NEW: Improved Empty State (hidden) #}
+    {# Improved Empty State (hidden) #}
     <div class="empty-state-container no-items-message" id="no-pickup-message" style="display: none;">
         <div class="empty-state-icon">📅</div>
         <h3>You have no items for pickup</h3>
@@ -45,7 +45,7 @@
         <a href="{% url 'browse_products' %}" class="btn btn-primary-empty">Browse Products</a>
     </div>
 {% else %}
-    {# ✅ NEW: Improved Empty State (visible) #}
+    {# Improved Empty State (visible) #}
     <div class="reservations-grid" id="pickup-grid"></div> {# Empty grid for JS target #}
     <div class="empty-state-container no-items-message" id="no-pickup-message">
         <div class="empty-state-icon">📅</div>
@@ -58,7 +58,7 @@
 <h2 class="section-title">Pending Backorders</h2>
 {# Check if the list is NOT empty to show the grid #}
 {% if backorders %}
-    <div class="reservations-grid" id="backorder-grid"> {# ✅ Added ID #}
+    <div class="reservations-grid" id="backorder-grid">
          {% for item in backorders %}
             <div class="reservation-card backorder"
                  data-id="{{ item.id }}"
@@ -88,7 +88,7 @@
             </div>
          {% endfor %}
     </div>
-     {# ✅ Message is outside grid, hidden initially #}
+     {# Message is outside grid, hidden initially #}
     <div class="empty-state-container no-items-message" id="no-backorder-message" style="display: none;">
         <div class="empty-state-icon">📦</div>
         <h3>You have no pending backorders</h3>
@@ -96,7 +96,7 @@
         <a href="{% url 'browse_products' %}" class="btn btn-primary-empty">Browse Products</a>
     </div>
 {% else %}
-    {# ✅ NEW: Improved Empty State (visible) #}
+    {# Improved Empty State (visible) #}
     <div class="reservations-grid" id="backorder-grid"></div> {# Empty grid for JS target #}
     <div class="empty-state-container no-items-message" id="no-backorder-message">
         <div class="empty-state-icon">📦</div>
@@ -328,7 +328,6 @@ document.addEventListener('DOMContentLoaded', () => {
         openModal(cancelModal);
     }
 
-// ✅ --- NEW: AJAX Form Handling --- ✅
 
 // Helper function to show dynamic success/error messages
 function showDynamicMessage(message, className = 'success') {
@@ -355,7 +354,7 @@ function handleAjaxFormSubmit(form) {
         event.preventDefault(); // Stop the page from reloading
 
         const submitButton = form.querySelector('button[type="submit"]');
-        // ✅ Store original text OUTSIDE try/catch/finally
+        // Store original text OUTSIDE try/catch/finally
         const originalButtonText = submitButton.textContent;
         submitButton.disabled = true;
         submitButton.textContent = 'Processing...';
@@ -423,11 +422,10 @@ function handleAjaxFormSubmit(form) {
             // --- Error ---
             console.error('Form submission error:', error);
             showDynamicMessage(`Error: ${error.message}`, 'error');
-            // ❌ REMOVE button reset from here
             // submitButton.disabled = false;
             // submitButton.textContent = originalButtonText;
         } finally {
-            // ✅ ADD FINALLY BLOCK: This ALWAYS runs after try or catch
+            //
             console.log("Resetting button state."); // Debug log
             submitButton.disabled = false;
             submitButton.textContent = originalButtonText;

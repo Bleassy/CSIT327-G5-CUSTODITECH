@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/manage_products.css' %}?v=1.4"> {# ✅ Version bumped #}
+<link rel="stylesheet" href="{% static 'css/manage_products.css' %}?v=1.4"> 
 {% endblock %}
 
 {% block content %}
@@ -355,7 +355,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==================================================================
 
     /**
-     * ✅ REPLACED: This now uses your .messages list
      * Displays a temporary message in the message container.
      * @param {string} message - The message to display.
      * @param {string} type - 'success' or 'error'.
@@ -744,7 +743,7 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', () => {
             const selectedIds = Array.from(document.querySelectorAll('.product-checkbox:checked')).map(cb => cb.value);
             const count = selectedIds.length;
-            // ✅ CHANGED: Use showMessage
+            //Use showMessage
             if (count === 0) { showMessage('Please select at least one product.', 'error'); return; }
             if (batchDeleteConfirmModal) {
                 batchDeleteConfirmModal.querySelector('#batch-delete-count').textContent = count;
@@ -778,7 +777,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // ✅ CHANGED: Use showMessage
+                    //Use showMessage
                     showMessage(data.message, 'success');
                     closeModal(modal);
                     form.reset();
@@ -786,13 +785,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     filterProducts();
                     updateBatchActionBar();
                 } else {
-                    // ✅ CHANGED: Use showMessage
+                    //Use showMessage
                     showMessage(data.error || 'An unknown error occurred.', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error during fetch or .then() processing:', error);
-                // ✅ CHANGED: Use showMessage
+                //Use showMessage
                 showMessage(`An error occurred: ${error.message}`, 'error');
             })
             .finally(() => {
@@ -821,25 +820,25 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // ✅ CHANGED: Use showMessage
+                
                     showMessage(data.message, 'success');
                     closeModal(modal);
                     updateProductRow(data.product);
                     filterProducts();
-                    // ✅ ADD THIS: Find and uncheck the specific checkbox
+                    
                         const updatedCheckbox = document.querySelector(`.product-checkbox[value="${data.product.id}"]`);
                         if (updatedCheckbox) {
                             updatedCheckbox.checked = false;
                         }
                     updateBatchActionBar();
                 } else {
-                    // ✅ CHANGED: Use showMessage
+                   
                     showMessage(data.error || 'An unknown error occurred.', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error during fetch or .then() processing:', error);
-                // ✅ CHANGED: Use showMessage
+             
                 showMessage(`An error occurred: ${error.message}`, 'error');
             })
             .finally(() => {
@@ -871,7 +870,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // ✅ CHANGED: Use showMessage
+                 
                     showMessage(data.message, 'success');
                     closeModal(modal);
                     const rowToRemove = document.querySelector(`.btn-delete[data-id="${data.product_id}"]`)?.closest('tr');
@@ -881,13 +880,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     filterProducts();
                     updateBatchActionBar();
                 } else {
-                    // ✅ CHANGED: Use showMessage
+                   
                     showMessage(data.error || 'An unknown error occurred.', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error during fetch or .then() processing:', error);
-                // ✅ CHANGED: Use showMessage
+             
                 showMessage(`An error occurred: ${error.message}`, 'error');
             })
             .finally(() => {
@@ -927,7 +926,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(data => {
                 if (data.success) {
-                    // ✅ CHANGED: Use showMessage
+              
                     showMessage(data.message, 'success');
                     closeModal(batchDeleteConfirmModal);
                     
@@ -944,13 +943,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(selectAllCheckbox) selectAllCheckbox.checked = false; 
                         updateBatchActionBar();
                 } else {
-                    // ✅ CHANGED: Use showMessage
+                   
                     showMessage(data.error || 'An unknown error occurred.', 'error');
                 }
             })
             .catch(error => {
                 console.error('Batch Delete Fetch Error:', error);
-                // ✅ CHANGED: Use showMessage
+            
                 showMessage(`An error occurred: ${error.message}`, 'error');
             })
             .finally(() => {

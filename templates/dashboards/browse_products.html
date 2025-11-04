@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
         openModal(backorderModal);
     }
 
-    // ✅ --- NEW: AJAX Form Handling --- ✅
+    //  --- NEW: AJAX Form Handling --- 
 
     // Helper function to show dynamic success/error messages
     function showDynamicMessage(message, className = 'success') {
@@ -381,7 +381,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 // --- Success ---
                 closeModal(form.closest('.modal')); // Close the modal
                 showDynamicMessage(data.message, 'success'); // Show success toast
-                // ✅ --- ADD THIS BLOCK TO UPDATE CARD ---
             if (data.product_id !== undefined && data.new_stock_quantity !== undefined) {
                 const productId = data.product_id;
                 const newStock = parseInt(data.new_stock_quantity);

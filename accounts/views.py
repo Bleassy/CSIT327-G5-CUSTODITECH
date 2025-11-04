@@ -30,7 +30,6 @@ def register(request):
         phone_number = form_data.get('phone_number')
         address = form_data.get('address')
 
-        # --- Consolidated Validation ---
         error_list = [] # Store errors for JSON response
         if full_name and not re.match(r"^[a-zA-ZñÑ. ]+$", full_name):
             error_list.append('Full name can only contain letters, spaces, and periods.')
@@ -55,8 +54,6 @@ def register(request):
         if password1 != password2:
             error_list.append('Passwords do not match.')
         
-
-        # --- Handle Validation Results ---
         if error_list:
             if is_ajax:
                 # Return JSON with list of errors
@@ -66,9 +63,7 @@ def register(request):
                 for error in error_list:
                     messages.error(request, error)
                 return render(request, 'registration/register.html', context)
-        # --- End Validation ---
 
-        # --- Try Supabase Sign Up ---
         try:
             response = supabase.auth.sign_up({
                 'email': email,
@@ -85,8 +80,6 @@ def register(request):
             })
 
             if response.user:
-
-                # --- Handle SUCCESS ---
                 success_msg = 'Registration successful!'
                 login_url = redirect('login').url
 
@@ -107,11 +100,10 @@ def register(request):
             if 'already registered' in error_message.lower():
                 user_facing_error = 'This email is already registered.'
             elif 'check your email' in error_message.lower(): # Catch Supabase rate limits or config issues
-                 user_facing_error = 'Could not send verification email. Please try again later.'
+                user_facing_error = 'Could not send verification email. Please try again later.'
 
             print(f"--- REGISTER ERROR: {error_message} ---") # Log actual error
 
-            # --- Handle FAILURE ---
             if is_ajax:
                 return JsonResponse({'success': False, 'errors': [user_facing_error]}, status=400)
             else:
@@ -124,6 +116,7 @@ def register(request):
 
 @require_http_methods(["GET", "POST"]) # Allow GET for initial page load
 def login_view(request):
+    """Handles the user login process for both students and admins."""
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -139,14 +132,14 @@ def login_view(request):
                 return render(request, 'registration/login.html')
 
         try:
-            # 1. Sign in user with Supabase
+            # Sign in user with Supabase
             response = supabase.auth.sign_in_with_password({
                 'email': email,
                 'password': password
             })
 
             if response.session:
-                # 2. Get user's actual role
+                # Get user's actual role
                 user_metadata = response.user.user_metadata
                 actual_user_type = user_metadata.get('user_type', 'student')
                 is_blocked = user_metadata.get('is_blocked', False)
@@ -161,7 +154,7 @@ def login_view(request):
                         messages.error(request, error_msg)
                         return redirect('login')
 
-                # 3. Check role match
+                # Check role match
                 if actual_user_type == selected_role:
                     # SUCCESS: Roles match
                     request.session['supa_access_token'] = response.session.access_token
@@ -215,7 +208,7 @@ def login_view(request):
 
 
 def logout_view(request):
-    """Logout user from Supabase"""
+    """Logout user from Supabase and clear the Django session."""
     try:
         # Sign out from Supabase
         supabase.auth.sign_out()
@@ -232,7 +225,7 @@ def logout_view(request):
 
 
 def forgot_password(request):
-    """Send password reset OTP via Supabase"""
+    """Send password reset OTP via Supabase."""
     if request.method == 'POST':
         email = request.POST.get('email')
         
@@ -260,7 +253,7 @@ def forgot_password(request):
 
 
 def verify_otp(request, email):
-    """Verify OTP sent by Supabase"""
+    """Verify OTP sent by Supabase."""
     if request.method == 'POST':
         otp = request.POST.get('otp')
         
@@ -296,7 +289,7 @@ def verify_otp(request, email):
 
 
 def reset_password(request):
-    """Reset password after OTP verification"""
+    """Reset password after OTP verification."""
     if 'supa_access_token' not in request.session:
         messages.error(request, 'Please verify your OTP first.')
         return redirect('forgot_password')
@@ -332,4 +325,3 @@ def reset_password(request):
             messages.error(request, f'Error: {str(e)}')
     
     return render(request, 'registration/reset_password.html')
-

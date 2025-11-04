@@ -1,5 +1,3 @@
-# In dashboards/context_processors.py
-
 from supabase_client import supabase
 
 def profile_context(request):
@@ -15,15 +13,15 @@ def profile_context(request):
     
     if hasattr(request, 'user') and request.user.is_authenticated:
         
-        # --- 1. Try to get email as a better fallback (if it exists) ---
+        # Try to get email as a better fallback (if it exists)
         try:
             if request.user.email:
                 # Use the part before the '@' as a fallback name
                 context['display_name'] = request.user.email.split('@')[0]
         except AttributeError:
-             pass # 'Student' will remain the fallback
+            pass # 'Student' will remain the fallback
 
-        # --- 2. Try to get the real name from the profile table ---
+        # Try to get the real name from the profile table
         try:
             user_id = request.user.id
             response = supabase.table('user_profiles').select('avatar_url', 'full_name').eq('user_id', user_id).single().execute()

@@ -1,19 +1,17 @@
-/* static/css/reports.css */
 
+/* --- Page Header --- */
 .page-header h1 {
     font-size: 28px;
     font-weight: 700;
     margin-bottom: 2rem;
 }
 
-/* ADDED: Global Search Styles */
+/* --- Global Search --- */
 .global-search-container {
-    max-width: 100000px; /* Adjust this value as needed */
-    
+    max-width: 100000px; /* Allows it to be full width */
 }
-/* END ADDED */
 
-
+/* --- Main Reports Grid Layout --- */
 .reports-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -22,36 +20,94 @@
     margin-bottom: 3rem;
 }
 
-.stats-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; }
-.stat-card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 1.5rem; }
-.stat-icon { width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 24px; }
-.stat-icon.products { background: #eff6ff; color: #2563eb; }
-.stat-icon.orders { background: #fdf2f8; color: #ec4899; }
-.stat-content h3 { font-size: 14px; color: #64748b; margin: 0 0 8px 0; font-weight: 500; }
-.stat-number { font-size: 32px; font-weight: 700; color: #1e293b; margin: 0; }
+/* --- Stat Card Styles --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
 
-.chart-container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); height: 500px; }
-.chart-container h2 { margin: 0 0 1.5rem 0; font-size: 18px; font-weight: 600; }
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    border: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
 
-/* ✅ NEW: Activity Log Section */
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 24px;
+}
+
+.stat-icon.products {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.stat-icon.orders {
+    background: #fdf2f8;
+    color: #ec4899;
+}
+
+.stat-content h3 {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0 0 8px 0;
+    font-weight: 500;
+}
+
+.stat-number {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+/* --- Chart Container --- */
+.chart-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    height: 500px;
+}
+
+.chart-container h2 {
+    margin: 0 0 1.5rem 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* --- Activity Log Section --- */
 .activity-log-section .page-header {
     border-top: 1px solid #e2e8f0;
     padding-top: 2rem;
     margin-bottom: 0;
 }
+
 .activity-log-section .page-header h2 {
     font-size: 24px;
     font-weight: 600;
 }
-/* --- New Search Bar Styles (from student side, adapted) --- */
+
+/* --- Log Search Bar Styles --- */
 .page-controls {
-    margin-bottom: 2.5rem; /* Increased margin */
+    margin-bottom: 2.5rem;
 }
 
-/* Make search container generic */
 .search-container {
-     margin-bottom: 2rem; /* Consistent bottom margin */
-     width: 100%;
+    margin-bottom: 2rem;
+    width: 100%;
 }
 
 .search-form {
@@ -64,45 +120,93 @@
     padding: 14px 20px;
     font-size: 16px;
     border: 1px solid #e2e8f0;
-    border-radius: 10px; /* Fully rounded corners */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
     outline: none;
     -webkit-appearance: none;
-       -moz-appearance: none;
-            appearance: none;
+    -moz-appearance: none;
+    appearance: none;
     width: 100%;
-    box-sizing: border-box; /* Include padding/border in width */
+    box-sizing: border-box;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .search-input:focus {
     outline: none;
-    border-color: #1e40af; /* Admin primary color for focus */
+    border-color: #1e40af;
     box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
     z-index: 2;
     position: relative;
 }
-.table-container { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); overflow-x: auto; }
-.data-table { width: 100%; border-collapse: collapse; text-align: left; }
-.data-table th, .data-table td { padding: 16px 20px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-.data-table th { background-color: #f8fafc; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-.data-table tr:last-child td { border-bottom: none; }
-.no-data-cell { text-align: center; padding: 40px; color: #64748b; }
-.badge { padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; background-color: #e5e7eb; color: #4b5563; }
 
-@media (max-width: 992px) {
-    .reports-grid { grid-template-columns: 1fr; }
+/* --- General Table Styles --- */
+.table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
 }
 
-.report-section, .low-stock-section {
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.data-table th,
+.data-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.data-table th {
+    background-color: #f8fafc;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+.no-data-cell {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+}
+
+.badge {
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    background-color: #e5e7eb;
+    color: #4b5563;
+}
+
+/* --- Responsive Media Query (992px) --- */
+@media (max-width: 992px) {
+    .reports-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- Stock/Status Table Highlights --- */
+.report-section,
+.low-stock-section {
     margin-bottom: 1rem;
 }
 
 .report-section {
-    margin-bottom: 4rem; /* Adjust this value as needed */
+    margin-bottom: 4rem;
 }
 
-.report-section h2, .low-stock-section h2 {
+.report-section h2,
+.low-stock-section h2 {
     font-size: 24px;
     font-weight: 600;
     margin-bottom: 1rem;
@@ -128,24 +232,74 @@
     border: 1px solid #fecaca;
 }
 
-/* [reports.css] - ADD THESE STYLES */
+/* --- General Button Styles --- */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.2s ease, background-color 0.2s ease;
+    width: auto;
+    margin-top: 0;
+}
 
+.btn-primary {
+    background-image: linear-gradient(to right, #1e40af 0%, #3b82f6 100%);
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    filter: brightness(115%);
+}
+
+.btn-danger {
+    background-image: linear-gradient(to right, #dc2626 0%, #ef4444 100%);
+    color: white;
+    border: none;
+}
+
+.btn-danger:hover {
+    filter: brightness(115%);
+}
+
+.btn-secondary,
+.cancel-modal-btn {
+    background-color: #e2e8f0;
+    color: #475569;
+    border: none;
+}
+
+.btn-secondary:hover,
+.cancel-modal-btn:hover {
+    background-color: #cbd5e1;
+}
+
+/* Style for the 'Clear All Logs' button in the header */
+#clear-all-logs-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+/* --- Batch Action Bar (for Logs) --- */
 .batch-action-bar {
-    position: fixed; /* Sticks to the bottom */
+    position: fixed;
     bottom: 0;
-    left: 0; /* Align to the left edge of the viewport */
-    right: 0; /* Stretch to the right edge of the viewport */
-    width: auto; /* Let left/right determine width */
-    background-color: #1e293b; /* Dark background */
+    left: 0;
+    right: 0;
+    width: auto;
+    background-color: #1e293b;
     color: white;
     padding: 1rem 1.5rem;
     border-top: 1px solid #334155;
-    display: flex; /* Use flexbox for layout */
-    justify-content: space-between; /* Space out count and buttons */
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    z-index: 100; /* Ensure it's above other content */
+    z-index: 100;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease-in-out; /* Smooth slide-in (optional) */
+    transition: transform 0.3s ease-in-out;
     transform: translateY(100%); /* Start hidden below screen */
 }
 
@@ -165,93 +319,46 @@
 
 /* Style selected table rows */
 .log-table tr.row-selected td {
-    background-color: #f0f9ff; /* Light blue background for selected rows */
+    background-color: #f0f9ff;
 }
 
-/* Adjust checkbox column width if needed */
+/* Adjust checkbox column width */
 .log-table th.checkbox-col,
 .log-table td:first-child {
-    width: 40px; /* Adjust as needed */
+    width: 40px;
     text-align: center;
 }
 
-.chart-container canvas + ul.chartjs-legend li { /* Adjust selector as needed */
-    margin-bottom: 5px !important; /* Add vertical space between items */
-    /* You could also adjust font-size here */
+/* --- Chart Legend (Fix) --- */
+.chart-container canvas + ul.chartjs-legend li {
+    margin-bottom: 5px !important;
     font-size: 8px !important;
 }
 
-
-/* --- Log Deletion Modal Button Styles --- */
-
+/* --- Modal Footer & Button Styles --- */
 #log-delete-confirm-modal .modal-footer {
     display: flex;
-    justify-content: flex-end; /* Align buttons to the right */
-    gap: 0.75rem; /* Space between buttons */
+    justify-content: flex-end;
+    gap: 0.75rem;
     padding: 1rem 1.5rem;
     border-top: 1px solid #e2e8f0;
     background-color: #f8fafc;
-    border-bottom-left-radius: 8px; /* Match modal content radius */
+    border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
 }
 
-/* Base button styles if not already defined globally */
-#log-delete-confirm-modal .btn {
-    display: inline-block;
-    font-weight: 500;
-    line-height: 1.5;
-    color: #212529; /* Default text color */
+/* --- "Clear All Logs" Modal --- */
+#clear-all-logs-confirm-modal .modal-content {
+    max-width: 450px;
+}
+
+#clear-all-logs-confirm-modal .modal-body {
     text-align: center;
-    text-decoration: none;
-    vertical-align: middle;
-    cursor: pointer;
-    user-select: none;
-    background-color: transparent;
-    border: 1px solid transparent;
-    padding: 0.6rem 1.2rem; /* Adjusted padding */
-    font-size: 0.9rem;      /* Adjusted font size */
-    border-radius: 6px;     /* Consistent radius */
-    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
-/* "Cancel" button in the modal */
-#log-delete-confirm-modal .cancel-modal-btn {
-    color: #fff;
-    background-color: #6c757d; /* Bootstrap secondary grey */
-    border-color: #6c757d;
-}
-
-#log-delete-confirm-modal .cancel-modal-btn:hover {
-    color: #fff;
-    background-color: #5a6268;
-    border-color: #545b62;
-}
-
-/* "Yes, Delete Selected" button in the modal */
-#log-delete-confirm-modal #confirm-log-delete-btn {
-    color: #fff;
-    background-color: #dc3545; /* Bootstrap danger red */
-    border-color: #dc3545;
-}
-
-#log-delete-confirm-modal #confirm-log-delete-btn:hover {
-    color: #fff;
-    background-color: #c82333;
-    border-color: #bd2130;
-}
-
-/* Disabled state for the confirm button during fetch */
-#log-delete-confirm-modal #confirm-log-delete-btn:disabled {
-    color: #fff;
-    background-color: #f8d7da; /* Lighter red */
-    border-color: #f5c6cb;
-    cursor: not-allowed;
-    opacity: 0.65;
-}
-
-/* Target the specific "Delete Selected" button in the log action bar */
+/* --- Specific Batch Button Styles --- */
+/* Target the "Delete Selected" button in the log action bar */
 #log-delete-bar #batch-log-delete-btn {
-    /* Use base .btn styles if defined globally, or add them here */
     display: inline-block;
     font-weight: 500;
     line-height: 1.5;
@@ -261,33 +368,26 @@
     cursor: pointer;
     user-select: none;
     border: 1px solid transparent;
-    padding: 0.5rem 1rem;     /* Adjust padding as needed */
+    padding: 0.5rem 1rem;
     font-size: 0.875rem; /* 14px */
-    border-radius: 6px;     /* Consistent radius */
-    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
-
-    /* Apply danger (red) theme */
+    border-radius: 6px;
+    transition: filter .15s ease-in-out, background-color .15s ease-in-out;
     color: #fff;
-    background-color: #dc3545; /* Bootstrap danger red */
-    border-color: #dc3545;
+    background-image: linear-gradient(to right, #dc2626 0%, #ef4444 100%);
+    border: none;
 }
 
-/* Hover effect for the action bar button */
 #log-delete-bar #batch-log-delete-btn:hover {
-    color: #fff;
-    background-color: #c82333;
-    border-color: #bd2130;
+    filter: brightness(115%);
 }
 
-/* Disabled state (optional, though less common for this button) */
 #log-delete-bar #batch-log-delete-btn:disabled {
-    color: #fff;
-    background-color: #f8d7da; /* Lighter red */
+    background-color: #f8d7da;
     border-color: #f5c6cb;
     cursor: not-allowed;
     opacity: 0.65;
+    filter: none;
 }
-
 
 /* --- KPI Grid Styles --- */
 .kpi-grid {
@@ -300,8 +400,8 @@
 .kpi-card {
     background: white;
     border-radius: 12px;
-    padding: 1.5rem; /* Slightly less padding than stats */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
     border: 1px solid #f1f5f9;
     display: flex;
     align-items: center;
@@ -309,24 +409,36 @@
 }
 
 .kpi-icon {
-    width: 48px; /* Slightly smaller icon */
+    width: 48px;
     height: 48px;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    font-size: 20px; /* Smaller icon font size */
+    font-size: 20px;
 }
 
-/* Icon specific styles (add more as needed) */
-.kpi-icon.sales { background: #dcfce7; color: #16a34a; } /* Green */
-.kpi-icon.inventory { background: #e0e7ff; color: #4f46e5; } /* Indigo */
-.kpi-icon.today { background: #ffedd5; color: #f97316; } /* Orange */
-.kpi-icon.pending-res { background: #fef9c3; color: #ca8a04; } /* Yellow */
+/* Icon specific styles */
+.kpi-icon.sales {
+    background: #dcfce7;
+    color: #16a34a;
+}
+.kpi-icon.inventory {
+    background: #e0e7ff;
+    color: #4f46e5;
+}
+.kpi-icon.today {
+    background: #ffedd5;
+    color: #f97316;
+}
+.kpi-icon.pending-res {
+    background: #fef9c3;
+    color: #ca8a04;
+}
 
 .kpi-content h3 {
-    font-size: 13px; /* Slightly smaller title */
+    font-size: 13px;
     color: #64748b;
     margin: 0 0 4px 0;
     font-weight: 500;
@@ -334,50 +446,38 @@
 }
 
 .kpi-number {
-    font-size: 24px; /* Smaller number */
+    font-size: 24px;
     font-weight: 700;
     color: #1e293b;
     margin: 0;
     line-height: 1.2;
 }
 
-/* --- Placeholder Section Styles (Removed - Replaced with searchable sections) --- */
-
-/* Adjustments for grid on smaller screens */
-@media (max-width: 576px) {
-    .kpi-grid {
-        grid-template-columns: 1fr; /* Stack KPIs on very small screens */
-    }
-}
-
 /* --- Overview Section Layout --- */
 .overview-grid {
     display: grid;
-    /* Create 3 columns by default */
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem; /* Space between table containers */
+    gap: 1.5rem;
 }
 
 /* Modifier for sections with fewer columns */
 .overview-grid.single-col {
-    grid-template-columns: minmax(0, 1.5fr); /* Allow single column to take reasonable width */
-    justify-content: start; /* Align single column to the left */
+    grid-template-columns: minmax(0, 1.5fr);
+    justify-content: start;
 }
 
-
 .overview-grid .table-container {
-    /* Styles for the individual boxes within the grid */
     background: white;
-    border-radius: 8px; /* Slightly smaller radius */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
     border: 1px solid #f1f5f9;
-    padding: 1rem; /* Padding inside the box */
+    padding: 1rem;
     height: 100%; /* Make boxes in a row the same height */
 }
 
 .overview-grid .table-container h3 {
     margin: 0 0 1rem 0;
-    font-size: 0.9rem; /* Smaller heading for tables */
+    font-size: 0.9rem;
     font-weight: 600;
     color: #475569;
     border-bottom: 1px solid #e2e8f0;
@@ -387,11 +487,11 @@
 /* Make table text slightly smaller */
 .data-table.small-text th,
 .data-table.small-text td {
-    padding: 8px 12px; /* Reduce padding */
-    font-size: 0.8rem; /* Reduce font size */
+    padding: 8px 12px;
+    font-size: 0.8rem;
 }
 .data-table.small-text th {
-    font-size: 0.7rem; /* Even smaller header text */
+    font-size: 0.7rem;
 }
 
 /* Responsive adjustments for overview grids */
@@ -410,7 +510,7 @@
     }
 }
 
-/* ADDED: Global No Results Message Style */
+/* --- Global "No Results" Message --- */
 .no-data-message {
     text-align: center;
     padding: 2rem;
@@ -419,50 +519,46 @@
     border-radius: 8px;
     border: 1px dashed #e2e8f0;
 }
-/* END ADDED */
 
-/* Style specifically for the log search form container (if needed) */
+/* Style for the log search form container */
 .activity-log-section .page-controls {
-    margin-bottom: 1.5rem; /* Adjust spacing if needed */
+    margin-bottom: 1.5rem;
 }
 
-/* Ensure log search form takes appropriate width */
 .log-search-form {
-     width: 100%; /* Or adjust as needed */
-     /* If you removed max-width from .search-form, add it back here */
+    width: 100%;
 }
 
-
-/* --- Pagination Styles (Improved) --- */
+/* --- Pagination Styles --- */
 .pagination-container {
-    margin-top: 2.5rem; /* More space above pagination */
-    margin-bottom: 1rem; /* Space below */
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Center everything */
+    align-items: center;
     gap: 0.75rem;
 }
 
 .pagination {
-    display: inline-flex; /* Use inline-flex for alignment */
+    display: inline-flex;
     padding-left: 0;
     list-style: none;
-    border-radius: 0.375rem; /* Rounded corners for the group */
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .page-item .page-link {
     position: relative;
     display: block;
-    padding: 0.6rem 1rem; /* Adjust padding for better touch targets */
+    padding: 0.6rem 1rem;
     margin-left: -1px; /* Overlap borders */
     line-height: 1.25;
-    color: #1e40af; /* Primary link color (Admin blue) */
+    color: #1e40af; /* Admin blue */
     background-color: #fff;
-    border: 1px solid #dee2e6; /* Standard border color */
+    border: 1px solid #dee2e6;
     text-decoration: none;
     transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out;
-    min-width: 40px; /* Ensure minimum width for numbers */
+    min-width: 40px;
     text-align: center;
 }
 
@@ -483,7 +579,7 @@
     z-index: 2;
     color: #173287; /* Darker blue */
     background-color: #f8f9fa; /* Very light grey */
-    border-color: #adb5bd; /* Slightly darker border */
+    border-color: #adb5bd;
 }
 
 /* Active page style */
@@ -497,7 +593,7 @@
 
 /* Disabled page style */
 .page-item.disabled .page-link {
-    color: #adb5bd; /* Lighter grey for disabled text */
+    color: #adb5bd;
     pointer-events: none;
     cursor: auto;
     background-color: #fff;
@@ -513,13 +609,10 @@
 /* Info text below pagination */
 .pagination-info {
     font-size: 0.875rem; /* 14px */
-    color: #64748b; /* Grey text */
+    color: #64748b;
 }
 
-/* --- End Pagination Styles --- */
-
-
-/* --- ✅ NEW: Mobile Responsive Fixes --- */
+/* --- Mobile Responsive Fixes (768px) --- */
 @media (max-width: 768px) {
     .reports-grid {
         grid-template-columns: 1fr; /* Stack stats and chart */
@@ -556,7 +649,8 @@
         font-size: 22px; /* Smaller number */
     }
 
-    .data-table th, .data-table td {
+    .data-table th,
+    .data-table td {
         padding: 12px 10px; /* Reduce table padding */
         font-size: 13px;
     }
