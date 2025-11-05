@@ -1,43 +1,44 @@
-from supabase_client import supabase
+
 
 def profile_context(request):
     """
     Adds the user's profile data AND a display_name
-    to every request context.
+    to every request context by reading it from request.user.
     """
     # Set default values
     context = {
         'profile': None,
-        'display_name': 'Student'  # A safe, generic default
+        'display_name': 'Student' 
     }
     
     if hasattr(request, 'user') and request.user.is_authenticated:
         
-        # Try to get email as a better fallback (if it exists)
+        # --- 1. Set fallback display_name from email ---
         try:
             if request.user.email:
-                # Use the part before the '@' as a fallback name
                 context['display_name'] = request.user.email.split('@')[0]
         except AttributeError:
-            pass # 'Student' will remain the fallback
+            pass 
 
-        # Try to get the real name from the profile table
+        # --- 2. Get profile data from the request.user object ---
+        # The middleware already fetched this for us.
         try:
-            user_id = request.user.id
-            response = supabase.table('user_profiles').select('avatar_url', 'full_name').eq('user_id', user_id).single().execute()
+            profile_data = request.user.profile
             
-            if response.data:
-                context['profile'] = response.data
+            if profile_data:
+                context['profile'] = profile_data
                 
-                # Check if 'full_name' exists and is not just an empty string
-                if response.data.get('full_name') and response.data['full_name'].strip():
-                    # Use the first word of their full name
-                    context['display_name'] = response.data['full_name'].split(' ')[0]
-                # If no full_name, the email fallback we set above will be used
+                # --- 3. Set real display_name from profile's full_name ---
+                full_name = profile_data.get('full_name')
+                if full_name and full_name.strip():
+                    context['display_name'] = full_name.split(' ')[0]
+            
+            # If profile_data is empty or full_name is blank,
+            # the email fallback we set above will be used.
         
         except Exception as e:
-            # Fail silently if the profile doesn't exist yet or there's an error
-            print(f"Error in profile context processor: {e}") 
+            # Fail silently if request.user.profile doesn't exist
+            print(f"Error in profile context processor (reading from request.user): {e}") 
             pass 
             
     return context

@@ -49,6 +49,22 @@
     display: block; /* Show only the one with the 'active' class */
 }
 
+.form-note {
+    font-size: 14px;
+    color: #475569; /* Same as label color */
+    background-color: #f8fafc; /* A very light gray, like disabled input */
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.form-note strong {
+    color: #1e293b;
+    font-weight: 600;
+}
+
 
 /* (Existing styles for cards, forms, buttons) */
 .profile-card {
@@ -281,3 +297,4 @@
         padding: 0.75rem 1rem;
     }
 }
+

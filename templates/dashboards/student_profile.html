@@ -82,6 +82,10 @@
         <div class="profile-card" id="password-card">
             <h2>Change Password</h2>
 
+            <p class="form-note">
+                <strong>Note:</strong> Once your password is changed, you will be redirected to login again using your new password.
+            </p>
+
             <form id="password-form" action="{% url 'student_profile' %}" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="form_type" value="password">
@@ -299,12 +303,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // --- Success ---
                 showDynamicMessage(data.message, 'success');
+
                 if (form.id === 'password-form') {
-                    form.reset();
-                    clearPasswordErrors(); 
-                }
-                if (form.id === 'details-form') {
-                    // Full update logic
+                    // 1. Check if the redirect_url exists in the JSON response
+                    if (data.redirect_url) {
+                        // 2. Wait 1.5 seconds for the user to read the message
+                        setTimeout(() => {
+                            // 3. Force the page to redirect
+                            window.location.href = data.redirect_url;
+                        }, 1500); 
+                    } else {
+                        // Fallback in case something went wrong
+                        form.reset();
+                        clearPasswordErrors();
+                    }
+                
+                } else if (form.id === 'details-form') {
+                    // logic for the details form
                     form.querySelector('.form-view-text[data-field="full_name"]').textContent = formData.get('full_name') || 'Not set';
                     form.querySelector('.form-view-text[data-field="phone_number"]').textContent = formData.get('phone_number') || 'Not set';
                     form.querySelector('.form-view-text[data-field="address"]').textContent = formData.get('address') || 'Not set';
@@ -313,9 +328,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         previewEl.innerHTML = `<img src="${data.avatar_url}" alt="Profile Picture">`;
                     }
                     document.getElementById('personal-info-card').classList.add('view-mode');
-                    clearAllFieldErrors(); // Clear field errors on success
-                    clearDetailsServerError(); // Clear server errors on success
+                    clearAllFieldErrors(); 
+                    clearDetailsServerError();
                 }
+
             } catch (error) {
                 console.error('Form submission error:', error);
                 if (form.id === 'password-form') {

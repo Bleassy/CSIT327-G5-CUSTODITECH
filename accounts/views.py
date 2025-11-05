@@ -7,6 +7,7 @@ from django.views.decorators.http import require_http_methods
 from supabase_client import supabase
 import re
 from django.http import JsonResponse
+from django.urls import reverse
 
 
 def register(request):
@@ -158,6 +159,7 @@ def login_view(request):
                 if actual_user_type == selected_role:
                     # SUCCESS: Roles match
                     request.session['supa_access_token'] = response.session.access_token
+                    request.session['supa_refresh_token'] = response.session.refresh_token
                     request.session.save()
 
                     # Determine redirect URL
@@ -218,6 +220,8 @@ def logout_view(request):
     # Clear Django session
     if 'supa_access_token' in request.session:
         del request.session['supa_access_token']
+    if 'supa_refresh_token' in request.session:
+        del request.session['supa_refresh_token']
 
     messages.success(request, "You have been logged out successfully.")
     
@@ -225,12 +229,17 @@ def logout_view(request):
 
 
 def forgot_password(request):
-    """Send password reset OTP via Supabase."""
+    """Send password reset OTP via Supabase (AJAX enabled)."""
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
     if request.method == 'POST':
         email = request.POST.get('email')
         
         if not email or not email.endswith('@cit.edu'):
-            messages.error(request, 'Only CIT institutional email addresses (@cit.edu) are allowed.')
+            error_msg = 'Only CIT institutional email addresses (@cit.edu) are allowed.'
+            if is_ajax:
+                return JsonResponse({'success': False, 'errors': [error_msg]}, status=400)
+            messages.error(request, error_msg)
             return render(request, 'registration/forgot_password.html')
         
         try:
@@ -241,24 +250,40 @@ def forgot_password(request):
                     'should_create_user': False  # Don't create new user if email doesn't exist
                 }
             })
-            messages.success(request, f'An OTP has been sent to {email}. Please check your inbox.')
-            return redirect('verify_otp', email=email)
-            
         except Exception as e:
-            # For security, don't reveal if email exists
-            messages.success(request, f'If an account exists with {email}, an OTP has been sent.')
-            return redirect('verify_otp', email=email)
+            # For security, we don't reveal if an email exists or not.
+            # We fail silently and return a success message regardless.
+            print(f"--- FORGOT PASSWORD ERROR (silenced): {e} ---")
+            pass
+        
+        # --- ALWAYS return success to prevent email enumeration ---
+        success_msg = f'If an account exists with {email}, an OTP has been sent. Please check your inbox.'
+        redirect_url = reverse('verify_otp', kwargs={'email': email})
+
+        if is_ajax:
+            # Return the message AND the redirect URL.
+            # The JS will show the message, then redirect.
+            return JsonResponse({'success': True, 'message': success_msg, 'redirect_url': redirect_url})
+        
+        # Non-AJAX fallback
+        messages.success(request, success_msg)
+        return redirect('verify_otp', email=email)
     
     return render(request, 'registration/forgot_password.html')
 
 
 def verify_otp(request, email):
-    """Verify OTP sent by Supabase."""
+    """Verify OTP sent by Supabase (AJAX enabled)."""
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
     if request.method == 'POST':
         otp = request.POST.get('otp')
         
         if not otp or len(otp) != 6:
-            messages.error(request, 'Please enter a valid 6-digit OTP.')
+            error_msg = 'Please enter a valid 6-digit OTP.'
+            if is_ajax:
+                return JsonResponse({'success': False, 'errors': [error_msg]}, status=400)
+            messages.error(request, error_msg)
             return render(request, 'registration/verify_otp.html', {'email': email})
         
         try:
@@ -271,25 +296,45 @@ def verify_otp(request, email):
             
             if response.session:
                 request.session['supa_access_token'] = response.session.access_token
+                request.session['supa_refresh_token'] = response.session.refresh_token
                 request.session['reset_email'] = email
                 
-                messages.success(request, 'OTP verified! Please enter your new password.')
+                success_msg = 'OTP verified! Please enter your new password.'
+                if is_ajax:
+                    redirect_url = reverse('reset_password')
+                    return JsonResponse({'success': True, 'message': success_msg, 'redirect_url': redirect_url})
+                
+                messages.success(request, success_msg)
                 return redirect('reset_password')
             else:
-                messages.error(request, 'Invalid or expired OTP.')
+                error_msg = 'Invalid or expired OTP. Please try again.'
+                if is_ajax:
+                    return JsonResponse({'success': False, 'errors': [error_msg]}, status=400)
+                messages.error(request, error_msg)
                 
         except Exception as e:
-            error_message = str(e)
-            if 'expired' in error_message.lower():
-                messages.error(request, 'OTP has expired. Please request a new one.')
+            error_message = str(e).lower()
+            user_facing_error = 'An unexpected error occurred. Please try again.'
+            
+            if 'token has expired' in error_message:
+                user_facing_error = 'OTP has expired or OTP you entered is incorrect. Please try again.'
+            elif 'invalid' in error_message or 'not found' in error_message:
+                user_facing_error = 'The OTP you entered is incorrect. Please try again.'
             else:
-                messages.error(request, 'Invalid OTP. Please try again.')
+                print(f"--- VERIFY OTP ERROR: {error_message} ---")
+
+            if is_ajax:
+                return JsonResponse({'success': False, 'errors': [user_facing_error]}, status=400)
+            
+            messages.error(request, user_facing_error)
     
     return render(request, 'registration/verify_otp.html', {'email': email})
 
 
 def reset_password(request):
-    """Reset password after OTP verification."""
+    """Reset password after OTP verification (AJAX enabled)."""
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
     if 'supa_access_token' not in request.session:
         messages.error(request, 'Please verify your OTP first.')
         return redirect('forgot_password')
@@ -298,30 +343,52 @@ def reset_password(request):
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
         
+        # --- New Validation ---
+        error_list = []
         if password1 != password2:
-            messages.error(request, 'Passwords do not match.')
-            return render(request, 'registration/reset_password.html')
+            error_list.append('Passwords do not match.')
         
-        if len(password1) < 6:
-            messages.error(request, 'Password must be at least 6 characters long.')
+        if len(password1) < 8:
+            error_list.append('Password must be at least 8 characters long.')
+        if not re.search(r'[A-Z]', password1):
+            error_list.append('Password needs an uppercase letter.')
+        if not re.search(r'[a-z]', password1):
+            error_list.append('Password needs a lowercase letter.')
+        if not re.search(r'[0-9]', password1):
+            error_list.append('Password needs a number.')
+        if not re.search(r'[@$!%*?&]', password1):
+            error_list.append('Password needs a special character (@$!%*?&).')
+
+        if error_list:
+            if is_ajax:
+                return JsonResponse({'success': False, 'errors': error_list}, status=400)
+            for error in error_list:
+                messages.error(request, error)
             return render(request, 'registration/reset_password.html')
         
         try:
             # Update password in Supabase
-            supabase.auth.update_user({
-                'password': password1
-            })
+            supabase.auth.update_user({'password': password1})
             
             # Clear session
-            if 'reset_email' in request.session:
-                del request.session['reset_email']
-            if 'supa_access_token' in request.session:
-                del request.session['supa_access_token']
+            if 'reset_email' in request.session: del request.session['reset_email']
+            if 'supa_access_token' in request.session: del request.session['supa_access_token']
+            if 'supa_refresh_token' in request.session: del request.session['supa_refresh_token']
 
-            messages.success(request, 'Your password has been successfully reset. Please log in.')
-            
+            success_msg = 'Your password has been successfully reset. Please log in.'
+            if is_ajax:
+                redirect_url = reverse('login')
+                # We add the message to the session so the login page can display it after redirect
+                messages.success(request, success_msg) 
+                return JsonResponse({'success': True, 'message': success_msg, 'redirect_url': redirect_url})
+
+            messages.success(request, success_msg)
             return redirect('login')
+            
         except Exception as e:
-            messages.error(request, f'Error: {str(e)}')
+            error_msg = f'Error: {str(e)}'
+            if is_ajax:
+                return JsonResponse({'success': False, 'errors': [error_msg]}, status=400)
+            messages.error(request, error_msg)
     
     return render(request, 'registration/reset_password.html')

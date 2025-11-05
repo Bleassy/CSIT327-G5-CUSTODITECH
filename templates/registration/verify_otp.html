@@ -21,6 +21,11 @@
             margin-bottom: 15px;
             border: 1px solid #c3e6cb;
         }
+        /* Style for our new AJAX messages */
+        #form-messages ul {
+            padding-left: 20px;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -30,6 +35,8 @@
                 <h1>Verify OTP</h1>
                 <p class="welcome-text">Enter the 6-digit code sent to {{ email }}</p>
                 
+                <div id="form-messages"></div>
+
                 {% if messages %}
                     {% for message in messages %}
                         <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">
@@ -38,7 +45,7 @@
                     {% endfor %}
                 {% endif %}
 
-                <form method="post">
+                <form method="post" id="otp-form">
                     {% csrf_token %}
                     
                     <div class="form-group">
@@ -55,7 +62,7 @@
                         <small class="help-text">OTP is valid for 5 minutes</small>
                     </div>
 
-                    <button type="submit" class="btn-login">VERIFY OTP</button>
+                    <button type="submit" class="btn-login" id="submit-button">VERIFY OTP</button>
                 </form>
                 
                 <div class="links">
@@ -74,7 +81,82 @@
             <p class="tagline">Check Your Email</p>
             <p class="tagline">OTP Expires in 5 Minutes</p>
             <p class="tagline">Pride of Cebu</p>
-        </div>
+            </div>
     </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const otpForm = document.getElementById('otp-form');
+    const submitButton = document.getElementById('submit-button');
+    const messagesContainer = document.getElementById('form-messages');
+
+    // Helper function to show messages
+    function showFormMessage(messages, isError = false) {
+        messagesContainer.innerHTML = ''; // Clear old messages
+        const messageDiv = document.createElement('div');
+        messageDiv.className = isError ? 'error-message' : 'success-message';
+        
+        if (Array.isArray(messages)) {
+            const ul = document.createElement('ul');
+            messages.forEach(msg => {
+                const li = document.createElement('li');
+                li.textContent = msg;
+                ul.appendChild(li);
+            });
+            messageDiv.appendChild(ul);
+        } else {
+            messageDiv.textContent = messages;
+        }
+        messagesContainer.appendChild(messageDiv);
+    }
+
+    otpForm.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Stop normal form submission
+        
+        // Show loading state
+        submitButton.disabled = true;
+        submitButton.textContent = 'VERIFYING...';
+        messagesContainer.innerHTML = ''; // Clear previous errors
+
+        const formData = new FormData(otpForm);
+        const csrfToken = formData.get('csrfmiddlewaretoken');
+
+        try {
+            const response = await fetch(window.location.href, { // Post to the same URL
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                // Handle 4xx/5xx errors (e.g., validation errors)
+                throw new Error(data.errors ? data.errors.join(', ') : 'An unknown error occurred.');
+            }
+
+            // --- Handle Success ---
+            if (data.success && data.redirect_url) {
+                showFormMessage(data.message || 'Success!', false);
+                // Wait a moment so the user sees the success message
+                setTimeout(() => {
+                    window.location.href = data.redirect_url;
+                }, 1000);
+            }
+
+        } catch (error) {
+            // --- Handle Fetch/Validation Errors ---
+            showFormMessage([error.message], true);
+        } finally {
+            // --- Reset Button ---
+            submitButton.disabled = false;
+            submitButton.textContent = 'VERIFY OTP';
+        }
+    });
+});
+</script>
 </body>
 </html>

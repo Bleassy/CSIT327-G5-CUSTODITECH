@@ -10,11 +10,11 @@ from .utils import log_activity, get_greeting
 from .decorators import admin_required, student_required
 from collections import defaultdict
 from datetime import datetime
+from django.urls import reverse
 import pytz
 import uuid
 import math
 import requests
-
 
 # --- Main Redirect View ---
 
@@ -519,7 +519,7 @@ def student_profile_view(request):
                 return JsonResponse({'success': False, 'error': 'New password cannot be the same as the current password.'}, status=400)
 
             try:
-                # 1. VALIDATE CURRENT PASSWORD by trying to sign in
+                # 1. VALIDATE CURRENT PASSWORD
                 user_email = request.user.email
                 supabase.auth.sign_in_with_password({
                     "email": user_email,
@@ -529,7 +529,25 @@ def student_profile_view(request):
                 # 2. UPDATE TO NEW PASSWORD
                 supabase.auth.update_user({'password': new_password1})
 
-                return JsonResponse({'success': True, 'message': '🔑 Your password has been changed successfully!'})
+                # 3. MANUALLY LOG THE USER OUT (Clear invalid tokens)
+                if 'supa_access_token' in request.session:
+                    del request.session['supa_access_token']
+                if 'supa_refresh_token' in request.session:
+                    del request.session['supa_refresh_token']
+                
+                # 4. PREPARE A CLEAN REDIRECT
+                # This message will show up on the login page after redirect
+                messages.success(request, 'Your password has been changed successfully! Please log in again.')
+                
+                # Get the URL for the login page
+                login_url = reverse('login') 
+
+                # 5. RETURN a JSON response telling the frontend to redirect
+                return JsonResponse({
+                    'success': True, 
+                    'message': '🔑 Your password has been changed successfully!',
+                    'redirect_url': login_url  # <-- Your JavaScript needs to handle this
+                })
 
             except requests.exceptions.HTTPError as e:
                 # CATCH AUTHENTICATION ERROR
@@ -1390,7 +1408,7 @@ def admin_profile_view(request):
                 return JsonResponse({'success': False, 'error': 'New password cannot be the same as the current password.'}, status=400)
 
             try:
-                # 1. VALIDATE CURRENT PASSWORD by trying to sign in
+                # 1. VALIDATE CURRENT PASSWORD
                 user_email = request.user.email
                 supabase.auth.sign_in_with_password({
                     "email": user_email,
@@ -1400,7 +1418,22 @@ def admin_profile_view(request):
                 # 2. UPDATE TO NEW PASSWORD
                 supabase.auth.update_user({'password': new_password1})
 
-                return JsonResponse({'success': True, 'message': '🔑 Your password has been changed successfully!'})
+                # 3. MANUALLY LOG THE USER OUT (Clear invalid tokens)
+                if 'supa_access_token' in request.session:
+                    del request.session['supa_access_token']
+                if 'supa_refresh_token' in request.session:
+                    del request.session['supa_refresh_token']
+                
+                # 4. PREPARE A CLEAN REDIRECT
+                messages.success(request, 'Your password has been changed successfully! Please log in again.')
+                login_url = reverse('login') 
+
+                # 5. RETURN a JSON response telling the frontend to redirect
+                return JsonResponse({
+                    'success': True, 
+                    'message': '🔑 Your password has been changed successfully!',
+                    'redirect_url': login_url  # <-- Your JavaScript needs to handle this
+                })
 
             except requests.exceptions.HTTPError as e:
                 # CATCH AUTHENTICATION ERROR

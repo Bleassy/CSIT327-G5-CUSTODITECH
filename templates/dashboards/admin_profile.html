@@ -93,6 +93,11 @@
         <!-- Change Password Card -->
         <div class="profile-card" id="password-card">
             <h2>Change Password</h2>
+
+            <p class="form-note">
+                <strong>Note:</strong> Once your password is changed, you will be redirected to login again using your new password.
+            </p>
+            
             <!-- Form for updating password -->
             <form id="password-form" action="{% url 'admin_profile' %}" method="post">
                 {% csrf_token %}
@@ -311,26 +316,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 showDynamicMessage(data.message, 'success');
                 
                 if (form.id === 'password-form') {
-                    form.reset();
-                    clearPasswordErrors();
-                }
+                    // 1. Check if the redirect_url exists
+                    if (data.redirect_url) {
+                        // 2. Wait 1.5 seconds for the message to be read
+                        setTimeout(() => {
+                            // 3. Force the redirect to the login page
+                            window.location.href = data.redirect_url;
+                        }, 1500);
+                    } else {
+                        // Fallback
+                        form.reset();
+                        clearPasswordErrors();
+                    }
 
-                if (form.id === 'details-form') {
-                    // Update view-mode text with new data
+                } else if (form.id === 'details-form') {
+                    // This is your original, correct logic for the details form
                     form.querySelector('.form-view-text[data-field="full_name"]').textContent = formData.get('full_name') || 'Not set';
                     form.querySelector('.form-view-text[data-field="phone_number"]').textContent = formData.get('phone_number') || 'Not set';
                     form.querySelector('.form-view-text[data-field="address"]').textContent = formData.get('address') || 'Not set';
                     
-                    // Update avatar in preview
                     if (data.avatar_url) {
                         document.getElementById('avatar-preview').innerHTML = `<img src="${data.avatar_url}" alt="Profile Picture">`;
                     }
                     
-                    // Switch back to view mode
                     document.getElementById('personal-info-card').classList.add('view-mode');
                     clearAllFieldErrors();
                     clearDetailsServerError();
                 }
+
             } catch (error) {
                 // --- Handle Failure ---
                 console.error('Form submission error:', error);

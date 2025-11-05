@@ -96,6 +96,40 @@
 
 <!-- Base JavaScript for all admin pages -->
 <script>
+        // --- Page Loader Logic ---
+        const loader = document.getElementById('page-loader');
+
+    if (loader) {
+        // Hide loader on page "show" (handles back/forward button navigation)
+        window.addEventListener('pageshow', function() {
+            loader.classList.remove('visible');
+        });
+
+        // Show loader on link clicks
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a');
+
+            if (link) {
+                // Filters: Don't show loader for...
+                
+                // (a) Links opening in a new tab
+                if (link.target === '_blank') return;
+                
+                // (b) Simple hash/anchor links on the same page
+                if (link.href.startsWith(window.location.href + '#')) return;
+
+                // (c) Mail or Tel links
+                if (link.href.startsWith('mailto:') || link.href.startsWith('tel:')) return;
+
+                // (d) Links inside the pagination container
+                if (link.closest('.pagination-container')) return;
+
+                // If no filters match, show the loader
+                loader.classList.add('visible');
+            }
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         
         // --- Hamburger Menu Logic ---
@@ -123,40 +157,6 @@
                 }
             });
         }
-
-        // --- Page Loader Logic ---
-        const loader = document.getElementById('page-loader');
-
-        // Hide loader on page "show" (handles back/forward button navigation)
-        window.addEventListener('pageshow', function() {
-            if (loader) {
-                loader.classList.remove('visible');
-            }
-        });
-
-        // Show loader on link clicks
-        document.addEventListener('click', function(e) {
-            const link = e.target.closest('a');
-
-            if (link && loader) {
-                // Filters: Don't show loader for...
-                
-                // (a) Links opening in a new tab
-                if (link.target === '_blank') return;
-                
-                // (b) Simple hash/anchor links on the same page
-                if (link.href.startsWith(window.location.href + '#')) return;
-
-                // (c) Mail or Tel links
-                if (link.href.startsWith('mailto:') || link.href.startsWith('tel:')) return;
-
-                // (d) Links inside the pagination container
-                if (link.closest('.pagination-container')) return;
-
-                // If no filters match, show the loader
-                loader.classList.add('visible');
-            }
-        });
     });
 </script>
 </body>
