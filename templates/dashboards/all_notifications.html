@@ -1,0 +1,297 @@
+{% extends 'dashboards/student_base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/all_notifications.css' %}?v=1.0">
+{% endblock %}
+
+{% block content %}
+<div class="notifications-page-container">
+    <div class="notifications-card">
+
+        <div class="notifications-header">
+            <h1 class="card-title">Notifications</h1>
+            <div class="tabs">
+                <button type="button" class="tab-btn active" data-tab="all">All</button>
+                <button type="button" class="tab-btn" data-tab="unread">Unread</button>
+            </div>
+        </div>
+
+        <div class="action-bar" id="action-bar" style="display: none;">
+            <div class="select-all-container">
+                <input type="checkbox" id="select-all-checkbox">
+                <label for="select-all-checkbox">Select All</label>
+            </div>
+            <div class="action-buttons">
+                <button type="button" class="btn btn-secondary" id="mark-read-btn" data-action="mark_read">Mark as Read</button>
+                <button type="button" class="btn btn-danger" id="delete-btn">Delete</button>
+            </div>
+        </div>
+
+        <div class="notification-list" id="notification-list-main">
+            {% for notification in all_notifications %}
+                <div class="notification-item-row" 
+                     data-id="{{ notification.id }}" 
+                     data-read="{{ notification.is_read|yesno:'true,false' }}"
+                     data-url="{% url 'mark_notification_read_and_redirect' notification.id %}">
+                    
+                    <input type="checkbox" class="notification-checkbox" value="{{ notification.id }}">
+                    
+                    <img src="{{ notification.product_image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" 
+                         alt="Product" class="product-image">
+                    
+                    <div class="notification-content">
+                        <p class="notification-message">{{ notification.message }}</p>
+                        <span class="notification-time">{{ notification.created_at|timesince }} ago</span>
+                    </div>
+                    
+                    {% if not notification.is_read %}
+                        <div class="unread-dot" title="Unread"></div>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">🎉</div>
+                    <h3>All clear!</h3>
+                    <p>You have no notifications right now.</p>
+                </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Get Elements ---
+    const listContainer = document.getElementById('notification-list-main');
+    const allNotificationRows = listContainer.querySelectorAll('.notification-item-row');
+    const actionBar = document.getElementById('action-bar');
+    const selectAllCheckbox = document.getElementById('select-all-checkbox');
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const markReadBtn = document.getElementById('mark-read-btn');
+    const deleteBtn = document.getElementById('delete-btn');
+    const loader = document.getElementById('page-loader'); // Get the page loader
+
+    let currentTab = 'all'; // Default tab
+
+    // --- Helper: Get CSRF Token ---
+    function getCsrfToken() {
+        // Find the token in the form. Fallback to cookies if needed.
+        let tokenInput = document.querySelector('form [name=csrfmiddlewaretoken]');
+        if (tokenInput) return tokenInput.value;
+        
+        // Fallback logic from student_base.html
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, 10) === 'csrftoken=') {
+                    return decodeURIComponent(cookie.substring(10));
+                }
+            }
+        }
+        return '';
+    }
+
+    // --- Helper: Show/Hide Empty State ---
+    function checkEmptyState() {
+        // ✅ FIX: Selector now correctly checks for rows that are NOT hidden
+        const visibleRows = listContainer.querySelectorAll('.notification-item-row:not([style*="display: none"])').length;
+        let emptyState = listContainer.querySelector('.empty-state');
+        
+        if (visibleRows === 0) {
+            if (!emptyState) {
+                emptyState = document.createElement('div');
+                emptyState.className = 'empty-state';
+                emptyState.innerHTML = `
+                    <div class="empty-state-icon">🧐</div>
+                    <h3>No notifications found</h3>
+                    <p>No notifications match this filter.</p>`;
+                listContainer.appendChild(emptyState);
+            }
+            emptyState.style.display = 'block';
+        } else if (emptyState) {
+            emptyState.style.display = 'none';
+        }
+    }
+
+    // --- 1. Tab Switching Logic ---
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            currentTab = button.dataset.tab;
+            
+            allNotificationRows.forEach(row => {
+                const isRead = row.dataset.read === 'true';
+                if (currentTab === 'all' || (currentTab === 'unread' && !isRead)) {
+                    row.style.display = 'flex'; // Use 'flex' to match CSS
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            selectAllCheckbox.checked = false;
+            allNotificationRows.forEach(row => row.querySelector('.notification-checkbox').checked = false);
+            updateActionBar();
+            checkEmptyState();
+        });
+    });
+
+    // --- 2. Action Bar & Checkbox Logic ---
+    function updateActionBar() {
+        // ✅ FIX: Selector now correctly checks for rows that are NOT hidden
+        const visibleCheckboxes = listContainer.querySelectorAll('.notification-item-row:not([style*="display: none"]) .notification-checkbox');
+        const checkedCheckboxes = listContainer.querySelectorAll('.notification-item-row:not([style*="display: none"]) .notification-checkbox:checked');
+        
+        const checkedCount = checkedCheckboxes.length;
+        
+        if (checkedCount > 0) {
+            actionBar.style.display = 'flex';
+            const hasUnread = Array.from(checkedCheckboxes).some(cb => cb.closest('.notification-item-row').dataset.read === 'false');
+            markReadBtn.textContent = hasUnread ? 'Mark as Read' : 'Mark as Unread';
+            markReadBtn.dataset.action = hasUnread ? 'mark_read' : 'mark_unread';
+        } else {
+            actionBar.style.display = 'none';
+        }
+        
+        // Update "Select All" checkbox state
+        selectAllCheckbox.checked = visibleCheckboxes.length > 0 && checkedCheckboxes.length === visibleCheckboxes.length;
+    }
+
+    // "Select All" click
+    selectAllCheckbox.addEventListener('change', () => {
+        const isChecked = selectAllCheckbox.checked;
+        // ✅ FIX: Selector now correctly checks for rows that are NOT hidden
+        listContainer.querySelectorAll('.notification-item-row:not([style*="display: none"]) .notification-checkbox').forEach(cb => {
+            cb.checked = isChecked;
+        });
+        updateActionBar();
+    });
+
+    // Individual checkbox click
+    listContainer.addEventListener('change', e => {
+        if (e.target.classList.contains('notification-checkbox')) {
+            updateActionBar();
+        }
+    });
+
+    // --- ✅ 3. FIX: Notification Row Click (Redirect) ---
+    listContainer.addEventListener('click', e => {
+        // Don't run if we clicked the checkbox
+        if (e.target.classList.contains('notification-checkbox')) {
+            return;
+        }
+        
+        const row = e.target.closest('.notification-item-row');
+        if (row) {
+            const url = row.dataset.url;
+            if (!url) return;
+
+            // 1. Show the page loader immediately
+            if (loader) loader.classList.add('visible');
+
+            // 2. Call the "mark as read" view using FETCH POST
+            // (This is the same logic from your dropdown)
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 3. Redirect to the URL from the response
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    window.location.href = "{% url 'my_orders' %}"; // Fallback
+                }
+            })
+            .catch(error => {
+                console.error('Error marking notification as read:', error);
+                window.location.href = "{% url 'my_orders' %}"; // Fallback
+            });
+        }
+    });
+
+    // --- 4. AJAX Action Button Clicks ---
+    async function handleBatchAction(action, button) {
+        // ✅ FIX: Selector now correctly checks for rows that are NOT hidden
+        const checkedIds = Array.from(listContainer.querySelectorAll('.notification-item-row:not([style*="display: none"]) .notification-checkbox:checked')).map(cb => cb.value);
+        if (checkedIds.length === 0) return;
+        
+        const url = (action === 'delete') ? "{% url 'batch_delete_notifications' %}" : "{% url 'batch_update_notifications' %}";
+        const formData = new FormData();
+        formData.append('notification_ids', checkedIds.join(','));
+        formData.append('action', markReadBtn.dataset.action); // 'mark_read' or 'mark_unread'
+        
+        button.disabled = true;
+        button.textContent = 'Processing...';
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await response.json();
+            if (!data.success) throw new Error(data.error);
+            
+            // Success! Update the UI
+            checkedIds.forEach(id => {
+                const row = listContainer.querySelector(`.notification-item-row[data-id="${id}"]`);
+                if (row) {
+                    if (action === 'delete') {
+                        row.remove();
+                    } else {
+                        // Mark as Read/Unread
+                        const newReadState = (markReadBtn.dataset.action === 'mark_read');
+                        row.dataset.read = newReadState ? 'true' : 'false';
+                        const dot = row.querySelector('.unread-dot');
+                        if (newReadState && dot) {
+                            dot.style.display = 'none';
+                        } else if (!newReadState && !dot) {
+                            // This item should be unread, but has no dot. Add one.
+                            const newDot = document.createElement('div');
+                            newDot.className = 'unread-dot';
+                            newDot.title = 'Unread';
+                            row.appendChild(newDot);
+                        }
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error('Batch action failed:', error);
+            alert('An error occurred. Please try again.');
+        } finally {
+            // Reset UI
+            selectAllCheckbox.checked = false;
+            updateActionBar(); // This will hide the bar
+            checkEmptyState(); // This will show/hide the empty message
+            button.disabled = false;
+            // Reset button text
+            if (button.id === 'delete-btn') button.textContent = 'Delete';
+            else button.textContent = 'Mark as Read';
+        }
+    }
+
+    // Attach listeners
+    markReadBtn.addEventListener('click', () => handleBatchAction('mark_read_unread', markReadBtn));
+    deleteBtn.addEventListener('click', () => handleBatchAction('delete', deleteBtn));
+
+    // Initial setup
+    checkEmptyState();
+});
+</script>
+{% endblock %}

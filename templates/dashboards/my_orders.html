@@ -8,8 +8,6 @@
 {% block content %}
 <h1 class="welcome-title">My Orders 📦</h1>
 
-
-
 <div class="search-container">
     <input type="search" id="order-search-input" class="search-input"
            placeholder="Search by name, category, or status (approved, pending, completed, cancelled, rejected)..."
@@ -35,8 +33,10 @@
                  data-total-price="{{ item.total_price|floatformat:2 }}"
                  data-payment-method="{{ item.payment_method|default:'Cash'|title }}"
                  data-created-at="{{ item.created_at|date:'M d, Y' }}"
-                 data-status="{{ item.status }}">
-
+                 data-status="{{ item.status }}"
+                 
+                 data-expires-at="{% if item.expires_at %}{{ item.expires_at|date:'M d, Y' }}{% endif %}">
+                 
                 <img src="{{ item.product_image_url|default:'...' }}" alt="{{ item.product_name }}" class="product-image">
                 <div class="card-body">
                     <div class="card-header">
@@ -45,43 +45,77 @@
                     </div>
                     <div class="details-grid">
                         <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
+                        
+                        <!-- MODIFICATION: Added Expires On row -->
+                        {% if item.expires_at %}
+                        <span>Expires On:</span><strong>{{ item.expires_at|date:"M d, Y" }}</strong>
+                        {% endif %}
+                        
                         <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong>
                         <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
                     </div>
                      <div class="info-note">
-                         <p>Claim your product at the Custodian Department within 3 days after it has been approved. Unclaimed items will be forfeited.</p>
+                          <p>Claim your product at the Custodian Department within 3 days after it has been approved. Unclaimed items will be forfeited.</p>
                      </div>
-                     </div>
+                </div>
             </div>
-        {% empty %}
-            <div class="empty-state-container no-items-message">
-                <div class="empty-state-icon">✅</div>
-                <h3>No orders ready for pickup</h3>
-                <p>No orders yet — once you place an order, it will automatically appear here.</p>
-                <a href="{% url 'browse_products' %}" class="btn btn-primary-empty">Browse Products</a>
-            </div>
-        {% endfor %}
+            {% empty %}
+                <div class="empty-state-container no-items-message">
+                    <div class="empty-state-icon">✅</div>
+                    <h3>No orders ready for pickup</h3>
+                    <p>No orders yet — once you place an order, it will automatically appear here.</p>
+                    <a href="{% url 'browse_products' %}" class="btn btn-primary-empty">Browse Products</a>
+                </div>
+            {% endfor %}
         </div>
     </section>
 
+    <!-- MERGE: Changed title from "Reservation Orders" to "Pending Orders" -->
     <section class="order-section" data-section-status="pending">
         <h2 class="section-title">Pending Orders</h2>
         <div class="orders-grid">
             {% for item in pending_orders %}
-             <div class="order-card" data-id="{{ item.id }}" data-name="{{ item.product_name }}" data-size="{{ item.product_size|default:'' }}" data-category="{{ item.product_category|default:'N/A' }}" data-description="{{ item.product_description|default:'No description available.' }}" data-image-url="{{ item.product_image_url|default:'...' }}" data-quantity="{{ item.quantity }}" data-total-price="{{ item.total_price|floatformat:2 }}" data-payment-method="{{ item.payment_method|default:'Cash'|title }}" data-created-at="{{ item.created_at|date:'M d, Y' }}" data-status="{{ item.status }}">
-                <img src="{{ item.product_image_url|default:'...' }}" alt="{{ item.product_name }}" class="product-image">
-                 <div class="card-body">
-                     <div class="card-header">
-                         <h3 class="product-name">{{ item.product_name }}{% if item.product_size %} - {{ item.product_size }}{% endif %}</h3>
-                         <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
-                     </div>
-                     <div class="details-grid">
-                         <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
-                         <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong>
-                         <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
-                     </div>
-                 </div>
-            </div>
+                 <div class="order-card"
+                       data-id="{{ item.id }}"
+                       data-name="{{ item.product_name }}"
+                       data-size="{{ item.product_size|default:'' }}"
+                       data-category="{{ item.product_category|default:'N/A' }}"
+                       data-description="{{ item.product_description|default:'No description available.' }}"
+                       data-image-url="{{ item.product_image_url|default:'...' }}"
+                       data-quantity="{{ item.quantity }}"
+                       data-total-price="{{ item.total_price|floatformat:2 }}"
+                       data-payment-method="{{ item.payment_method|default:'Cash'|title }}"
+                       data-created-at="{{ item.created_at|date:'M d, Y' }}"
+                       data-status="{{ item.status }}"
+                       
+                       data-expires-at="{% if item.expires_at %}{{ item.expires_at|date:'M d, Y' }}{% endif %}"
+                       
+                       
+                       data-order-type="{{ item.order_type|title }}"
+                       >
+                    <img src="{{ item.product_image_url|default:'...' }}" alt="{{ item.product_name }}" class="product-image">
+                    <div class="card-body">
+                        <div class="card-header">
+                            <h3 class="product-name">{{ item.product_name }}{% if item.product_size %} - {{ item.product_size }}{% endif %}</h3>
+                            <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
+                        </div>
+                        <div class="details-grid">
+                            <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
+                        
+
+                            <!-- MODIFICATION: Added Expires On row -->
+                            {% if item.expires_at %}
+                            <span>Expires On:</span><strong>{{ item.expires_at|date:"M d, Y" }}</strong>
+                            {% endif %}
+
+                            <!-- MERGE: Added Order Type row -->
+                            <span>Order Type:</span><strong>{{ item.order_type|title }}</strong>
+                            
+                            <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong>
+                            <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
+                        </div>
+                    </div>
+                </div>
             {% empty %}
                 <div class="empty-state-container no-items-message">
                     <div class="empty-state-icon">🛒</div>
@@ -98,17 +132,17 @@
         <div class="orders-grid completed-grid">
             {% for item in completed_orders %}
              <div class="order-card history" data-id="{{ item.id }}" data-name="{{ item.product_name }}" data-size="{{ item.product_size|default:'' }}" data-category="{{ item.product_category|default:'N/A' }}" data-description="{{ item.product_description|default:'...' }}" data-image-url="{{ item.product_image_url|default:'...' }}" data-quantity="{{ item.quantity }}" data-total-price="{{ item.total_price|floatformat:2 }}" data-payment-method="{{ item.payment_method|default:'Cash'|title }}" data-created-at="{{ item.created_at|date:'M d, Y' }}" data-status="{{ item.status }}">
-                <img src="{{ item.product_image_url|default:'...' }}" alt="{{ item.product_name }}" class="product-image">
+                 <img src="{{ item.product_image_url|default:'...' }}" alt="{{ item.product_name }}" class="product-image">
                  <div class="card-body">
-                     <div class="card-header">
-                         <h3 class="product-name">{{ item.product_name }}{% if item.product_size %} - {{ item.product_size }}{% endif %}</h3>
-                         <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
-                     </div>
-                     <div class="details-grid">
-                         <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
-                         <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong>
-                         <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
-                     </div>
+                      <div class="card-header">
+                           <h3 class="product-name">{{ item.product_name }}{% if item.product_size %} - {{ item.product_size }}{% endif %}</h3>
+                           <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
+                      </div>
+                      <div class="details-grid">
+                           <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
+                           <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong>
+                           <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
+                      </div>
                  </div>
             </div>
             {% empty %}
@@ -136,15 +170,15 @@
                  <input type="checkbox" class="order-checkbox other-checkbox" value="{{ item.id }}">
                 <img src="{{ item.product_image_url|default:'...' }}" alt="{{ item.product_name }}" class="product-image">
                  <div class="card-body">
-                     <div class="card-header">
-                         <h3 class="product-name">{{ item.product_name }}{% if item.product_size %} - {{ item.product_size }}{% endif %}</h3>
-                         <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
-                     </div>
-                     <div class="details-grid">
-                         <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
-                         <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong>
-                         <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
-                     </div>
+                      <div class="card-header">
+                           <h3 class="product-name">{{ item.product_name }}{% if item.product_size %} - {{ item.product_size }}{% endif %}</h3>
+                           <span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span>
+                      </div>
+                      <div class="details-grid">
+                           <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
+                           <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong>
+                           <span>Total Price:</span><strong>₱{{ item.total_price|floatformat:2 }}</strong>
+                      </div>
                  </div>
             </div>
             {% empty %}
@@ -177,6 +211,16 @@
                     <p id="details-description" class="details-description"></p>
                     <div class="details-summary-grid">
                         <span>Date Ordered:</span><strong id="details-created-at"></strong>
+                    
+                        
+                        <!-- MODIFICATION: Added Expires On elements -->
+                        <span id="details-expires-label">Expires On:</span>
+                        <strong id="details-expires-at"></strong>
+
+                        <!-- MERGE: Added Order Type elements -->
+                        <span id="details-order-type-label">Order Type:</span>
+                        <strong id="details-order-type"></strong>
+                        
                         <span>Quantity:</span><strong id="details-quantity"></strong>
                         <span>Total Price:</span><strong id="details-total-price"></strong>
                         <span>Payment Method:</span><strong id="details-payment-method"></strong>
@@ -258,6 +302,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Get Modals & Elements ---
     const detailsModal = document.getElementById('order-details-modal');
+
+    // --- MERGE: Added new modal elements for Order Type ---
+    const detailsOrderTypeLabel = detailsModal.querySelector('#details-order-type-label');
+    const detailsOrderTypeVal = detailsModal.querySelector('#details-order-type');
+
     const deleteConfirmModal = document.getElementById('delete-confirm-modal');
     const batchDeleteConfirmModal = document.getElementById('batch-delete-confirm-modal');
     const batchActionBar = document.getElementById('batch-action-bar');
@@ -361,6 +410,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const claimNote = detailsModal.querySelector('#details-claim-note');
                 claimNote.style.display = (data.status === 'approved') ? 'block' : 'none';
+
+                // --- MODIFICATION: Show/Hide Expires On in Modal ---
+                const expiresLabelEl = detailsModal.querySelector('#details-expires-label');
+                const expiresValueEl = detailsModal.querySelector('#details-expires-at');
+                
+                // data.expiresAt will be the string from the attribute, or ""
+                if (data.expiresAt) {
+                    expiresValueEl.textContent = data.expiresAt;
+                    expiresLabelEl.style.display = ''; // Use '' to reset to default (block, inline, grid-item, etc.)
+                    expiresValueEl.style.display = '';
+                } else {
+                    expiresValueEl.textContent = '';
+                    expiresLabelEl.style.display = 'none';
+                    expiresValueEl.style.display = 'none';
+                }
+                // --- END MODIFICATION ---
+
+                // --- MERGE: Add JS logic for Order Type ---
+                if (detailsOrderTypeLabel && detailsOrderTypeVal) {
+                    // data.orderType will be "Reservation" or "Backorder" (from |title filter)
+                    if (data.status === 'pending' && data.orderType) {
+                        detailsOrderTypeVal.textContent = data.orderType;
+                        detailsOrderTypeLabel.style.display = '';
+                        detailsOrderTypeVal.style.display = '';
+                    } else {
+                        // Hide it for 'approved' or 'completed' orders
+                        detailsOrderTypeVal.textContent = '';
+                        detailsOrderTypeLabel.style.display = 'none';
+                        detailsOrderTypeVal.style.display = 'none';
+                    }
+                }
+                // --- End of MERGE ---
 
                 const deleteBtn = detailsModal.querySelector('#details-delete-btn');
                 const cancelBtn = detailsModal.querySelector('#details-cancel-btn');
@@ -602,12 +683,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Helper function to populate and open the single delete modal
     function openDeleteConfirmModal(data) {
-       if (!deleteConfirmModal) { console.error("Cannot open delete confirmation modal - not found."); return; }
-       const form = deleteConfirmModal.querySelector('#delete-single-order-form');
-       form.action = `/dashboard/student/delete-order/${data.orderId}/`; // Use data.orderId
-       const confirmNameEl = deleteConfirmModal.querySelector('#delete-confirm-product-name');
-       confirmNameEl.textContent = data.size ? `${data.name} - ${data.size}` : data.name; 
-       openModal(deleteConfirmModal);
+      if (!deleteConfirmModal) { console.error("Cannot open delete confirmation modal - not found."); return; }
+      const form = deleteConfirmModal.querySelector('#delete-single-order-form');
+      form.action = `/dashboard/student/delete-order/${data.orderId}/`; // Use data.orderId
+      const confirmNameEl = deleteConfirmModal.querySelector('#delete-confirm-product-name');
+      confirmNameEl.textContent = data.size ? `${data.name} - ${data.size}` : data.name; 
+      openModal(deleteConfirmModal);
     }
 
     // --- Logic for Student Order Cancellation ---

@@ -44,7 +44,24 @@
         {% endif %}
         <div class="orders-grid">
             {% for order in approved_orders %}
-            <div class="order-card" data-id="{{ order.id }}" data-order-type="{{ order.order_type|title|default:'N/A' }}" data-name="{{ order.product_name }}" data-size="{{ order.product_size|default:'' }}" data-category="{{ order.product_category|default:'N/A' }}" data-description="{{ order.product_description|default:'No description available.' }}" data-image-url="{{ order.product_image_url|default:'...' }}" data-quantity="{{ order.quantity }}" data-total-price="{{ order.total_price|floatformat:2 }}" data-payment-method="{{ order.payment_method|default:'Cash'|title }}" data-created-at="{{ order.created_at|date:'M d, Y' }}" data-status="{{ order.status }}" data-student-name="{{ order.student_name|default:'N/A' }}" data-student-id="{{ order.student_id|default:'N/A' }}">
+            <!-- MERGE: Added data-expires-at -->
+            <div class="order-card" 
+                 data-id="{{ order.id }}" 
+                 data-order-type="{{ order.order_type|title|default:'N/A' }}" 
+                 data-name="{{ order.product_name }}" 
+                 data-size="{{ order.product_size|default:'' }}" 
+                 data-category="{{ order.product_category|default:'N/A' }}" 
+                 data-description="{{ order.product_description|default:'No description available.' }}" 
+                 data-image-url="{{ order.product_image_url|default:'...' }}" 
+                 data-quantity="{{ order.quantity }}" 
+                 data-total-price="{{ order.total_price|floatformat:2 }}" 
+                 data-payment-method="{{ order.payment_method|default:'Cash'|title }}" 
+                 data-created-at="{{ order.created_at|date:'M d, Y' }}" 
+                 data-status="{{ order.status }}" 
+                 data-student-name="{{ order.student_name|default:'N/A' }}" 
+                 data-student-id="{{ order.student_id|default:'N/A' }}"
+                 data-expires-at="{% if order.expires_at %}{{ order.expires_at|date:'M d, Y' }}{% endif %}"
+            >
                 <span class="status-badge status-{{ order.status }}">{{ order.status|title }}</span>
                 <input type="checkbox" class="order-checkbox approved-checkbox" value="{{ order.id }}">
                 <img src="{{ order.product_image_url|default:'...' }}" alt="{{ order.product_name }}" class="product-image">
@@ -55,6 +72,12 @@
                         <span>Type:</span><strong>{{ order.order_type|title|default:'N/A' }}</strong>
                         <span>Student:</span><strong>{{ order.student_name|default:'N/A' }} ({{ order.student_id|default:'N/A' }})</strong>
                         <span>Date:</span><strong>{{ order.created_at|date:"M d, Y" }}</strong>
+                        
+                        <!-- MERGE: Added Expires On row -->
+                        {% if order.expires_at %}
+                        <span>Expires On:</span><strong>{{ order.expires_at|date:"M d, Y" }}</strong>
+                        {% endif %}
+                        
                         <span>Quantity:</span><strong>{{ order.quantity }}</strong>
                         <span>Total Price:</span><strong>₱{{ order.total_price|floatformat:2 }}</strong>
                         <span>Payment:</span><strong>{{ order.payment_method|default:'Cash'|title }}</strong>
@@ -66,7 +89,9 @@
             {% endfor %}
         </div>
     </section>
-</div> <div class="searchable-section">
+</div> 
+
+<div class="searchable-section">
     <section class="order-section" data-section-status="pending">
         <h2 class="section-title">Pending Orders</h2>
         {% if pending_orders %}
@@ -77,7 +102,24 @@
         {% endif %}
         <div class="orders-grid">
             {% for order in pending_orders %}
-            <div class="order-card" data-id="{{ order.id }}" data-order-type="{{ order.order_type|title|default:'N/A' }}" data-name="{{ order.product_name }}" data-size="{{ order.product_size|default:'' }}" data-category="{{ order.product_category|default:'N/A' }}" data-description="{{ order.product_description|default:'No description available.' }}" data-image-url="{{ order.product_image_url|default:'...' }}" data-quantity="{{ order.quantity }}" data-total-price="{{ order.total_price|floatformat:2 }}" data-payment-method="{{ order.payment_method|default:'Cash'|title }}" data-created-at="{{ order.created_at|date:'M d, Y' }}" data-status="{{ order.status }}" data-student-name="{{ order.student_name|default:'N/A' }}" data-student-id="{{ order.student_id|default:'N/A' }}">
+            <!-- MERGE: Added data-expires-at -->
+            <div class="order-card" 
+                 data-id="{{ order.id }}" 
+                 data-order-type="{{ order.order_type|title|default:'N/A' }}" 
+                 data-name="{{ order.product_name }}" 
+                 data-size="{{ order.product_size|default:'' }}" 
+                 data-category="{{ order.product_category|default:'N/A' }}" 
+                 data-description="{{ order.product_description|default:'No description available.' }}" 
+                 data-image-url="{{ order.product_image_url|default:'...' }}" 
+                 data-quantity="{{ order.quantity }}" 
+                 data-total-price="{{ order.total_price|floatformat:2 }}" 
+                 data-payment-method="{{ order.payment_method|default:'Cash'|title }}" 
+                 data-created-at="{{ order.created_at|date:'M d, Y' }}" 
+                 data-status="{{ order.status }}" 
+                 data-student-name="{{ order.student_name|default:'N/A' }}" 
+                 data-student-id="{{ order.student_id|default:'N/A' }}"
+                 data-expires-at="{% if order.expires_at %}{{ order.expires_at|date:'M d, Y' }}{% endif %}"
+            >
                 <span class="status-badge status-{{ order.status }}">{{ order.status|title }}</span>
                 <input type="checkbox" class="order-checkbox pending-checkbox" value="{{ order.id }}">
                 <img src="{{ order.product_image_url|default:'...' }}" alt="{{ order.product_name }}" class="product-image">
@@ -88,6 +130,12 @@
                         <span>Type:</span><strong>{{ order.order_type|title|default:'N/A' }}</strong>
                         <span>Student:</span><strong>{{ order.student_name|default:'N/A' }} ({{ order.student_id|default:'N/A' }})</strong>
                         <span>Date:</span><strong>{{ order.created_at|date:"M d, Y" }}</strong>
+                        
+                        <!-- MERGE: Added Expires On row -->
+                        {% if order.expires_at %}
+                        <span>Expires On:</span><strong>{{ order.expires_at|date:"M d, Y" }}</strong>
+                        {% endif %}
+                        
                         <span>Quantity:</span><strong>{{ order.quantity }}</strong>
                         <span>Total Price:</span><strong>₱{{ order.total_price|floatformat:2 }}</strong>
                         <span>Payment:</span><strong>{{ order.payment_method|default:'Cash'|title }}</strong>
@@ -99,7 +147,9 @@
             {% endfor %}
         </div>
     </section>
-</div> <div class="searchable-section">
+</div> 
+
+<div class="searchable-section">
     <section class="order-section" data-section-status="completed">
         <h2 class="section-title">Completed Orders</h2>
         {% if completed_orders %}
@@ -110,7 +160,24 @@
         {% endif %}
         <div class="orders-grid">
             {% for order in completed_orders %}
-            <div class="order-card" data-id="{{ order.id }}" data-order-type="{{ order.order_type|title|default:'N/A' }}" data-name="{{ order.product_name }}" data-size="{{ order.product_size|default:'' }}" data-category="{{ order.product_category|default:'N/A' }}" data-description="{{ order.product_description|default:'No description available.' }}" data-image-url="{{ order.product_image_url|default:'...' }}" data-quantity="{{ order.quantity }}" data-total-price="{{ order.total_price|floatformat:2 }}" data-payment-method="{{ order.payment_method|default:'Cash'|title }}" data-created-at="{{ order.created_at|date:'M d, Y' }}" data-status="{{ order.status }}" data-student-name="{{ order.student_name|default:'N/A' }}" data-student-id="{{ order.student_id|default:'N/A' }}">
+            <!-- MERGE: Added data-expires-at -->
+            <div class="order-card" 
+                 data-id="{{ order.id }}" 
+                 data-order-type="{{ order.order_type|title|default:'N/A' }}" 
+                 data-name="{{ order.product_name }}" 
+                 data-size="{{ order.product_size|default:'' }}" 
+                 data-category="{{ order.product_category|default:'N/A' }}" 
+                 data-description="{{ order.product_description|default:'No description available.' }}" 
+                 data-image-url="{{ order.product_image_url|default:'...' }}" 
+                 data-quantity="{{ order.quantity }}" 
+                 data-total-price="{{ order.total_price|floatformat:2 }}" 
+                 data-payment-method="{{ order.payment_method|default:'Cash'|title }}" 
+                 data-created-at="{{ order.created_at|date:'M d, Y' }}" 
+                 data-status="{{ order.status }}" 
+                 data-student-name="{{ order.student_name|default:'N/A' }}" 
+                 data-student-id="{{ order.student_id|default:'N/A' }}"
+                 data-expires-at="{% if order.expires_at %}{{ order.expires_at|date:'M d, Y' }}{% endif %}"
+            >
                 <span class="status-badge status-{{ order.status }}">{{ order.status|title }}</span>
                 <input type="checkbox" class="order-checkbox completed-checkbox" value="{{ order.id }}">
                 <img src="{{ order.product_image_url|default:'...' }}" alt="{{ order.product_name }}" class="product-image">
@@ -130,7 +197,9 @@
             {% endfor %}
         </div>
     </section>
-</div> <div class="searchable-section">
+</div> 
+
+<div class="searchable-section">
     <section class="order-section" data-section-status="cancelled rejected">
         <h2 class="section-title">Cancelled & Rejected Orders</h2>
         {% if other_orders %}
@@ -141,7 +210,24 @@
         {% endif %}
         <div class="orders-grid">
             {% for order in other_orders %}
-            <div class="order-card" data-id="{{ order.id }}" data-order-type="{{ order.order_type|title|default:'N/A' }}" data-name="{{ order.product_name }}" data-size="{{ order.product_size|default:'' }}" data-category="{{ order.product_category|default:'N/A' }}" data-description="{{ order.product_description|default:'No description available.' }}" data-image-url="{{ order.product_image_url|default:'...' }}" data-quantity="{{ order.quantity }}" data-total-price="{{ order.total_price|floatformat:2 }}" data-payment-method="{{ order.payment_method|default:'Cash'|title }}" data-created-at="{{ order.created_at|date:'M d, Y' }}" data-status="{{ order.status }}" data-student-name="{{ order.student_name|default:'N/A' }}" data-student-id="{{ order.student_id|default:'N/A' }}">
+            <!-- MERGE: Added data-expires-at -->
+            <div class="order-card" 
+                 data-id="{{ order.id }}" 
+                 data-order-type="{{ order.order_type|title|default:'N/A' }}" 
+                 data-name="{{ order.product_name }}" 
+                 data-size="{{ order.product_size|default:'' }}" 
+                 data-category="{{ order.product_category|default:'N/A' }}" 
+                 data-description="{{ order.product_description|default:'No description available.' }}" 
+                 data-image-url="{{ order.product_image_url|default:'...' }}" 
+                 data-quantity="{{ order.quantity }}" 
+                 data-total-price="{{ order.total_price|floatformat:2 }}" 
+                 data-payment-method="{{ order.payment_method|default:'Cash'|title }}" 
+                 data-created-at="{{ order.created_at|date:'M d, Y' }}" 
+                 data-status="{{ order.status }}" 
+                 data-student-name="{{ order.student_name|default:'N/A' }}" 
+                 data-student-id="{{ order.student_id|default:'N/A' }}"
+                 data-expires-at="{% if order.expires_at %}{{ order.expires_at|date:'M d, Y' }}{% endif %}"
+            >
                 <span class="status-badge status-{{ order.status }}">{{ order.status|title }}</span>
                 <input type="checkbox" class="order-checkbox other-checkbox" value="{{ order.id }}">
                 <img src="{{ order.product_image_url|default:'...' }}" alt="{{ order.product_name }}" class="product-image">
@@ -222,6 +308,11 @@
                         <span>Type:</span><strong id="details-order-type"></strong>
                         <span>Student:</span><strong id="details-student"></strong>
                         <span>Date Ordered:</span><strong id="details-created-at"></strong>
+                        
+                        <!-- MERGE: Added Expires On elements -->
+                        <span id="details-expires-label">Expires On:</span>
+                        <strong id="details-expires-at"></strong>
+                        
                         <span>Product Category:</span><strong id="details-category"></strong>
                         <span>Quantity:</span><strong id="details-quantity"></strong>
                         <span>Total Price:</span><strong id="details-total-price"></strong>
@@ -255,7 +346,7 @@
                  {% csrf_token %}
                  <button type="button" class="btn btn-danger" id="open-single-delete-modal-btn">
                      Delete Order
-                </button>
+                 </button>
              </form>
             
         </div>
@@ -467,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('button')) {
                  // Specifically allow checkbox click to propagate for selection logic
                  if (!e.target.classList.contains('order-checkbox')) {
-                      e.stopPropagation(); // Stop modal opening for buttons etc.
+                     e.stopPropagation(); // Stop modal opening for buttons etc.
                  }
                 return;
             }
@@ -501,6 +592,23 @@ document.addEventListener('DOMContentLoaded', () => {
             statusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
             statusBadge.className = 'status-badge';
             statusBadge.classList.add(`status-${status}`);
+
+            // --- MERGE: Show/Hide Expires On in Modal ---
+            const expiresLabelEl = detailsModal.querySelector('#details-expires-label');
+            const expiresValueEl = detailsModal.querySelector('#details-expires-at');
+            
+            // data.expiresAt will be the string from the attribute, or ""
+            if (data.expiresAt) {
+                expiresValueEl.textContent = data.expiresAt;
+                expiresLabelEl.style.display = ''; // Use '' to reset to default
+                expiresValueEl.style.display = '';
+            } else {
+                // Hide if no date (e.g., for backorders or completed orders)
+                expiresValueEl.textContent = '';
+                expiresLabelEl.style.display = 'none';
+                expiresValueEl.style.display = 'none';
+            }
+            // --- END MERGE ---
 
             // Set action URLs for all forms
             singleStatusForm.action = `/dashboard/admin/update-order-status/${data.id}/`;
@@ -617,8 +725,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const deleteCount = completedChecked + otherChecked;
          if (batchDeleteBar) {
-            batchDeleteBar.style.display = deleteCount > 0 ? 'flex' : 'none';
-            if (deleteCount > 0) batchDeleteBar.querySelector('#delete-selected-count').textContent = `${deleteCount} item(s) selected`;
+             batchDeleteBar.style.display = deleteCount > 0 ? 'flex' : 'none';
+             if (deleteCount > 0) batchDeleteBar.querySelector('#delete-selected-count').textContent = `${deleteCount} item(s) selected`;
          }
 
         // --- Update visual selection state for cards ---
@@ -783,8 +891,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- BATCH STATUS UPDATE (Pending Section) ---
      if (batchPendingStatusUpdateBtn) {
-        batchPendingStatusUpdateBtn.addEventListener('click', () => {
-             // Get IDs only from VISIBLE checked boxes in this group
+         batchPendingStatusUpdateBtn.addEventListener('click', () => {
+              // Get IDs only from VISIBLE checked boxes in this group
             const selectedIds = Array.from(document.querySelectorAll('.searchable-section:not([style*="display: none"]) .pending-checkbox:checked')).map(cb => cb.value);
             if (selectedIds.length === 0) return;
 
@@ -804,7 +912,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showMessage(data.error || 'An unknown error occurred.', 'error');
                 }
             });
-        });
+         });
      }
 
     // --- BATCH DELETE (Trigger Modal) ---
@@ -823,27 +931,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- BATCH DELETE (Confirm & Fetch) ---
      if (confirmBatchDeleteBtn) {
-        confirmBatchDeleteBtn.addEventListener('click', function() {
-            const idsToSubmit = this.dataset.ids;
-            if (!idsToSubmit) return;
+         confirmBatchDeleteBtn.addEventListener('click', function() {
+             const idsToSubmit = this.dataset.ids;
+             if (!idsToSubmit) return;
 
-            const formData = new FormData(batchDeleteForm);
-            formData.set('order_ids', idsToSubmit);
-            const url = batchDeleteForm.getAttribute('action'); // Assumes action is correct
+             const formData = new FormData(batchDeleteForm);
+             formData.set('order_ids', idsToSubmit);
+             const url = batchDeleteForm.getAttribute('action'); // Assumes action is correct
 
-            handleFetch(url, formData, this).then(data => {
-                if (data && data.success) {
-                    showMessage(data.message, 'success');
-                    closeModal(batchDeleteConfirmModal);
-                    data.order_ids.forEach(id => { // Use the IDs returned from backend
-                        removeOrderCard(id);
-                    });
-                     // updateActionBars will be called by removeOrderCard -> filterGlobalOrders
-                } else if (data) {
-                    showMessage(data.error || 'An unknown error occurred.', 'error');
-                }
-            });
-        });
+             handleFetch(url, formData, this).then(data => {
+                 if (data && data.success) {
+                     showMessage(data.message, 'success');
+                     closeModal(batchDeleteConfirmModal);
+                     data.order_ids.forEach(id => { // Use the IDs returned from backend
+                         removeOrderCard(id);
+                     });
+                      // updateActionBars will be called by removeOrderCard -> filterGlobalOrders
+                 } else if (data) {
+                     showMessage(data.error || 'An unknown error occurred.', 'error');
+                 }
+             });
+         });
      }
 
     // --- SINGLE STATUS UPDATE (Full Form - Approved) ---
@@ -871,25 +979,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- SINGLE STATUS UPDATE (Pending Form) ---
      if (singlePendingStatusForm) {
-        singlePendingStatusForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const url = this.action;
-            const button = this.querySelector('button[type="submit"]');
+         singlePendingStatusForm.addEventListener('submit', function(e) {
+             e.preventDefault();
+             const formData = new FormData(this);
+             const url = this.action;
+             const button = this.querySelector('button[type="submit"]');
 
-            handleFetch(url, formData, button).then(data => {
-                if (data && data.success) {
-                    showMessage(data.message, 'success');
-                    closeModal(detailsModal);
-                    data.orders.forEach(order => { // Expecting one order
-                        moveOrderCard(order.id, order.status);
-                    });
-                     // updateActionBars called by moveOrderCard
-                } else if (data) {
-                    showMessage(data.error || 'An unknown error occurred.', 'error');
-                }
-            });
-        });
+             handleFetch(url, formData, button).then(data => {
+                 if (data && data.success) {
+                     showMessage(data.message, 'success');
+                     closeModal(detailsModal);
+                     data.orders.forEach(order => { // Expecting one order
+                         moveOrderCard(order.id, order.status);
+                     });
+                      // updateActionBars called by moveOrderCard
+                 } else if (data) {
+                     showMessage(data.error || 'An unknown error occurred.', 'error');
+                 }
+             });
+         });
      }
 
     // --- SINGLE DELETE (Trigger Modal) ---
@@ -916,32 +1024,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- SINGLE DELETE (Confirm & Fetch) ---
      if (confirmSingleDeleteBtn) {
-        confirmSingleDeleteBtn.addEventListener('click', function() {
-            const url = this.dataset.url;
-            if (!url) return;
+         confirmSingleDeleteBtn.addEventListener('click', function() {
+             const url = this.dataset.url;
+             if (!url) return;
 
-             const orderIdMatch = url.match(/\/delete-order\/(\d+)\/?$/);
-             const orderId = orderIdMatch ? orderIdMatch[1] : null;
-             if (!orderId) {
-                  console.error("Could not extract order ID from URL:", url);
-                  return;
-             }
+              const orderIdMatch = url.match(/\/delete-order\/(\d+)\/?$/);
+              const orderId = orderIdMatch ? orderIdMatch[1] : null;
+              if (!orderId) {
+                   console.error("Could not extract order ID from URL:", url);
+                   return;
+              }
 
-            // Create empty FormData just to work with our handleFetch helper for POST
-            const formData = new FormData();
+             // Create empty FormData just to work with our handleFetch helper for POST
+             const formData = new FormData();
 
-            handleFetch(url, formData, this).then(data => {
-                if (data && data.success) {
-                    showMessage(data.message, 'success');
-                    closeModal(singleDeleteConfirmModal);
-                    closeModal(detailsModal); // Close the details modal too
-                    removeOrderCard(data.order_id || orderId); // Use ID from response or fallback to extracted ID
-                     // updateActionBars called by removeOrderCard
-                } else if (data) {
-                    showMessage(data.error || 'An unknown error occurred.', 'error');
-                }
-            });
-        });
+             handleFetch(url, formData, this).then(data => {
+                 if (data && data.success) {
+                     showMessage(data.message, 'success');
+                     closeModal(singleDeleteConfirmModal);
+                     closeModal(detailsModal); // Close the details modal too
+                     removeOrderCard(data.order_id || orderId); // Use ID from response or fallback to extracted ID
+                      // updateActionBars called by removeOrderCard
+                 } else if (data) {
+                     showMessage(data.error || 'An unknown error occurred.', 'error');
+                 }
+             });
+         });
      }
 
 }); // End DOMContentLoaded

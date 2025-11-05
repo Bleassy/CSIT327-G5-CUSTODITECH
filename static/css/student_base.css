@@ -379,3 +379,158 @@ textarea:focus-visible {
 .student-name-link:focus-visible {
     border-radius: 50%;
 }
+
+
+/* --- ✅ START: Notification Bell Styles --- */
+.notification-bell-wrapper {
+    position: relative; /* This is crucial for positioning the dropdown */
+}
+
+.notification-btn {
+    background: none;
+    border: none;
+    padding: 8px;
+    margin: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+.notification-btn:hover {
+    background-color: #f8f9fa; /* Same as nav-btn:hover */
+}
+
+.notification-count {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background-color: #dc2626; /* Red */
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+}
+
+.notification-dropdown {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 130%; /* Position below the bell */
+    right: 0;
+    width: 360px;
+    max-height: 400px;
+    overflow-y: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: 1px solid #e2e8f0;
+    z-index: 1001; /* Must be higher than the header */
+}
+
+.notification-dropdown.visible {
+    display: block; /* Show when JS adds this class */
+}
+
+.dropdown-header {
+    padding: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+.dropdown-header strong {
+    font-size: 16px;
+    color: #1e293b;
+}
+
+.notification-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    display: block;
+    width: 100%; /* Make button fill width */
+    text-align: left; /* Reset button default */
+    background: none; /* Reset button default */
+    border: none; /* Reset button default */
+    cursor: pointer;
+    padding: 1rem;
+    text-decoration: none;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.2s ease, opacity 0.3s ease;
+    
+    /* ✅ FIX: Add for the blue dot */
+    position: relative;
+    padding-left: 2rem; 
+}
+.notification-item:hover {
+    background-color: #f8fafc;
+}
+
+/* ✅ FIX: Style for the blue "unread" dot */
+.notification-item.notification-unread::before {
+    content: '';
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #3b82f6; /* A nice blue */
+}
+
+/* ✅ FIX: Style for "read" items (they won't have the class) */
+.notification-item:not(.notification-unread) {
+    opacity: 0.7;
+}
+.notification-item:not(.notification-unread):hover {
+    opacity: 1;
+}
+
+.notification-item p {
+    margin: 0 0 0.25rem 0;
+    font-size: 14px;
+    color: #334155;
+    line-height: 1.4;
+}
+
+.notification-item .notification-time {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.notification-item.empty {
+    padding: 2rem 1rem;
+    text-align: center;
+}
+.notification-item.empty p {
+    font-size: 14px;
+    color: #64748b;
+}
+
+.notification-btn.active {
+    background-color: rgba(128, 0, 0, 0.1); /* Light maroon, same as profile link */
+}
+
+.dropdown-footer {
+    padding: 0.75rem;
+    text-align: center;
+    background-color: #f8fafc;
+    border-top: 1px solid #f1f5f9;
+}
+.dropdown-footer a {
+    font-size: 14px;
+    font-weight: 500;
+    color: #800000;
+    text-decoration: none;
+}
+.dropdown-footer a:hover {
+    text-decoration: underline;
+}
+/* --- ✅ END: Notification Bell Styles --- */

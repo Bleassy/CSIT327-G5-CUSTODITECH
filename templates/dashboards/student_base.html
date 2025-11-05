@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,6 +30,43 @@
             <a href="{% url 'my_orders' %}" class="nav-btn {% if active_page == 'orders' %}active{% endif %}">📦 My Orders</a>
         </nav>
         <div class="header-right">
+
+            <div class="notification-bell-wrapper">
+                <button type="button" 
+            class="notification-btn {% if active_page == 'notifications' %}active{% endif %}" 
+            id="notification-bell-btn" 
+            aria-label="Toggle notifications">
+        🔔
+                    {% if notification_count > 0 %}
+                        <span class="notification-count">{{ notification_count }}</span>
+                    {% endif %}
+                </button>
+                <div class="notification-dropdown" id="notification-dropdown">
+                    <div class="dropdown-header">
+                        <strong>Notifications</strong>
+                    </div>
+                <div class="notification-list" id="notification-list">
+                    {% for notification in notifications %}
+                        
+                        <button type="button" 
+                                class="notification-item {% if not notification.is_read %}notification-unread{% endif %}" 
+                                data-url="{% url 'mark_notification_read_and_redirect' notification.id %}">
+                            
+                            <p class="notification-message">{{ notification.message }}</p>
+                            <span class="notification-time">{{ notification.created_at|timesince }} ago</span>
+                        </button>
+
+                    {% empty %}
+                        <div class="notification-item empty">
+                            <p>You have no new notifications.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+                    <div class="dropdown-footer">
+                        <a href="{% url 'all_notifications' %}">View All Notifications</a>
+                    </div>
+                </div>
+            </div>
             <a href="{% url 'student_profile' %}" class="student-name-link {% if active_page == 'profile' %}active{% endif %}">
                 {% if profile.avatar_url %}
                     <img src="{{ profile.avatar_url }}" alt="Profile" class="header-avatar">
@@ -65,40 +103,54 @@
     {% block extra_js %}{% endblock %}
 
     <script>
+        // Helper function to get the CSRF token from cookies
+        function getCsrfToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, 10) === 'csrftoken=') {
+                        cookieValue = decodeURIComponent(cookie.substring(10));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+
+    <script>
         // ===== Page Loader Logic =====
-        
-        // 1. Get the page loader
         const loader = document.getElementById('page-loader');
-         
         if (loader) {
-            // 2. Hide loader on page "show" (for back/forward button)
+            // Hide loader on page "show" (for back/forward button)
             window.addEventListener('pageshow', function() {
                 loader.classList.remove('visible');
             });
 
-            // 3. Show loader on link clicks
+            // Show loader on link clicks
             document.addEventListener('click', function(e) {
-                // Check if the clicked element is a link (or inside one)
                 const link = e.target.closest('a');
 
                 if (link) {
                     // --- Filters: Don't show loader for... ---
-                    
-                    // (a) Links opening in a new tab
                     if (link.target === '_blank') return;
-                    
-                    // (b) Simple hash/anchor links on the same page
                     if (link.href.startsWith(window.location.href + '#')) return;
-
-                    // (c) Mail or Tel links
                     if (link.href.startsWith('mailto:') || link.href.startsWith('tel:')) return;
-
-                    // (d) Links inside the pagination container
                     if (link.closest('.pagination-container')) return;
+                    
+                    // This logic is for the "View All" link in the footer
+                    if (link.closest('.notification-dropdown')) {
+                        loader.classList.add('visible');
+                        return; // Let the link click proceed
+                    }
+
+                    if (e.target.closest('#notification-bell-btn')) return;
 
                     if (e.ctrlKey || e.metaKey) return;
-
-                    // --- Show the loader ---
+                    
                     loader.classList.add('visible');
                 }
             });
@@ -107,26 +159,16 @@
         // Wait for the document to be fully loaded
         document.addEventListener('DOMContentLoaded', function() {
             
-            // 1. Find the button and the header
+            // --- Hamburger Menu Logic ---
             const hamburgerBtn = document.querySelector('.hamburger-btn');
             const header = document.querySelector('.dashboard-header');
             const body = document.body;
-
-            // 2. Check if the elements were found
             if (hamburgerBtn && header && body) {
-                
-                // 3. Add a click event listener to the button
                 hamburgerBtn.addEventListener('click', function() {
-                    
-                    // 4. Toggle the '.menu-is-open' class on the header and body
                     header.classList.toggle('menu-is-open');
                     body.classList.toggle('menu-is-open');
-
-                    // 5. Update accessibility attribute
                     const isExpanded = header.classList.contains('menu-is-open');
                     hamburgerBtn.setAttribute('aria-expanded', isExpanded);
-
-                    // 6. Change hamburger icon to 'X' or '☰'
                     const icon = hamburgerBtn.querySelector('.hamburger-icon');
                     if (isExpanded) {
                         icon.innerHTML = '&times;'; // 'X' icon
@@ -135,6 +177,68 @@
                     }
                 });
             }
+
+            // --- MERGE: Updated Notification Logic ---
+            const bellBtn = document.getElementById('notification-bell-btn');
+            const dropdown = document.getElementById('notification-dropdown');
+
+            if (bellBtn && dropdown) {
+                // Toggle dropdown on bell click
+                bellBtn.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Prevents the 'document' click from closing it
+                    dropdown.classList.toggle('visible');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (dropdown.classList.contains('visible') && !dropdown.contains(e.target)) {
+                        dropdown.classList.remove('visible');
+                    }
+                });
+            }
+
+            // --- MERGE: Add Click-to-Redirect Logic for notification buttons ---
+            const notificationList = document.getElementById('notification-list');
+            if (notificationList) {
+                notificationList.addEventListener('click', function(e) {
+                    // Find the button that was clicked
+                    const notificationItem = e.target.closest('.notification-item');
+                    
+                    if (notificationItem) {
+                        const url = notificationItem.dataset.url;
+                        if (!url) return;
+
+                        // 1. Show the page loader immediately
+                        if (loader) loader.classList.add('visible');
+
+                        // 2. Call the "mark as read" function
+                        fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': getCsrfToken(),
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            // 3. Redirect to the URL from the response
+                            // This happens *after* the database update is complete
+                            if (data.redirect_url) {
+                                window.location.href = data.redirect_url;
+                            } else {
+                                // Fallback if something went wrong
+                                window.location.href = "{% url 'my_orders' %}";
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error marking notification as read:', error);
+                            // Still redirect so the user isn't stuck
+                            window.location.href = "{% url 'my_orders' %}";
+                        });
+                    }
+                });
+            }
+            // --- END MERGE ---
         });
     </script>
     </body>

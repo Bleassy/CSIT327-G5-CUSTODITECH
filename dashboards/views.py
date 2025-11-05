@@ -9,12 +9,16 @@ from django.views.decorators.http import require_POST
 from .utils import log_activity, get_greeting
 from .decorators import admin_required, student_required
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from django.urls import reverse
+from django.views.decorators.http import require_http_methods
+from .decorators import student_required
+import json
 import pytz
 import uuid
 import math
 import requests
+
 
 # --- Main Redirect View ---
 
@@ -33,6 +37,177 @@ def dashboard_redirect(request):
     return redirect('student_dashboard')
 
 # --- Student Views ---
+
+@student_required
+@require_http_methods(["POST"]) # Only allow POST requests
+def mark_notifications_as_read(request):
+    """
+    Marks all unread notifications for the current user as 'read'.
+    Called by JavaScript when the notification bell is opened.
+    """
+    # We only want AJAX requests
+    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+
+    try:
+        # Use the user's RLS-enabled client (supabase).
+        # This will ONLY update their own notifications.
+        supabase.table('notifications') \
+            .update({'is_read': True}) \
+            .eq('user_id', request.user.id) \
+            .eq('is_read', False) \
+            .execute()
+
+        # Return success
+        return JsonResponse({'success': True})
+
+    except Exception as e:
+        print(f"Error marking notifications as read: {e}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@student_required
+@require_http_methods(["POST"])
+def mark_notification_read_and_redirect(request, notification_id):
+    """
+    Marks a single notification as read and then redirects the user
+    to that notification's link.
+    """
+    # Default URL if something goes wrong
+    fallback_url = '/dashboard/student/my-orders/' 
+    
+    try:
+        # First, get the notification's link_url
+        # This respects RLS, so a user can only get their own notification
+        response = supabase.table('notifications') \
+            .select('link_url') \
+            .eq('id', notification_id) \
+            .eq('user_id', request.user.id) \
+            .single() \
+            .execute()
+
+        if response.data and response.data.get('link_url'):
+            link_url = response.data['link_url']
+        else:
+            link_url = fallback_url
+
+        # After getting the link, mark the notification as read
+        supabase.table('notifications') \
+            .update({'is_read': True}) \
+            .eq('id', notification_id) \
+            .eq('user_id', request.user.id) \
+            .execute()
+
+        return JsonResponse({'success': True, 'redirect_url': link_url})
+
+    except Exception as e:
+        print(f"Error marking single notification as read: {e}")
+        link_url = fallback_url # Send to default page on error
+    
+    return redirect(link_url)
+
+@student_required
+def all_notifications_view(request):
+    """
+    Renders the new "All Notifications" page.
+    Fetches all notifications (both read and unread) with product details.
+    """
+    all_notifications = []
+    try:
+        user_id = request.user.id
+        # Call the new RPC function we just created
+        response = supabase_service.rpc('get_my_detailed_notifications', {'p_user_id': user_id}).execute()
+        
+        if response.data:
+            for item in response.data:
+                # Parse the date string into a datetime object
+                try:
+                    item['created_at'] = datetime.fromisoformat(item['created_at'])
+                except (ValueError, TypeError):
+                    item['created_at'] = None
+                
+                all_notifications.append(item)
+                
+    except Exception as e:
+        messages.error(request, f"Could not fetch your notifications: {e}")
+        
+    context = {
+        'all_notifications': all_notifications,
+        'active_page': 'notifications', # For highlighting the nav link
+        'page_title': 'All Notifications',
+    }
+    return render(request, 'dashboards/all_notifications.html', context)
+
+@student_required
+@require_http_methods(["POST"])
+def batch_update_notifications(request):
+    """
+    Handles an AJAX POST request to mark a batch of notifications
+    as 'read' or 'unread'.
+    """
+    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+    
+    try:
+        notification_ids_str = request.POST.get('notification_ids')
+        action = request.POST.get('action') # "mark_read" or "mark_unread"
+
+        if not notification_ids_str or not action:
+            raise ValueError("Missing 'notification_ids' or 'action'.")
+
+        notification_ids = [int(nid) for nid in notification_ids_str.split(',') if nid.isdigit()]
+        
+        if not notification_ids:
+            raise ValueError("No valid notification IDs provided.")
+
+        new_status = True if action == 'mark_read' else False
+        
+        # This update respects RLS, so the user can only
+        # update their own notifications.
+        supabase.table('notifications') \
+            .update({'is_read': new_status}) \
+            .in_('id', notification_ids) \
+            .eq('user_id', request.user.id) \
+            .execute()
+        
+        return JsonResponse({'success': True, 'message': f'{len(notification_ids)} notifications updated.'})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@student_required
+@require_http_methods(["POST"])
+def batch_delete_notifications(request):
+    """
+    Handles an AJAX POST request to permanently delete a batch of notifications.
+    """
+    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+    
+    try:
+        notification_ids_str = request.POST.get('notification_ids')
+        if not notification_ids_str:
+            raise ValueError("Missing 'notification_ids'.")
+
+        notification_ids = [int(nid) for nid in notification_ids_str.split(',') if nid.isdigit()]
+        
+        if not notification_ids:
+            raise ValueError("No valid notification IDs provided.")
+        
+        # We need to create a special policy to allow deletion.
+        # But for now, let's use the service client to delete.
+        # This is safe because we get the user_id from the *authenticated* request
+        # and add it to the query.
+        supabase_service.table('notifications') \
+            .delete() \
+            .in_('id', notification_ids) \
+            .eq('user_id', request.user.id) \
+            .execute()
+        
+        return JsonResponse({'success': True, 'message': f'{len(notification_ids)} notifications deleted.'})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
 @student_required
 def student_dashboard(request):
@@ -201,6 +376,21 @@ def my_orders_view(request):
                             item['created_at'] = datetime.strptime(created_at_str, '%Y-%m-%dT%H:%M:%S.%f')
                         except ValueError:
                             item['created_at'] = None # Or keep original string
+                
+                # --- Add expires_at parsing ---
+                if item.get('expires_at'):
+                    expires_at_str = item['expires_at']
+                    try:
+                        # Attempt parsing with timezone
+                        item['expires_at'] = datetime.fromisoformat(expires_at_str)
+                    except ValueError:
+                        # Fallback for naive datetime strings
+                        try:
+                            item['expires_at'] = datetime.strptime(expires_at_str, '%Y-%m-%dT%H:%M:%S.%f')
+                        except ValueError:
+                            item['expires_at'] = None # Or keep original string
+                else:
+                    item['expires_at'] = None # Ensure the key exists
 
             # Separate orders into lists based on status
             for item in all_orders:
@@ -886,13 +1076,26 @@ def order_management_view(request):
     
     try:
         params = {'p_search_term': search_query}
-        response = supabase.rpc('get_all_orders_with_details', params).execute()
+        response = supabase_service.rpc('get_all_orders_with_details', params).execute()
         
         if response.data:
             all_orders_empty = False
             for item in response.data:
+                # --- Parse created_at ---
                 if item.get('created_at'):
-                    item['created_at'] = datetime.fromisoformat(item['created_at'])
+                    try:
+                        item['created_at'] = datetime.fromisoformat(item['created_at'])
+                    except (ValueError, TypeError):
+                        item['created_at'] = None
+
+                # --- Add expires_at parsing ---
+                if item.get('expires_at'):
+                    try:
+                        item['expires_at'] = datetime.fromisoformat(item['expires_at'])
+                    except (ValueError, TypeError):
+                        item['expires_at'] = None
+                else:
+                    item['expires_at'] = None
                 
                 status = item.get('status')
                 
@@ -1079,10 +1282,26 @@ def update_order_status(request, order_id):
                         'p_new_status': new_status
                     }).execute()
             else:
-                # Simple status update
-                supabase_service.table('orders').update({
-                    'status': new_status
-                }).in_('id', order_ids).execute()
+                # Build the dictionary of what to update
+                update_data = {'status': new_status}
+                new_status_lower = new_status.lower()
+
+                if new_status == 'approved':
+                    # SET a new 3-day expiration date from right now
+                    expires_at_date = datetime.now(timezone.utc) + timedelta(days=3)
+                    update_data['expires_at'] = expires_at_date.isoformat()
+                
+                elif new_status == 'completed':
+                    # CLEAR the expiration date, as it's no longer needed
+                    update_data['expires_at'] = None
+                
+                # Note: If new_status is 'pending', we do nothing,
+                # which preserves the original reservation expiration date.
+
+                # Perform the update
+                supabase_service.table('orders').update(
+                    update_data
+                ).in_('id', order_ids).execute()
 
             # After updating, re-fetch the orders to get fresh data
             updated_orders_response = supabase_service.table('orders') \
