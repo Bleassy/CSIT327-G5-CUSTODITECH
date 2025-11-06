@@ -3,7 +3,7 @@
 {% load humanize %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/all_notifications.css' %}?v=1.0">
+    <link rel="stylesheet" href="{% static 'css/all_notifications.css' %}?v=1.2">
 {% endblock %}
 
 {% block content %}
@@ -12,20 +12,14 @@
 
         <div class="notifications-header">
             <h1 class="card-title">Notifications</h1>
-            <div class="tabs">
-                <button type="button" class="tab-btn active" data-tab="all">All</button>
-                <button type="button" class="tab-btn" data-tab="unread">Unread</button>
-            </div>
-        </div>
-
-        <div class="action-bar" id="action-bar" style="display: none;">
-            <div class="select-all-container">
-                <input type="checkbox" id="select-all-checkbox">
-                <label for="select-all-checkbox">Select All</label>
-            </div>
-            <div class="action-buttons">
-                <button type="button" class="btn btn-secondary" id="mark-read-btn" data-action="mark_read">Mark as Read</button>
-                <button type="button" class="btn btn-danger" id="delete-btn">Delete</button>
+            <div class="header-controls">
+                <div class="tabs">
+                    <button type="button" class="tab-btn active" data-tab="all">All</button>
+                    <button type="button" class="tab-btn" data-tab="unread">Unread</button>
+                    <button type="button" class="btn-mark-all" id="mark-all-read-btn">
+                        Mark All as Read
+                </button>
+                </div>
             </div>
         </div>
 
@@ -50,17 +44,58 @@
                         <div class="unread-dot" title="Unread"></div>
                     {% endif %}
                 </div>
-            {% empty %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">🎉</div>
-                    <h3>All clear!</h3>
-                    <p>You have no notifications right now.</p>
-                </div>
             {% endfor %}
-        </div>
+
+                <div class="empty-state" id="static-empty-state" {% if all_notifications %}style="display: none;"{% endif %}>
+                    <div class="empty-state-icon">🎉</div>
+                    <h3>All clear!</h3>
+                    <p>You have no notifications right now.</p>
+                </div>
+            
+
+                <div class="empty-state" id="filter-empty-state" style="display: none;">
+                <div class="empty-state-icon">🧐</div>
+                <h3>No notifications found</h3>
+                <p>No notifications match this filter.</p>
+            </div>
+        </div>
 
     </div>
 </div>
+
+<div class="action-bar" id="action-bar">
+    
+
+    <div class="select-all-container">
+        <input type="checkbox" id="select-all-checkbox">
+        <label for="select-all-checkbox">Select All</label>
+    </div>
+
+    <div class="action-buttons">
+        <button type="button" class="btn btn-secondary" id="mark-read-btn" data-action="mark_read">Mark as Read</button>
+        <button type="button" class="btn btn-secondary" id="mark-unread-btn" data-action="mark_unread">Mark as Unread</button>
+        <button type="button" class="btn btn-danger" id="delete-btn">Delete</button>
+    </div>
+</div>
+
+<div id="batch-delete-confirm-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Confirm Deletion</h2>
+            <span class="close-btn" data-close-modal="batch-delete-confirm-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="icon">⚠️</div>
+            <h3>Are you sure?</h3>
+            <p>This will permanently delete the selected notifications. This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-close-modal="batch-delete-confirm-modal">Cancel</button>
+            <button type="button" class="btn btn-danger" id="confirm-delete-btn">Yes, Delete</button>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 
@@ -74,8 +109,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectAllCheckbox = document.getElementById('select-all-checkbox');
     const tabButtons = document.querySelectorAll('.tab-btn');
     const markReadBtn = document.getElementById('mark-read-btn');
+    const markUnreadBtn = document.getElementById('mark-unread-btn');
     const deleteBtn = document.getElementById('delete-btn');
     const loader = document.getElementById('page-loader'); // Get the page loader
+    const deleteModal = document.getElementById('batch-delete-confirm-modal');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+    const markAllReadBtn = document.getElementById('mark-all-read-btn');
 
     let currentTab = 'all'; // Default tab
 
@@ -98,28 +137,71 @@ document.addEventListener('DOMContentLoaded', () => {
         return '';
     }
 
-    // --- Helper: Show/Hide Empty State ---
-    function checkEmptyState() {
-        // ✅ FIX: Selector now correctly checks for rows that are NOT hidden
-        const visibleRows = listContainer.querySelectorAll('.notification-item-row:not([style*="display: none"])').length;
-        let emptyState = listContainer.querySelector('.empty-state');
-        
-        if (visibleRows === 0) {
-            if (!emptyState) {
-                emptyState = document.createElement('div');
-                emptyState.className = 'empty-state';
-                emptyState.innerHTML = `
-                    <div class="empty-state-icon">🧐</div>
-                    <h3>No notifications found</h3>
-                    <p>No notifications match this filter.</p>`;
-                listContainer.appendChild(emptyState);
+    // --- NEW HELPER: Update Header Count ---
+    function updateHeaderCount(newCount) {
+        // Find the bell button in the header
+        const bellButton = document.getElementById('notification-bell-btn');
+        if (!bellButton) return;
+
+        let countElement = bellButton.querySelector('.notification-count');
+
+        if (newCount > 0) {
+            if (!countElement) {
+                // If the count span doesn't exist, create it
+                countElement = document.createElement('span');
+                countElement.className = 'notification-count';
+                bellButton.appendChild(countElement);
             }
-            emptyState.style.display = 'block';
-        } else if (emptyState) {
-            emptyState.style.display = 'none';
+            countElement.textContent = newCount;
+        } else {
+            // If the new count is 0, remove the element
+            if (countElement) {
+                countElement.remove();
+            }
         }
     }
 
+    // --- Helper: Show/Hide Empty State ---
+    function checkEmptyState() {
+        // First, get a count of ALL notification rows, visible or not
+        const totalRows = listContainer.querySelectorAll('.notification-item-row').length;
+        // Next, get a count of only the VISIBLE rows (matching the filter)
+        const visibleRows = listContainer.querySelectorAll('.notification-item-row:not([style*="display: none"])').length;
+        
+        const staticEmptyState = document.getElementById('static-empty-state');
+        const filterEmptyState = document.getElementById('filter-empty-state');
+
+        if (totalRows === 0) {
+            // --- CASE 1: All notifications are truly gone (deleted) ---
+            // Show "All clear! 🎉"
+            if (staticEmptyState) {
+                staticEmptyState.style.display = 'block';
+            }
+            // Hide "No filter results 🧐"
+            if (filterEmptyState) {
+                filterEmptyState.style.display = 'none';
+            }
+        } else {
+            // --- CASE 2: Notifications exist, but may be filtered ---
+            // Hide "All clear! 🎉"
+            if (staticEmptyState) {
+                staticEmptyState.style.display = 'none';
+           }
+            
+            // Now, check if the *filter* resulted in 0 items
+            if (visibleRows === 0) {
+                // Show "No filter results 🧐"
+                if (filterEmptyState) {
+                    filterEmptyState.style.display = 'block';
+                }
+            } else {
+                // Hide "No filter results 🧐"
+                if (filterEmptyState) {
+                    filterEmptyState.style.display = 'none';
+                }
+            }
+        }
+    }
     // --- 1. Tab Switching Logic ---
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -145,19 +227,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 2. Action Bar & Checkbox Logic ---
     function updateActionBar() {
-        // ✅ FIX: Selector now correctly checks for rows that are NOT hidden
         const visibleCheckboxes = listContainer.querySelectorAll('.notification-item-row:not([style*="display: none"]) .notification-checkbox');
         const checkedCheckboxes = listContainer.querySelectorAll('.notification-item-row:not([style*="display: none"]) .notification-checkbox:checked');
         
         const checkedCount = checkedCheckboxes.length;
         
         if (checkedCount > 0) {
-            actionBar.style.display = 'flex';
+            // ✅ CHANGE 3: Replaced style.display with CSS class toggles
+            actionBar.classList.add('is-active');
+            document.body.classList.add('action-bar-visible');
+            
+            // Check what types of items are selected
             const hasUnread = Array.from(checkedCheckboxes).some(cb => cb.closest('.notification-item-row').dataset.read === 'false');
-            markReadBtn.textContent = hasUnread ? 'Mark as Read' : 'Mark as Unread';
-            markReadBtn.dataset.action = hasUnread ? 'mark_read' : 'mark_unread';
+            const hasRead = Array.from(checkedCheckboxes).some(cb => cb.closest('.notification-item-row').dataset.read === 'true');
+
+            // Show/hide buttons based on selection
+            markReadBtn.style.display = hasUnread ? 'inline-block' : 'none';
+            markUnreadBtn.style.display = hasRead ? 'inline-block' : 'none';
+            deleteBtn.style.display = 'inline-block'; // Show delete if anything is selected
+
         } else {
-            actionBar.style.display = 'none';
+            // ✅ CHANGE 4: Replaced style.display with CSS class toggles
+            actionBar.classList.remove('is-active');
+            document.body.classList.remove('action-bar-visible');
         }
         
         // Update "Select All" checkbox state
@@ -167,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // "Select All" click
     selectAllCheckbox.addEventListener('change', () => {
         const isChecked = selectAllCheckbox.checked;
-        // ✅ FIX: Selector now correctly checks for rows that are NOT hidden
+        // Selector now correctly checks for rows that are NOT hidden
         listContainer.querySelectorAll('.notification-item-row:not([style*="display: none"]) .notification-checkbox').forEach(cb => {
             cb.checked = isChecked;
         });
@@ -223,14 +315,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 4. AJAX Action Button Clicks ---
     async function handleBatchAction(action, button) {
-        // ✅ FIX: Selector now correctly checks for rows that are NOT hidden
         const checkedIds = Array.from(listContainer.querySelectorAll('.notification-item-row:not([style*="display: none"]) .notification-checkbox:checked')).map(cb => cb.value);
         if (checkedIds.length === 0) return;
+
         
         const url = (action === 'delete') ? "{% url 'batch_delete_notifications' %}" : "{% url 'batch_update_notifications' %}";
         const formData = new FormData();
         formData.append('notification_ids', checkedIds.join(','));
-        formData.append('action', markReadBtn.dataset.action); // 'mark_read' or 'mark_unread'
+        formData.append('action', action); // 'mark_read', 'mark_unread', or 'delete'
         
         button.disabled = true;
         button.textContent = 'Processing...';
@@ -239,13 +331,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(url, {
                 method: 'POST',
                 body: formData,
-                headers: {
-                    'X-CSRFToken': getCsrfToken(),
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                headers: { 'X-CSRFToken': getCsrfToken(), 'X-Requested-With': 'XMLHttpRequest' }
             });
             const data = await response.json();
             if (!data.success) throw new Error(data.error);
+
+            if (data.new_unread_count !== undefined) {
+                updateHeaderCount(data.new_unread_count);
+            }
             
             // Success! Update the UI
             checkedIds.forEach(id => {
@@ -254,18 +347,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (action === 'delete') {
                         row.remove();
                     } else {
-                        // Mark as Read/Unread
-                        const newReadState = (markReadBtn.dataset.action === 'mark_read');
+                        const newReadState = (action === 'mark_read');
                         row.dataset.read = newReadState ? 'true' : 'false';
                         const dot = row.querySelector('.unread-dot');
-                        if (newReadState && dot) {
-                            dot.style.display = 'none';
-                        } else if (!newReadState && !dot) {
-                            // This item should be unread, but has no dot. Add one.
-                            const newDot = document.createElement('div');
-                            newDot.className = 'unread-dot';
-                            newDot.title = 'Unread';
-                            row.appendChild(newDot);
+                        if (newReadState) {
+                            if (dot) dot.remove();
+                        } else {
+                            if (!dot) {
+                                const newDot = document.createElement('div');
+                                newDot.className = 'unread-dot';
+                                newDot.title = 'Unread';
+                                row.appendChild(newDot);
+                            }
                         }
                     }
                 }
@@ -277,18 +370,118 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally {
             // Reset UI
             selectAllCheckbox.checked = false;
-            updateActionBar(); // This will hide the bar
-            checkEmptyState(); // This will show/hide the empty message
-            button.disabled = false;
-            // Reset button text
-            if (button.id === 'delete-btn') button.textContent = 'Delete';
-            else button.textContent = 'Mark as Read';
+            allNotificationRows.forEach(row => {
+                const cb = row.querySelector('.notification-checkbox');
+                if (cb) cb.checked = false;
+            });
+            updateActionBar(); 
+
+            if (deleteModal) deleteModal.style.display = 'none';
+
+            if (currentTab === 'unread' && action === 'mark_read') {
+                checkedIds.forEach(id => {
+                    const row = listContainer.querySelector(`.notification-item-row[data-id="${id}"]`);
+                    if (row) {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+       
+            checkEmptyState();
+            // Reset button states
+            markReadBtn.disabled = false;
+            markReadBtn.textContent = 'Mark as Read';
+            markUnreadBtn.disabled = false;
+            markUnreadBtn.textContent = 'Mark as Unread';
+            deleteBtn.disabled = false;
+            deleteBtn.textContent = 'Delete';
+            confirmDeleteBtn.disabled = false;
+            confirmDeleteBtn.textContent = 'Yes, Delete';
         }
     }
 
+    // --- ✅ NEW "MARK ALL READ" FUNCTION ---
+    async function handleMarkAllRead() {
+        const hasUnread = listContainer.querySelector('.notification-item-row[data-read="false"]');
+        if (!hasUnread) {
+            console.log("No unread items to mark as read.");
+            return; // Stop the function
+        }
+        markAllReadBtn.disabled = true;
+        markAllReadBtn.textContent = 'Processing...';
+        
+        try {
+            const response = await fetch("{% url 'mark_all_as_read' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const data = await response.json();
+            if (!data.success) throw new Error(data.error);
+
+            // 1. Update header count
+            if (data.new_unread_count !== undefined) {
+                updateHeaderCount(data.new_unread_count);
+            }
+
+            // 2. Update all visible items on the page
+            allNotificationRows.forEach(row => {
+                row.dataset.read = 'true';
+                const dot = row.querySelector('.unread-dot');
+                if (dot) dot.remove();
+                
+                // 3. If on "Unread" tab, hide the row
+                if (currentTab === 'unread') {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // 4. Update the empty state message
+            checkEmptyState();
+        } catch (error) {
+            console.error('Mark all as read failed:', error);
+            alert('An error occurred. Please try again.');
+        } finally {
+            // 5. Reset the button
+            markAllReadBtn.disabled = false;
+            markAllReadBtn.textContent = 'Mark All as Read';
+        }
+    }
+    // --- END OF NEW FUNCTION ---
+
+
     // Attach listeners
-    markReadBtn.addEventListener('click', () => handleBatchAction('mark_read_unread', markReadBtn));
-    deleteBtn.addEventListener('click', () => handleBatchAction('delete', deleteBtn));
+    markReadBtn.addEventListener('click', () => handleBatchAction('mark_read', markReadBtn));
+    markUnreadBtn.addEventListener('click', () => handleBatchAction('mark_unread', markUnreadBtn));
+
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', handleMarkAllRead);
+    }
+
+    // --- NEW MODAL LISTENERS ---
+    // When "Delete" in the action bar is clicked, show the modal
+    deleteBtn.addEventListener('click', () => {
+        if (deleteModal) deleteModal.style.display = 'flex';
+    });
+
+    // When "Yes, Delete" in the modal is clicked, run the action
+    confirmDeleteBtn.addEventListener('click', () => {
+        handleBatchAction('delete', confirmDeleteBtn);
+    });
+
+    // Add listeners to all "Cancel" (close) buttons on the modal
+    if (deleteModal) {
+        deleteModal.querySelectorAll('[data-close-modal]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                deleteModal.style.display = 'none';
+            });
+        });
+    }
+    // --- END OF NEW LISTENERS ---
+
 
     // Initial setup
     checkEmptyState();

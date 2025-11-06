@@ -72,11 +72,16 @@
 }
 
 /* --- Header Right Side (Profile/Logout) --- */
-.header-right {
+.header-right-desktop,
+.header-right-mobile {
     display: flex;
     align-items: center;
     gap: 12px;
     flex-shrink: 0;
+}
+
+.header-right-mobile {
+    display: none;
 }
 .student-name {
     width: 32px;
@@ -143,16 +148,53 @@
     z-index: 1001;
 }
 
+.header-controls-right {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
 /* --- Responsive Breakpoint (992px) --- */
 @media (max-width: 992px) {
+    .notifications-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+     .header-controls {
+        width: 100%;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .tabs {
+        width: 100%;
+    }
+    
+    .tab-btn {
+        flex: 1; /* Make tabs equal width */
+    }
+    
+    .btn-mark-all {
+        width: 100%;
+        text-align: center;
+    }
     
     .dashboard-header {
         padding: 0 1rem;
-        justify-content: space-between;
+       /* justify-content: space-between; */
     }
+
+    .header-left {
+        flex: 1;
+      }
 
     .hamburger-btn {
         display: block;
+    }
+    .header-right-desktop {
+        display: none;
     }
 
     .mobile-menu-wrapper {
@@ -177,8 +219,8 @@
     }
 
     /* "Open" State */
-    .dashboard-header.menu-is-open .mobile-menu-wrapper {
-        display: flex; /* Show the menu */
+    .dashboard-header.menu-is-open .mobile-menu-wrapper{
+        display: flex; /* Show the menu AND the profile/logout section */
     }
     
     /* Change hamburger icon to an "X" when open */
@@ -210,7 +252,8 @@
         border-radius: 0;
     }
 
-    .header-right {
+    .header-right-mobile {
+        display: flex;
         flex-direction: column;
         align-items: stretch;
         gap: 0.5rem;
@@ -286,6 +329,7 @@
     opacity: 0;
 }
 
+
 /* --- Profile Name & Avatar Link --- */
 .student-name-link {
     display: flex;
@@ -296,9 +340,9 @@
     transition: background-color 0.2s ease-in-out;
     text-decoration: none;
 }
-
-.student-name-link:hover {
-    background-color: #f8f9fa;
+.student-name-link:hover,
+.student-name-link.active {
+    background-color: rgba(128, 0, 0, 0.1); /* Light maroon */
 }
 
 .student-name-text {
@@ -306,10 +350,6 @@
     color: #1e293b;
     font-size: 15px;
     display: block;
-}
-.student-name-link:hover,
-.student-name-link.active {
-    background-color: rgba(128, 0, 0, 0.1); /* Light maroon */
 }
 
 .header-avatar {
@@ -364,6 +404,7 @@
     100% { transform: rotate(360deg); }
 }
 
+
 /* --- Accessibility Focus Styles --- */
 a:focus-visible,
 button:focus-visible,
@@ -381,9 +422,9 @@ textarea:focus-visible {
 }
 
 
-/* --- ✅ START: Notification Bell Styles --- */
+/* --- ✅ START: Notification Bell Styles (Consolidated & Fixed) --- */
 .notification-bell-wrapper {
-    position: relative; /* This is crucial for positioning the dropdown */
+    position: relative;
 }
 
 .notification-btn {
@@ -399,14 +440,17 @@ textarea:focus-visible {
     transition: background-color 0.2s ease;
 }
 .notification-btn:hover {
-    background-color: #f8f9fa; /* Same as nav-btn:hover */
+    background-color: #f8f9fa;
+}
+.notification-btn.active {
+    background-color: rgba(128, 0, 0, 0.1);
 }
 
 .notification-count {
     position: absolute;
     top: 4px;
     right: 4px;
-    background-color: #dc2626; /* Red */
+    background-color: #dc2626;
     color: white;
     font-size: 10px;
     font-weight: 600;
@@ -420,74 +464,126 @@ textarea:focus-visible {
 }
 
 .notification-dropdown {
-    display: none; /* Hidden by default */
+    display: none;
+    flex-direction: column; /* This is key */
     position: absolute;
-    top: 130%; /* Position below the bell */
+    top: 130%;
     right: 0;
-    width: 360px;
-    max-height: 400px;
-    overflow-y: auto;
+    width: 380px; /* Made wider for the picture */
+    max-height: 450px; /* Max height before *list* scrolls */
     background: white;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     border: 1px solid #e2e8f0;
-    z-index: 1001; /* Must be higher than the header */
+    z-index: 1001;
 }
 
 .notification-dropdown.visible {
-    display: block; /* Show when JS adds this class */
+    display: flex; /* ✅ Use flex to make the layout work */
 }
 
 .dropdown-header {
     padding: 1rem;
     border-bottom: 1px solid #f1f5f9;
+    flex-shrink: 0; /* Prevents header from shrinking */
 }
 .dropdown-header strong {
     font-size: 16px;
     color: #1e293b;
+    display: block;
+    margin-bottom: 0.75rem;
 }
 
-.notification-list {
+/* Tab Styles */
+.notification-dropdown .tabs {
+    display: flex;
+    gap: 0.5rem;
+    background-color: #f1f5f9;
+    border-radius: 8px;
+    padding: 0.25rem;
+    width: fit-content;
+}
+.notification-dropdown .tab-btn {
+    background: transparent;
+    border: none;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+.notification-dropdown .tab-btn:hover {
+    background-color: #e2e8f0;
+}
+.notification-dropdown .tab-btn.active {
+    background-color: #fff;
+    color: #800000;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ This is the ONLY scrollable part */
+.notification-dropdown .notification-list {
     max-height: 300px;
     overflow-y: auto;
+    flex-shrink: 1; /* Allows the list to shrink and grow */
 }
 
+/* Notification Item Layout */
 .notification-item {
-    display: block;
-    width: 100%; /* Make button fill width */
-    text-align: left; /* Reset button default */
-    background: none; /* Reset button default */
-    border: none; /* Reset button default */
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
     cursor: pointer;
     padding: 1rem;
     text-decoration: none;
     border-bottom: 1px solid #f1f5f9;
     transition: background-color 0.2s ease, opacity 0.3s ease;
-    
-    /* ✅ FIX: Add for the blue dot */
     position: relative;
-    padding-left: 2rem; 
 }
 .notification-item:hover {
     background-color: #f8fafc;
 }
 
-/* ✅ FIX: Style for the blue "unread" dot */
-.notification-item.notification-unread::before {
-    content: '';
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #3b82f6; /* A nice blue */
+.notification-product-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+    background-color: #f1f5f9;
+    flex-shrink: 0;
 }
 
-/* ✅ FIX: Style for "read" items (they won't have the class) */
+.notification-content {
+    flex-grow: 1;
+    padding-right: 1rem; /* Space for the dot */
+}
+
+.unread-dot {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #3b82f6;
+    flex-shrink: 0;
+}
+
+.notification-item.notification-unread::before {
+    display: none; /* Hide old dot */
+}
+
 .notification-item:not(.notification-unread) {
     opacity: 0.7;
+}
+.notification-item:not(.notification-unread) .unread-dot {
+    display: none;
 }
 .notification-item:not(.notification-unread):hover {
     opacity: 1;
@@ -498,6 +594,8 @@ textarea:focus-visible {
     font-size: 14px;
     color: #334155;
     line-height: 1.4;
+    white-space: normal;
+    word-break: break-word;
 }
 
 .notification-item .notification-time {
@@ -505,17 +603,41 @@ textarea:focus-visible {
     color: #64748b;
 }
 
-.notification-item.empty {
+/* --- Empty State (for Dropdown) --- */
+.notification-list .empty-state {
     padding: 2rem 1rem;
     text-align: center;
 }
-.notification-item.empty p {
-    font-size: 14px;
-    color: #64748b;
+
+.empty-state-icon {
+    font-size: 2.5rem;
+    line-height: 1;
+    margin-bottom: 1rem;
+
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #fde8e8;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.notification-btn.active {
-    background-color: rgba(128, 0, 0, 0.1); /* Light maroon, same as profile link */
+.empty-state h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+}
+
+.empty-state p {
+    font-size: 15px;
+    color: #64748b;
+    margin: 0;
 }
 
 .dropdown-footer {
@@ -523,6 +645,7 @@ textarea:focus-visible {
     text-align: center;
     background-color: #f8fafc;
     border-top: 1px solid #f1f5f9;
+    flex-shrink: 0; /* Prevents footer from shrinking */
 }
 .dropdown-footer a {
     font-size: 14px;
@@ -534,3 +657,13 @@ textarea:focus-visible {
     text-decoration: underline;
 }
 /* --- ✅ END: Notification Bell Styles --- */
+
+/* Responsive fix for dropdown on mobile */
+@media (max-width: 992px) {
+    .notification-dropdown {
+        width: 380px;
+        max-width: 95vw;
+        left: auto;
+        right: 0;
+    }
+}

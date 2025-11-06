@@ -17,18 +17,10 @@ urlpatterns = [
     path('student/cancel-order/<int:order_id>/', views.cancel_order_view, name='cancel_order'),
     path('dashboard/student/notifications/mark-read/', views.mark_notifications_as_read, name='mark_notifications_as_read'),
     path('dashboard/student/notifications/read/<int:notification_id>/', views.mark_notification_read_and_redirect, name='mark_notification_read_and_redirect'),
-    path('dashboard/student/notifications/', 
-         views.all_notifications_view, 
-         name='all_notifications'),
-    
-    path('dashboard/student/notifications/batch-update/', 
-         views.batch_update_notifications, 
-         name='batch_update_notifications'),
-         
-    path('dashboard/student/notifications/batch-delete/', 
-         views.batch_delete_notifications, 
-         name='batch_delete_notifications'),
-
+    path('dashboard/student/notifications/', views.all_notifications_view, name='all_notifications'),
+    path('dashboard/student/notifications/batch-update/', views.batch_update_notifications, name='batch_update_notifications'),
+    path('dashboard/student/notifications/batch-delete/', views.batch_delete_notifications, name='batch_delete_notifications'),
+    path('notifications/mark-all-read/', views.mark_all_as_read_view, name='mark_all_as_read'),
 
 
 

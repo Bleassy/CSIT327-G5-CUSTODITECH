@@ -54,7 +54,7 @@ def notifications_context(request):
             # ✅ FIX: Fetch 5 newest notifications,
             # selecting 'is_read' but NOT filtering by it.
             response = supabase.table('notifications') \
-                .select('id, message, link_url, created_at, is_read') \
+                .select('id, message, link_url, created_at, is_read, products(image_url)') \
                 .order('created_at', desc=True) \
                 .limit(20) \
                 .execute()

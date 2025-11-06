@@ -1,15 +1,10 @@
 {% load static %}
-{% load humanize %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
+{% load humanize %}<!DOCTYPE html><html lang="en"><head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ page_title|default:'Dashboard' }} - CIT Wildcats Store</title>
-    <link rel="stylesheet" href="{% static 'css/student_base.css' %}?v=1.2">
-    {% block extra_css %}{% endblock %}
-</head>
-<body class="buyer-dashboard">
+    <link rel="stylesheet" href="{% static 'css/student_base.css' %}?v=1.3">
+    {% block extra_css %}{% endblock %}</head><body class="buyer-dashboard">
 
     <div class="loader-overlay" id="page-loader">
         <div class="loader-spinner"></div>
@@ -17,7 +12,7 @@
 
     <header class="dashboard-header">
     <div class="header-left">
-        <a class="logo" href="{% url 'student_dashboard' %}"> <span class="logo-icon">🐱</span>
+        <a class="logo {% if active_page == 'dashboard' %}active{% endif %}" href="{% url 'student_dashboard' %}"> <span class="logo-icon">🐱</span>
             <span class="logo-text">CIT Wildcats Store</span>
         </a>
     </div>
@@ -29,45 +24,7 @@
             <a href="{% url 'my_reservations' %}" class="nav-btn {% if active_page == 'reservations' %}active{% endif %}">📅 My Reservations</a>
             <a href="{% url 'my_orders' %}" class="nav-btn {% if active_page == 'orders' %}active{% endif %}">📦 My Orders</a>
         </nav>
-        <div class="header-right">
-
-            <div class="notification-bell-wrapper">
-                <button type="button" 
-            class="notification-btn {% if active_page == 'notifications' %}active{% endif %}" 
-            id="notification-bell-btn" 
-            aria-label="Toggle notifications">
-        🔔
-                    {% if notification_count > 0 %}
-                        <span class="notification-count">{{ notification_count }}</span>
-                    {% endif %}
-                </button>
-                <div class="notification-dropdown" id="notification-dropdown">
-                    <div class="dropdown-header">
-                        <strong>Notifications</strong>
-                    </div>
-                <div class="notification-list" id="notification-list">
-                    {% for notification in notifications %}
-                        
-                        <button type="button" 
-                                class="notification-item {% if not notification.is_read %}notification-unread{% endif %}" 
-                                data-url="{% url 'mark_notification_read_and_redirect' notification.id %}">
-                            
-                            <p class="notification-message">{{ notification.message }}</p>
-                            <span class="notification-time">{{ notification.created_at|timesince }} ago</span>
-                        </button>
-
-                    {% empty %}
-                        <div class="notification-item empty">
-                            <p>You have no new notifications.</p>
-                        </div>
-                    {% endfor %}
-                </div>
-                    <div class="dropdown-footer">
-                        <a href="{% url 'all_notifications' %}">View All Notifications</a>
-                    </div>
-                </div>
-            </div>
-            <a href="{% url 'student_profile' %}" class="student-name-link {% if active_page == 'profile' %}active{% endif %}">
+        <div class="header-right header-right-mobile"> <a href="{% url 'student_profile' %}" class="student-name-link {% if active_page == 'profile' %}active{% endif %}">
                 {% if profile.avatar_url %}
                     <img src="{{ profile.avatar_url }}" alt="Profile" class="header-avatar">
                 {% else %}
@@ -83,12 +40,90 @@
         </div>
     </div>
     
-    <button class="hamburger-btn" aria-label="Toggle menu" aria-expanded="false">
-        <span class="hamburger-icon">&equiv;</span>
-    </button>
-</header>
-    <div class="container">
+    <div class="header-controls-right">
+        <div class="notification-bell-wrapper">
+            <button type="button" 
+                    class="notification-btn {% if active_page == 'notifications' %}active{% endif %}" 
+                    id="notification-bell-btn" 
+                    aria-label="Toggle notifications">
+                🔔
+                {% if notification_count > 0 %}
+                    <span class="notification-count">{{ notification_count }}</span>
+                {% endif %}
+            </button>
+            
+            <div class="notification-dropdown" id="notification-dropdown">
+                <div class="dropdown-header">
+                    <strong>Notifications</strong>
+                    <div class="tabs" id="notification-tabs">
+                        <button type="button" class="tab-btn active" data-tab="all">All</button>
+                        <button type="button" class="tab-btn" data-tab="unread">Unread</button>
+                    </div>
+                </div>
 
+                <div class="notification-list" id="notification-list">
+                    {% for notification in notifications %}
+                        
+                        <button type="button" 
+                                class="notification-item {% if not notification.is_read %}notification-unread{% endif %}" 
+                                data-url="{% url 'mark_notification_read_and_redirect' notification.id %}"
+                                data-read="{{ notification.is_read|yesno:'true,false' }}">
+                            
+                            <img src="{{ notification.products.image_url|default:'https://placehold.co/400x300/e0e7ff/3730a3?text=Item' }}" 
+                                 alt="Product" class="notification-product-image">
+                            
+                            <div class="notification-content">
+                                <p class="notification-message">{{ notification.message }}</p>
+                                <span class="notification-time">{{ notification.created_at|timesince }} ago</span>
+                            </div>
+
+                            {% if not notification.is_read %}
+                                <div class="unread-dot"></div>
+                            {% endif %}
+                        </button>
+
+                    {% empty %}
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🎉</div>
+                            <h3>All clear!</h3>
+                            <p>You have no notifications right now.</p>
+                        </div>
+                    {% endfor %}
+
+                    <div class="empty-state" id="dynamic-empty-state" style="display: none;">
+                            <div class="empty-state-icon">🧐</div>
+                            <h3>No notifications found</h3>
+                            <p>No notifications match this filter.</p>
+                        </div>
+                    </div>
+
+                <div class="dropdown-footer">
+                    <a href="{% url 'all_notifications' %}">View All Notifications</a>
+                </div>
+            </div>
+            </div>
+
+        <div class="header-right header-right-desktop"> <a href="{% url 'student_profile' %}" class="student-name-link {% if active_page == 'profile' %}active{% endif %}">
+                {% if profile.avatar_url %}
+                    <img src="{{ profile.avatar_url }}" alt="Profile" class="header-avatar">
+                {% else %}
+                    <span class="header-avatar header-initials">
+                        {{ profile.full_name|default:request.user.get_full_name|default:'U'|first|upper }}
+                    </span>
+                {% endif %}
+                <span class="student-name-text">
+                    Hello, <strong>{{ display_name|default:'Student' }}</strong>!
+                </span>
+            </a>
+            <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+        </div>
+    
+        <button class="hamburger-btn" aria-label="Toggle menu" aria-expanded="false">
+            <span class="hamburger-icon">&equiv;</span>
+        </button>
+    </div></header>
+    
+    <div class="container">
         <ul class="messages" id="messages-container">
             {% if messages %}
                 {% for message in messages %}
@@ -125,32 +160,32 @@
         // ===== Page Loader Logic =====
         const loader = document.getElementById('page-loader');
         if (loader) {
-            // Hide loader on page "show" (for back/forward button)
             window.addEventListener('pageshow', function() {
                 loader.classList.remove('visible');
             });
 
-            // Show loader on link clicks
             document.addEventListener('click', function(e) {
                 const link = e.target.closest('a');
-
                 if (link) {
-                    // --- Filters: Don't show loader for... ---
+                    if (link.classList.contains('active')) {
+                        e.preventDefault();
+                        return;
+                    }
                     if (link.target === '_blank') return;
                     if (link.href.startsWith(window.location.href + '#')) return;
                     if (link.href.startsWith('mailto:') || link.href.startsWith('tel:')) return;
                     if (link.closest('.pagination-container')) return;
                     
-                    // This logic is for the "View All" link in the footer
                     if (link.closest('.notification-dropdown')) {
                         loader.classList.add('visible');
-                        return; // Let the link click proceed
+                        return; 
                     }
-
                     if (e.target.closest('#notification-bell-btn')) return;
+                    
+                    // Filter for new tab buttons
+                    if (e.target.closest('#notification-tabs')) return; 
 
                     if (e.ctrlKey || e.metaKey) return;
-                    
                     loader.classList.add('visible');
                 }
             });
@@ -178,15 +213,26 @@
                 });
             }
 
-            // --- MERGE: Updated Notification Logic ---
+            // --- Updated Notification Logic ---
             const bellBtn = document.getElementById('notification-bell-btn');
             const dropdown = document.getElementById('notification-dropdown');
 
             if (bellBtn && dropdown) {
                 // Toggle dropdown on bell click
                 bellBtn.addEventListener('click', function(e) {
-                    e.stopPropagation(); // Prevents the 'document' click from closing it
+                    if (bellBtn.classList.contains('active')) {
+                        return;
+                    }
+                    e.stopPropagation(); 
                     dropdown.classList.toggle('visible');
+
+                    // Close hamburger menu if it's open
+                    if (header.classList.contains('menu-is-open')) {
+                        header.classList.remove('menu-is-open');
+                        body.classList.remove('menu-is-open');
+                        hamburgerBtn.setAttribute('aria-expanded', 'false');
+                        hamburgerBtn.querySelector('.hamburger-icon').innerHTML = '&equiv;';
+                    }
                 });
 
                 // Close dropdown when clicking outside
@@ -197,21 +243,18 @@
                 });
             }
 
-            // --- MERGE: Add Click-to-Redirect Logic for notification buttons ---
+            // --- Click-to-Redirect Logic for notification buttons ---
             const notificationList = document.getElementById('notification-list');
             if (notificationList) {
                 notificationList.addEventListener('click', function(e) {
-                    // Find the button that was clicked
                     const notificationItem = e.target.closest('.notification-item');
                     
                     if (notificationItem) {
                         const url = notificationItem.dataset.url;
                         if (!url) return;
 
-                        // 1. Show the page loader immediately
                         if (loader) loader.classList.add('visible');
 
-                        // 2. Call the "mark as read" function
                         fetch(url, {
                             method: 'POST',
                             headers: {
@@ -221,24 +264,78 @@
                         })
                         .then(response => response.json())
                         .then(data => {
-                            // 3. Redirect to the URL from the response
-                            // This happens *after* the database update is complete
                             if (data.redirect_url) {
                                 window.location.href = data.redirect_url;
                             } else {
-                                // Fallback if something went wrong
                                 window.location.href = "{% url 'my_orders' %}";
                             }
                         })
                         .catch(error => {
                             console.error('Error marking notification as read:', error);
-                            // Still redirect so the user isn't stuck
                             window.location.href = "{% url 'my_orders' %}";
                         });
                     }
                 });
             }
-            // --- END MERGE ---
+
+            // --- NEW: Tab switching logic for dropdown ---
+            const notificationTabs = document.getElementById('notification-tabs');
+            if (notificationList && notificationTabs) {
+                notificationTabs.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('tab-btn')) {
+                        // Stop the dropdown from closing
+                        e.stopPropagation();
+                        
+                        // Update active tab button
+                        notificationTabs.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                        e.target.classList.add('active');
+                        
+                        const currentTab = e.target.dataset.tab;
+                        
+                        // Filter the list
+                        notificationList.querySelectorAll('.notification-item, .empty-state').forEach(item => {
+                            if (item.classList.contains('empty-state')) return;
+                            
+                            const isRead = item.dataset.read === 'true';
+                            if (currentTab === 'all' || (currentTab === 'unread' && !isRead)) {
+                                item.style.display = 'flex';
+                            } else {
+                                item.style.display = 'none';
+                            }
+                        });
+                        checkDropdownEmptyState();
+                    }
+                });
+            }
+
+            // --- NEW HELPER FUNCTION ---
+        const dynamicEmptyState = document.getElementById('dynamic-empty-state');
+
+        function checkDropdownEmptyState() {
+            if (!notificationList || !dynamicEmptyState) return;
+
+            // Find the "All Clear!" message
+            const staticEmptyState = notificationList.querySelector('.empty-state:not(#dynamic-empty-state)');
+            
+            // If "All Clear!" is showing, don't do anything
+            if (staticEmptyState && staticEmptyState.offsetParent !== null) {
+                dynamicEmptyState.style.display = 'none';
+                return;
+            }
+
+            // Count how many items are visible
+            const visibleItems = notificationList.querySelectorAll('.notification-item:not([style*="display: none"])').length;
+
+            if (visibleItems === 0) {
+                // No items are visible, so show the dynamic "No notifications match" message
+                dynamicEmptyState.style.display = 'block';
+            } else {
+                // Items are visible, so hide the dynamic message
+                dynamicEmptyState.style.display = 'none';
+            }
+        }
+        // --- END HELPER FUNCTION ---
+
         });
     </script>
     </body>

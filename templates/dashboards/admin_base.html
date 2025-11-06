@@ -27,7 +27,7 @@
         
         <!-- Header Left: Logo -->
         <div class="header-left">
-            <a href="{% url 'admin_dashboard' %}" class="logo">
+            <a href="{% url 'admin_dashboard' %}" class="logo {% if active_page == 'dashboard' %}active{% endif %}">
                 <span class="logo-icon">🐱</span>
                 <span class="logo-text">CIT Wildcats Admin</span>
             </a>
@@ -110,7 +110,12 @@
             const link = e.target.closest('a');
 
             if (link) {
-                // Filters: Don't show loader for...
+                
+                // --- Filters: Don't show loader for... ---
+                if (link.classList.contains('active')) {
+                    e.preventDefault(); // This stops the reload
+                    return;
+                }
                 
                 // (a) Links opening in a new tab
                 if (link.target === '_blank') return;

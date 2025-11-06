@@ -168,8 +168,18 @@ def batch_update_notifications(request):
             .in_('id', notification_ids) \
             .eq('user_id', request.user.id) \
             .execute()
+
+        # After updating, get the new total unread count (using RLS-enabled client)
+        count_response = supabase.table('notifications') \
+            .select('id', count='exact') \
+            .eq('is_read', False) \
+            .execute()
         
-        return JsonResponse({'success': True, 'message': f'{len(notification_ids)} notifications updated.'})
+        return JsonResponse({
+            'success': True, 
+            'message': f'{len(notification_ids)} notifications updated.',
+            'new_unread_count': count_response.count  
+        })
 
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
@@ -204,7 +214,46 @@ def batch_delete_notifications(request):
             .eq('user_id', request.user.id) \
             .execute()
         
-        return JsonResponse({'success': True, 'message': f'{len(notification_ids)} notifications deleted.'})
+        # After deleting, get the new total unread count (using RLS-enabled client)
+        count_response = supabase.table('notifications') \
+            .select('id', count='exact') \
+            .eq('is_read', False) \
+            .execute()
+        
+        return JsonResponse({
+            'success': True, 
+            'message': f'{len(notification_ids)} notifications deleted.',
+            'new_unread_count': count_response.count  
+        })
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@student_required
+@require_http_methods(["POST"])
+def mark_all_as_read_view(request):
+    """
+    Handles an AJAX POST request to mark ALL unread notifications
+    for a user as 'read'.
+    """
+    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+    
+    try:
+        # This update respects RLS, so the user can only update their own notifications.
+        # It finds all notifications that are 'is_read: False' and sets them to 'True'.
+        supabase.table('notifications') \
+            .update({'is_read': True}) \
+            .eq('user_id', request.user.id) \
+            .eq('is_read', False) \
+            .execute()
+        
+        # After marking all as read, the new unread count is 0.
+        return JsonResponse({
+            'success': True, 
+            'message': 'All notifications marked as read.',
+            'new_unread_count': 0  # We know the new count is 0
+        })
 
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
