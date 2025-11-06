@@ -182,8 +182,8 @@
     }
     
     .dashboard-header {
-        padding: 0 1rem;
-       /* justify-content: space-between; */
+        padding: 0 0.5rem;
+        height: 60px; /* Slightly smaller header on mobile */
     }
 
     .header-left {
@@ -217,6 +217,20 @@
         padding: 0.5rem 0;
         gap: 0;
     }
+
+    .header-controls-right {
+        gap: 0.5rem;
+    }
+
+     .notification-btn {
+        padding: 6px;
+        font-size: 18px;
+    }
+    
+    .header-left .logo {
+        font-size: 14px;
+    }
+    
 
     /* "Open" State */
     .dashboard-header.menu-is-open .mobile-menu-wrapper{
@@ -279,6 +293,14 @@
         background-color: #fee2e2;
         border-color: #fca5a5;
         color: #dc2626;
+    }
+}
+
+/* Show abbreviated logo text on medium mobile */
+@media (max-width: 768px) and (min-width: 481px) {
+    .logo-text {
+        display: block;
+        font-size: 12px;
     }
 }
 
@@ -658,12 +680,55 @@ textarea:focus-visible {
 }
 /* --- ✅ END: Notification Bell Styles --- */
 
-/* Responsive fix for dropdown on mobile */
+/* --- Mobile Notification Dropdown Fixes --- */
 @media (max-width: 992px) {
+    .notification-bell-wrapper {
+        position: static; /* Change from relative to contain dropdown properly */
+    }
+    
     .notification-dropdown {
-        width: 380px;
-        max-width: 95vw;
-        left: auto;
-        right: 0;
+        position: fixed; /* Change from absolute to fixed for mobile */
+        top: 70px; /* Position below header */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 95vw; /* Use viewport width */
+        max-width: 400px;
+        max-height: 70vh; /* Limit height to viewport */
+        z-index: 1002; /* Higher z-index to appear above menu */
+    }
+    
+    .notification-list {
+        max-height: 50vh !important; /* Reduce list height on mobile */
+    }
+    
+    /* Ensure dropdown appears above mobile menu */
+    .dashboard-header.menu-is-open .notification-dropdown.visible {
+        z-index: 1003;
+    }
+}
+
+/* Additional mobile optimizations */
+@media (max-width: 480px) {
+    .notification-dropdown {
+        width: 98vw;
+        max-width: 98vw;
+        margin: 0 1vw;
+    }
+    
+    .notification-item {
+        padding: 0.75rem;
+    }
+    
+    .notification-product-image {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .notification-message {
+        font-size: 13px;
+    }
+    
+    .dropdown-header {
+        padding: 0.75rem;
     }
 }
