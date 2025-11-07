@@ -56,6 +56,7 @@ body {
 .logo-icon {
     font-size: 3rem;
     margin-top: 10px;
+    color: #FFD700;
 }
 
 .tagline {
@@ -315,4 +316,9 @@ input:valid:not(:placeholder-shown) {
     .form-group {
         margin-bottom: 14px;
     }
+}
+
+.logo-icon i {
+    font-size: 3rem; 
+    color: #FFD700;
 }

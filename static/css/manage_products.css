@@ -593,3 +593,15 @@
         border-radius: 10px;
     }
 }
+
+/* Styles the icon in the "Add New Product" button */
+.btn-add i {
+    margin-right: 8px;
+}
+
+/* Styles the new "warning" icon in the table */
+.low-stock-icon {
+    color: #a16207; /* Matches your .low-stock-row text color */
+    font-weight: 600; /* Makes the icon bold */
+    margin-right: 4px;
+}

@@ -1,4 +1,19 @@
 /* --- Product Grid and Card Styles --- */
+
+/* --- Icon style for Page Header --- */
+.page-header h1 i {
+    margin-right: 10px;
+    font-size: 24px; /* A bit smaller than the h1's 28px */
+    color: #1e40af; 
+    vertical-align: middle; /* Aligns it nicely with the text */
+}
+
+.welcome-title i {
+    margin-right: 10px;
+    color: #800000; 
+}
+
+
 .product-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -641,3 +656,6 @@
         border-radius: 10px; /* Make all corners round */
     }
 }
+
+
+

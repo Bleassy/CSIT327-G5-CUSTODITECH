@@ -47,14 +47,14 @@
             {% endfor %}
 
                 <div class="empty-state" id="static-empty-state" {% if all_notifications %}style="display: none;"{% endif %}>
-                    <div class="empty-state-icon">🎉</div>
+                    <div class="empty-state-icon"><i class="fa-solid fa-check"></i></div>
                     <h3>All clear!</h3>
                     <p>You have no notifications right now.</p>
                 </div>
             
 
                 <div class="empty-state" id="filter-empty-state" style="display: none;">
-                <div class="empty-state-icon">🧐</div>
+                <div class="empty-state-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
                 <h3>No notifications found</h3>
                 <p>No notifications match this filter.</p>
             </div>
@@ -85,7 +85,6 @@
             <span class="close-btn" data-close-modal="batch-delete-confirm-modal">&times;</span>
         </div>
         <div class="modal-body">
-            <div class="icon">⚠️</div>
             <h3>Are you sure?</h3>
             <p>This will permanently delete the selected notifications. This action cannot be undone.</p>
         </div>

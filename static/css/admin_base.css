@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
 
+
 /* --- General Body and Font Styles --- */
 body {
     margin: 0;
@@ -61,6 +62,7 @@ body {
     gap: 0;
     margin-left: 3rem;
     flex: 1;
+    margin-right: 0.5rem;
 }
 
 .admin-nav .nav-btn {
@@ -495,5 +497,18 @@ textarea:focus-visible {
     border-radius: 50%;
 }
 
+/* --- Icon Spacing --- */
+.nav-btn i,
+.admin-name-link i {
+    margin-right: 4px; /* Adds space between the icon and the text */
+    width: 20px; /* Gives all icons a consistent width */
+    text-align: center;
+}
+
+/* Adjust the logo icon size */
+.logo-icon i {
+    font-size: 24px;
+    margin-right: 0;
+}
 
 

@@ -11,7 +11,7 @@
 
 <!-- Welcome banner -->
 <div class="welcome-section">
-    <h1 class="welcome-title">{{ greeting }}, {{ display_name }}! 👑</h1>
+    <h1 class="welcome-title">{{ greeting }}, {{ display_name }}!</h1>
     <p class="welcome-subtitle">
         Here's a quick overview of your platform's activity.
     </p>
@@ -21,7 +21,7 @@
 <div class="stats-grid">
     <!-- Stat Card: Total Products -->
     <div class="stat-card">
-        <div class="stat-icon products">📦</div>
+        <div class="stat-icon products"><i class="fa-solid fa-boxes-stacked"></i></div>
         <div class="stat-content">
             <h3>Total Products</h3>
             <div class="stat-number">{{ stats.total_products }}</div>
@@ -29,7 +29,7 @@
     </div>
     <!-- Stat Card: Total Orders -->
     <div class="stat-card">
-        <div class="stat-icon orders">🛍️</div>
+        <div class="stat-icon orders"><i class="fa-solid fa-store"></i></div>
         <div class="stat-content">
             <h3>Total Orders</h3>
             <div class="stat-number">{{ stats.total_orders }}</div>
@@ -37,7 +37,7 @@
     </div>
     <!-- Stat Card: Active Products -->
     <div class="stat-card">
-        <div class="stat-icon active-products">✔️</div>
+        <div class="stat-icon active-products"><i class="fa-solid fa-check"></i></div>
         <div class="stat-content">
             <h3>Active Products</h3>
             <div class="stat-number">{{ stats.active_products }}</div>
@@ -45,7 +45,7 @@
     </div>
     <!-- Stat Card: Pending Orders -->
     <div class="stat-card">
-        <div class="stat-icon pending-orders">⏳</div>
+        <div class="stat-icon pending-orders"><i class="fa-solid fa-hourglass-half"></i></div>
         <div class="stat-content">
             <h3>Pending Orders</h3>
             <div class="stat-number">{{ stats.pending_orders }}</div>
@@ -58,9 +58,9 @@
     <h2 class="section-title">Quick Actions</h2>
     <!-- Grid of links to other admin pages -->
     <div class="actions-grid">
-        <a href="{% url 'manage_products' %}" class="action-btn">📦 Add/View Products</a>
-        <a href="{% url 'order_management' %}" class="action-btn">📋 View New Orders</a>
-        <a href="{% url 'reports' %}" class="action-btn">📊 Generate Report</a>
+        <a href="{% url 'manage_products' %}" class="action-btn"><i class="fa-solid fa-boxes-stacked"></i> Add/View Products</a>
+        <a href="{% url 'order_management' %}" class="action-btn"><i class="fa-solid fa-clipboard-list"></i> View New Orders</a>
+        <a href="{% url 'reports' %}" class="action-btn"><i class="fa-solid fa-chart-bar"></i> Generate Report</a>
     </div>
 </div>
 {% endblock %}

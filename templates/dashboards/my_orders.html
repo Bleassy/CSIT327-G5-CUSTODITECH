@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-<h1 class="welcome-title">My Orders 📦</h1>
+<h1 class="welcome-title"><i class="fa-solid fa-box-archive"></i> My Orders</h1>
 
 <div class="search-container">
     <input type="search" id="order-search-input" class="search-input"
@@ -61,7 +61,7 @@
             </div>
             {% empty %}
                 <div class="empty-state-container no-items-message">
-                    <div class="empty-state-icon">✅</div>
+                    <div class="empty-state-icon"><i class="fa-solid fa-check"></i></div>
                     <h3>No orders ready for pickup</h3>
                     <p>No orders yet — once you place an order, it will automatically appear here.</p>
                     <a href="{% url 'browse_products' %}" class="btn btn-primary-empty">Browse Products</a>
@@ -118,7 +118,7 @@
                 </div>
             {% empty %}
                 <div class="empty-state-container no-items-message">
-                    <div class="empty-state-icon">🛒</div>
+                    <div class="empty-state-icon"><i class="fa-solid fa-calendar-check"></i></div>
                     <h3>You have no pending orders</h3>
                     <p>Looks like you haven't placed an order yet. Start browsing to find something!</p>
                     <a href="{% url 'browse_products' %}" class="btn btn-primary-empty">Browse Products</a>
@@ -147,7 +147,7 @@
             </div>
             {% empty %}
                 <div class="empty-state-container no-items-message">
-                    <div class="empty-state-icon">🎉</div>
+                    <div class="empty-state-icon"><i class="fa-solid fa-cart-shopping"></i></div>
                     <h3>No completed orders</h3>
                     <p>After you pick up an approved order, it will appear in this section.</p>
                     <a href="{% url 'browse_products' %}" class="btn btn-primary-empty">Browse Products</a>
@@ -183,7 +183,7 @@
             </div>
             {% empty %}
                 <div class="empty-state-container no-items-message">
-                    <div class="empty-state-icon">📦</div>
+                    <div class="empty-state-icon"><i class="fa-solid fa-box-open"></i></div>
                     <h3>No cancelled orders</h3>
                     <p>All of your orders are active. Keep it up!</p>
                     <a href="{% url 'browse_products' %}" class="btn btn-primary-empty">Browse Products</a>

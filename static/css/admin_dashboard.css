@@ -123,6 +123,20 @@
     text-decoration: none;
 }
 
+/* Style for the crown icon in the welcome title */
+.welcome-title i {
+    font-size: 28px;
+    margin-left: 10px;
+    vertical-align: middle;
+    color: #fcd34d; /* A gold/yellow color */
+}
+
+/* Style for the icons in the quick action buttons */
+.action-btn i {
+    font-size: 18px;
+    color: inherit; 
+}
+
 .action-btn:hover {
     background: white;
     border-color: #1e40af;

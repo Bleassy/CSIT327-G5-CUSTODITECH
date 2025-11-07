@@ -18,28 +18,28 @@
 <div class="searchable-section">
     <div class="kpi-grid">
         <div class="kpi-card">
-            <div class="kpi-icon sales">💰</div>
+            <div class="kpi-icon sales"><i class="fa-solid fa-sack-dollar"></i></div>
             <div class="kpi-content">
                 <h3>Total Sales (Completed)</h3>
                 <div class="kpi-number">₱{{ kpi.total_sales|default:0|floatformat:2|intcomma }}</div>
             </div>
         </div>
         <div class="kpi-card">
-            <div class="kpi-icon inventory"> 📈 </div>
+            <div class="kpi-icon inventory"><i class="fa-solid fa-chart-line"></i></div>
             <div class="kpi-content">
                 <h3>Current Inventory Value</h3>
                 <div class="kpi-number">₱{{ kpi.inventory_value|default:0|floatformat:2|intcomma }}</div>
             </div>
         </div>
         <div class="kpi-card">
-            <div class="kpi-icon today">📅</div>
+            <div class="kpi-icon today"><i class="fa-solid fa-calendar-day"></i></div>
             <div class="kpi-content">
                 <h3>Total Orders (Today)</h3>
                 <div class="kpi-number">{{ kpi.orders_today|default:0 }}</div>
             </div>
         </div>
         <div class="kpi-card">
-            <div class="kpi-icon pending-res">⏳</div>
+            <div class="kpi-icon pending-res"><i class="fa-solid fa-hourglass-half"></i></div>
             <div class="kpi-content">
                 <h3>Pending Reservations</h3>
                 <div class="kpi-number">{{ kpi.pending_reservations|default:0 }}</div>
@@ -50,11 +50,11 @@
     <div class="reports-grid">
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon products">📦</div>
+                <div class="stat-icon products"><i class="fa-solid fa-boxes-stacked"></i></div>
                 <div class="stat-content"><h3>Total Products</h3><div class="stat-number">{{ total_products }}</div></div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon orders">🛍️</div>
+                <div class="stat-icon orders"><i class="fa-solid fa-store"></i></div>
                 <div class="stat-content"><h3>Total Orders & Reservations</h3><div class="stat-number">{{ total_orders_reservations }}</div></div>
             </div>
         </div>
@@ -217,7 +217,7 @@
                 {% for product in unavailable_products %}
                 <tr><td>{{ product.name }}</td><td>{{ product.category }}</td><td><span class="status-highlight-unavailable">{{ product.stock_quantity }} pcs</span></td></tr>
                 {% empty %}
-                <tr><td colspan="3" class="no-data-cell"><p>👍 All products are currently available.</p></td></tr>
+                <tr><td colspan="3" class="no-data-cell"><p><i class="fa-solid fa-thumbs-up"></i> All products are currently available.</p></td></tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -233,7 +233,7 @@
                 {% for product in low_stock_products %}
                 <tr><td>{{ product.name }}</td><td>{{ product.category }}</td><td><span class="stock-highlight">{{ product.stock_quantity }} pcs</span></td></tr>
                 {% empty %}
-                <tr><td colspan="3" class="no-data-cell"><p>👍 No items are currently low on stock.</p></td></tr>
+                <tr><td colspan="3" class="no-data-cell"><p><i class="fa-solid fa-thumbs-up"></i> No items are currently low on stock.</p></td></tr>
                 {% endfor %}
             </tbody>
         </table>

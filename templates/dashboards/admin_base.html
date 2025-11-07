@@ -8,6 +8,8 @@
     
     <!-- Main base stylesheet for the admin panel -->
     <link rel="stylesheet" href="{% static 'css/admin_base.css' %}?v=1.1">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
     <!-- Django block for extra CSS files on specific pages -->
     {% block extra_css %}{% endblock %}
@@ -28,7 +30,7 @@
         <!-- Header Left: Logo -->
         <div class="header-left">
             <a href="{% url 'admin_dashboard' %}" class="logo {% if active_page == 'dashboard' %}active{% endif %}">
-                <span class="logo-icon">🐱</span>
+                <span class="logo-icon"><i class="fa-solid fa-cat"></i></span>
                 <span class="logo-text">CIT Wildcats Admin</span>
             </a>
         </div>
@@ -38,11 +40,11 @@
             
             <!-- Main Navigation Bar -->
             <nav class="admin-nav">
-                <a href="{% url 'admin_dashboard' %}" class="nav-btn {% if active_page == 'dashboard' %}active{% endif %}">🏠 Dashboard</a>
-                <a href="{% url 'manage_products' %}" class="nav-btn {% if active_page == 'manage_products' %}active{% endif %}">📦 Manage Products</a>
-                <a href="{% url 'order_management' %}" class="nav-btn {% if active_page == 'order_management' %}active{% endif %}">📅 Order Management</a>
-                <a href="{% url 'manage_students' %}" class="nav-btn {% if active_page == 'manage_students' %}active{% endif %}">👥 Manage Students</a>
-                <a href="{% url 'reports' %}" class="nav-btn {% if active_page == 'reports' %}active{% endif %}">📊 Reports</a>
+                <a href="{% url 'admin_dashboard' %}" class="nav-btn {% if active_page == 'dashboard' %}active{% endif %}"><i class="fa-solid fa-house"></i> Dashboard</a>
+                <a href="{% url 'manage_products' %}" class="nav-btn {% if active_page == 'manage_products' %}active{% endif %}"><i class="fa-solid fa-boxes-stacked"></i> Manage Products</a>
+                <a href="{% url 'order_management' %}" class="nav-btn {% if active_page == 'order_management' %}active{% endif %}"><i class="fa-solid fa-clipboard-list"></i> Order Management</a>
+                <a href="{% url 'manage_students' %}" class="nav-btn {% if active_page == 'manage_students' %}active{% endif %}"><i class="fa-solid fa-users"></i> Manage Students</a>
+                <a href="{% url 'reports' %}" class="nav-btn {% if active_page == 'reports' %}active{% endif %}"><i class="fa-solid fa-chart-bar"></i> Reports</a>
             </nav>
             
             <!-- Header Right: Profile & Logout -->

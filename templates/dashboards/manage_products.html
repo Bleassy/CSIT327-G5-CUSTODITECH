@@ -8,7 +8,7 @@
 {% block content %}
 <div class="page-header">
     <h1>Manage Products</h1>
-    <button class="btn btn-add" id="add-product-btn">📦 Add New Product</button>
+    <button class="btn btn-add" id="add-product-btn"><i class="fa-solid fa-plus"></i> Add New Product</button>
 </div>
 
 <div class="search-filter-container">
@@ -62,7 +62,7 @@
                     <td>₱{{ product.price|floatformat:2 }}</td>
                     <td>
                         {% if product.stock_quantity < 10 and product.stock_quantity > 0 %}
-                            ⚠️ {{ product.stock_quantity }} pcs
+                            <span class="low-stock-icon"><i class="fa-solid fa-triangle-exclamation"></i></span> {{ product.stock_quantity }} pcs
                         {% else %}
                             {{ product.stock_quantity }} pcs
                         {% endif %}
@@ -418,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
             statusClass = 'unavailable-row';
             dataStatus = 'unavailable';
         } else if (stock < 10 && stock > 0) {
-            stockDisplay = `⚠️ ${stock} pcs`;
+            stockDisplay = `<span class="low-stock-icon"><i class="fa-solid fa-triangle-exclamation"></i></span> ${stock} pcs`;
             statusDisplay = `<span class="badge badge-low-stock">Low Stock</span>`;
             statusClass = 'low-stock-row';
             dataStatus = 'low stock';
@@ -485,7 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
             statusClass = 'unavailable-row';
             dataStatus = 'unavailable';
         } else if (stock < 10 && stock > 0) {
-            stockDisplay = `⚠️ ${stock} pcs`;
+            stockDisplay = `<span class="low-stock-icon"><i class="fa-solid fa-triangle-exclamation"></i></span> ${stock} pcs`;
             statusDisplay = `<span class="badge badge-low-stock">Low Stock</span>`;
             statusClass = 'low-stock-row';
             dataStatus = 'low stock';

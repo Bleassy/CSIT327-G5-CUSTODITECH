@@ -1,4 +1,9 @@
 
+.welcome-title i {
+    margin-right: 10px;
+    color: #800000; 
+}
+
 /* --- General Modal Styles --- */
 .modal {
     display: none; /* Hidden by default - JS will change this to 'flex' to show */

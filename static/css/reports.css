@@ -20,6 +20,19 @@
     margin-bottom: 3rem;
 }
 
+/* Style for icons inside table "no data" cells */
+.no-data-cell p {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.no-data-cell p i {
+    font-size: 1.1em;
+    color: #16a34a; /* A nice green for the "thumbs up" */
+}
+
 /* --- Stat Card Styles --- */
 .stats-grid {
     display: grid;

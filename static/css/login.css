@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
 
+
+.welcome-text i {
+    color: #FFD700;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -200,6 +205,11 @@ body {
     margin-top: 10px;
 }
 
+.logo-icon i {
+    font-size: 3rem; 
+    color: #FFD700;
+}
+
 .tagline {
     font-size: 1.3rem;
     margin: 10px 0;
@@ -273,3 +283,11 @@ body {
     /* Inherit or add specific styles here */
     margin-bottom: 1rem; /* Example */
 }
+
+/* Style for the icon in the success message */
+.success-message i {
+    margin-right: 8px;
+    font-size: 0.9em;
+}
+
+

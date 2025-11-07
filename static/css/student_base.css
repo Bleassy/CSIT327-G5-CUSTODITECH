@@ -152,6 +152,7 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
+    gap: 0.40rem;
 }
 
 /* --- Responsive Breakpoint (992px) --- */
@@ -731,4 +732,25 @@ textarea:focus-visible {
     .dropdown-header {
         padding: 0.75rem;
     }
+}
+
+/* --- Icon Spacing --- */
+.nav-btn i,
+.student-name-link i,
+.notification-btn i {
+    margin-right: 8px; /* Adds space between the icon and the text */
+    width: 20px; /* Gives all icons a consistent width */
+    text-align: center;
+}
+
+/* Make the bell icon slightly larger */
+.notification-btn i {
+    font-size: 1.4rem;
+    margin-right: 0;
+}
+
+/* Adjust the logo icon size */
+.logo-icon i {
+    font-size: 22px; /* A bit smaller than the emoji */
+    margin-right: 0;
 }

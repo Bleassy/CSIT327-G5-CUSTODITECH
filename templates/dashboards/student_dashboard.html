@@ -10,19 +10,19 @@
 
 <!-- 1. Welcome Card -->
 <div class="welcome-card">
-    <h1>{{ greeting }}, {{ display_name }}! 👋</h1>
+    <h1>{{ greeting }}, {{ display_name }}!</h1>
     <p>Manage your reservations and orders with ease.</p>
 </div>
 
 <!-- 2. Action Cards -->
 <div class="action-cards-grid">
     <a href="{% url 'browse_products' %}" class="action-card">
-        <div class="card-icon">🛍️</div>
+        <div class="card-icon"><i class="fa-solid fa-store"></i></div>
         <h2>Browse Products</h2>
         <p>Explore our wide selection of school supplies and items.</p>
     </a>
     <a href="{% url 'my_reservations' %}" class="action-card">
-        <div class="card-icon">📅</div>
+        <div class="card-icon"><i class="fa-solid fa-calendar-days"></i></div>
         <h2>My Reservations</h2>
         <p>Check the status of your current and past reservations.</p>
     </a>
@@ -64,10 +64,11 @@
                     <div class="item-details">
                         <h4>{{ latest_order.product_name }}</h4>
                         <div class="details-grid">
-                            <span>Date Ordered:</span><strong>{{ latest_order.created_at|date:"M d, Y" }}</strong>
                             <span>Quantity:</span><strong>{{ latest_order.quantity }}</strong>
                             <span>Total Price:</span><strong>₱{{ latest_order.total_price|floatformat:2 }}</strong>
                             <span>Payment:</span><strong>{{ latest_order.payment_method|title }}</strong>
+                            <span>Date Ordered:</span><strong>{{ latest_order.created_at|date:"M d, Y" }}</strong>
+                            <span>Expires On:</span><strong>{{ latest_order.expires_at|date:"M d, Y" }}</strong>
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,18 @@
 
+
+/* --- Icon Styles --- */
+.welcome-title i {
+    margin-right: 10px;
+    color: #800000; 
+}
+
+.empty-state-icon i {
+    font-size: 3rem; 
+    line-height: 1;
+}
+
 /* --- Page & Section --- */
+
 .section-title {
     font-size: 24px;
     font-weight: 600;

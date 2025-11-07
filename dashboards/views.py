@@ -311,6 +311,12 @@ def student_dashboard(request):
             if latest_order.get('created_at'):
                 latest_order['created_at'] = datetime.fromisoformat(latest_order['created_at'])
 
+            if latest_order.get('expires_at'):
+                try:
+                    latest_order['expires_at'] = datetime.fromisoformat(latest_order['expires_at'])
+                except (ValueError, TypeError):
+                    latest_order['expires_at'] = None
+
     except Exception as e:
         messages.error(request, "Could not load dashboard summaries.")
 
@@ -490,7 +496,7 @@ def batch_delete_orders_view(request):
                 .eq('user_id', user_id) \
                 .execute()
 
-            return JsonResponse({'success': True, 'message': f"{len(order_ids)} order(s) have been deleted."})
+            return JsonResponse({'success': True, 'message': f"✅ {len(order_ids)} order(s) have been deleted."})
 
         except Exception as e:
             return JsonResponse({'success': False, 'error': f"An error occurred during batch deletion: {e}"}, status=400)
@@ -514,7 +520,7 @@ def delete_single_order_view(request, order_id):
                 .eq('user_id', user_id) \
                 .execute()
             
-            return JsonResponse({'success': True, 'message': f"🗑️ Order #{order_id} has been permanently deleted."})
+            return JsonResponse({'success': True, 'message': f" Order #{order_id} has been permanently deleted."})
 
         except Exception as e:
             return JsonResponse({'success': False, 'error': f"Failed to delete order #{order_id}: {e}"}, status=400)
@@ -829,7 +835,7 @@ def cancel_reservation_view(request, reservation_id):
                 'p_new_status': 'cancelled'
             }).execute()
             
-            return JsonResponse({'success': True, 'message': '🗑️ Your reservation has been successfully cancelled.'})
+            return JsonResponse({'success': True, 'message': '✅ Your reservation has been successfully cancelled.'})
             
         except Exception as e:
             return JsonResponse({'success': False, 'error': f"Could not cancel the reservation: {e}"}, status=400)
@@ -852,7 +858,7 @@ def cancel_order_view(request, order_id):
             
             # Call RPC to cancel and restore stock
             supabase.rpc('cancel_or_reject_order', {'p_order_id': order_id, 'p_new_status': 'cancelled'}).execute()
-            return JsonResponse({'success': True, 'message': "🗑️ Your order has been successfully cancelled.", 'order_id': order_id})
+            return JsonResponse({'success': True, 'message': "✅ Your order has been successfully cancelled.", 'order_id': order_id})
         except Exception as e:
             return JsonResponse({'success': False, 'error': f"Could not cancel the order: {e}"}, status=400)
     return JsonResponse({'success': False, 'error': 'Invalid request.'}, status=400)
@@ -1200,7 +1206,7 @@ def admin_batch_delete_orders_view(request):
             
             return JsonResponse({
                 'success': True, 
-                'message': f"🗑️ {len(order_ids)} has been permanently deleted.",
+                'message': f"{len(order_ids)} has been permanently deleted.",
                 'order_ids': order_ids 
             })
             
@@ -1412,7 +1418,7 @@ def delete_order_view(request, order_id):
             
             return JsonResponse({
                 'success': True, 
-                'message': f'🗑️ Order #{order_id} has been permanently deleted.',
+                'message': f'✅ Order #{order_id} has been permanently deleted.',
                 'order_id': order_id
             })
             
@@ -1600,7 +1606,7 @@ def clear_all_logs_view(request):
         
         return JsonResponse({
             'success': True, 
-            'message': f'🗑️ Successfully cleared all {log_count} log entries.'
+            'message': f'✅ Successfully cleared all {log_count} log entries.'
         })
 
     except Exception as e:
@@ -1902,7 +1908,7 @@ def admin_delete_student_view(request, user_id):
         
         return JsonResponse({
             'success': True, 
-            'message': f'🗑️ Student {student_name} has been permanently deleted.',
+            'message': f'✅ Student {student_name} has been permanently deleted.',
             'user_id': str(user_id) # Send back the ID for the JS
         })
 

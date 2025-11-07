@@ -279,6 +279,7 @@ body.action-bar-visible {
     height: 95px;
     border-radius: 50%;
     background-color: #fde8e8; /* Light maroon background */
+    color: #800000;
 
     display: flex;
     align-items: center;
@@ -307,6 +308,11 @@ body.action-bar-visible {
         gap: 1rem;
         padding: 1rem; /* Reduce padding on mobile */
     }
+
+    .notifications-card {
+        overflow: visible;
+    }
+
     .tabs {
         width: 100%;
         flex-wrap: nowrap; /* Keep tabs in one row */
