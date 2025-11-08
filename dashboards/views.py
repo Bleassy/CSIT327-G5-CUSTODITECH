@@ -64,6 +64,32 @@ def mark_notifications_as_read(request):
     except Exception as e:
         print(f"Error marking notifications as read: {e}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+@student_required
+@require_http_methods(["POST"])
+def mark_all_as_read_header_view(request):
+    """
+    Handles an AJAX POST request to mark all of the user's
+    unread notifications as 'read'.
+    """
+    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+    
+    try:
+        # This update respects RLS, so the user can only
+        # update their own notifications.
+        supabase.table('notifications') \
+            .update({'is_read': True}) \
+            .eq('user_id', request.user.id) \
+            .eq('is_read', False) \
+            .execute()
+        
+        # After updating, the new unread count is 0
+        return JsonResponse({'success': True, 'new_unread_count': 0})
+
+    except Exception as e:
+        print(f"Error marking all notifications as read: {e}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 @student_required
 @require_http_methods(["POST"])
@@ -1418,7 +1444,7 @@ def delete_order_view(request, order_id):
             
             return JsonResponse({
                 'success': True, 
-                'message': f'✅ Order #{order_id} has been permanently deleted.',
+                'message': f'Order #{order_id} has been permanently deleted.',
                 'order_id': order_id
             })
             
@@ -1446,6 +1472,7 @@ def reports_view(request):
     log_entries = []
     low_stock_products = []
     unavailable_products = []
+    pending_backorders_count = 0
     status_counts_dict = {
         'pending': 0, 'approved': 0, 'completed': 0, 'rejected': 0, 'cancelled': 0
     }
@@ -1472,6 +1499,20 @@ def reports_view(request):
             # Set defaults if RPC fails
             report_data = {'total_products': 0, 'total_orders_reservations': 0}
             kpi_data = {'total_sales': 0, 'inventory_value': 0, 'orders_today': 0, 'pending_reservations': 0}
+
+        # --- Add new query for pending backorders ---
+        try:
+            backorder_count_response = supabase_service.table('orders') \
+                .select('id', count='exact') \
+                .eq('status', 'pending') \
+                .eq('order_type', 'backorder') \
+                .execute()
+            if backorder_count_response.count is not None:
+                pending_backorders_count = backorder_count_response.count
+        except Exception as e:
+            print(f"Error fetching backorder count: {e}")
+            pending_backorders_count = 0
+        # --- End of new query ---
 
         # --- Fetch supporting product lists ---
         low_stock_response = supabase_service.table('products').select('*').gt('stock_quantity', 0).lt('stock_quantity', 10).order('stock_quantity', desc=False).execute()
@@ -1546,7 +1587,8 @@ def reports_view(request):
         'unavailable_products': unavailable_products,
         'search_query': search_query,
         'log_pagination': log_pagination_context,
-        'active_page': 'reports'
+        'active_page': 'reports',
+        'pending_backorders_count': pending_backorders_count
     }
     return render(request, 'dashboards/reports.html', context)
 

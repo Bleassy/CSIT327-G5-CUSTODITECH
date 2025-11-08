@@ -21,6 +21,7 @@ urlpatterns = [
     path('dashboard/student/notifications/batch-update/', views.batch_update_notifications, name='batch_update_notifications'),
     path('dashboard/student/notifications/batch-delete/', views.batch_delete_notifications, name='batch_delete_notifications'),
     path('notifications/mark-all-read/', views.mark_all_as_read_view, name='mark_all_as_read'),
+    path('dashboard/student/notifications/mark_all_as_read_header_view/',views.mark_all_as_read_header_view,name='mark_all_as_read_header_view'),
 
 
 

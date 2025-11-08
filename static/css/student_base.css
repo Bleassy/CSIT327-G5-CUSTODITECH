@@ -517,6 +517,8 @@ textarea:focus-visible {
     margin-bottom: 0.75rem;
 }
 
+
+
 /* Tab Styles */
 .notification-dropdown .tabs {
     display: flex;
@@ -546,7 +548,42 @@ textarea:focus-visible {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* ✅ This is the ONLY scrollable part */
+/* START: Add these new styles */
+.dropdown-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.dropdown-header strong {
+    font-size: 16px;
+    color: #1e293b;
+    display: block;
+}
+
+.btn-mark-all-read {
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    margin: 0;
+    font-size: 12px;
+    font-weight: 500;
+    color: #800000;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+.btn-mark-all-read:hover {
+    background-color: #fde8e8; /* Light maroon */
+}
+.btn-mark-all-read:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+/* END: Add these new styles */
+
+/* This is the ONLY scrollable part */
 .notification-dropdown .notification-list {
     max-height: 300px;
     overflow-y: auto;

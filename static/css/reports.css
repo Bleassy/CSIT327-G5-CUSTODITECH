@@ -405,7 +405,7 @@
 /* --- KPI Grid Styles --- */
 .kpi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive columns */
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
     gap: 1.5rem; /* Space between cards */
     margin-bottom: 3rem; /* Space below KPIs */
 }
@@ -419,6 +419,11 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+}
+
+.kpi-content {
+    /* This tells the flex item it can shrink smaller than its content's width */
+    min-width: 0;
 }
 
 .kpi-icon {
@@ -450,20 +455,26 @@
     color: #ca8a04;
 }
 
+.kpi-icon.pending-backorders {
+    background: #fef9c3; 
+    color: #ca8a04;
+}
+
 .kpi-content h3 {
     font-size: 13px;
     color: #64748b;
     margin: 0 0 4px 0;
     font-weight: 500;
-    white-space: nowrap; /* Prevent wrapping */
+    
 }
 
 .kpi-number {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
     color: #1e293b;
     margin: 0;
     line-height: 1.2;
+    overflow-wrap: break-word;
 }
 
 /* --- Overview Section Layout --- */
@@ -514,6 +525,10 @@
     }
     .overview-grid.single-col {
         grid-template-columns: minmax(0, 1fr); /* Full width single column */
+    }
+
+    .kpi-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 columns on tablets */
     }
 }
 
@@ -629,6 +644,10 @@
 @media (max-width: 768px) {
     .reports-grid {
         grid-template-columns: 1fr; /* Stack stats and chart */
+    }
+
+    .kpi-grid {
+        grid-template-columns: 1fr; /* 1 column on phones */
     }
 
     .chart-container {

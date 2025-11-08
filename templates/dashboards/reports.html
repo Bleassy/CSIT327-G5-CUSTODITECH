@@ -45,6 +45,17 @@
                 <div class="kpi-number">{{ kpi.pending_reservations|default:0 }}</div>
             </div>
         </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon pending-backorders"><i class="fa-solid fa-hourglass-half"></i></div>
+            <div class="kpi-content">
+                <h3>Pending Backorders</h3>
+                <div class="kpi-number">{{ pending_backorders_count }}</div>
+            </div>
+        </div>
+
+        
+        
     </div>
 </div> <div class="searchable-section">
     <div class="reports-grid">

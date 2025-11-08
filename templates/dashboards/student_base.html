@@ -66,7 +66,11 @@
                     <div class="tabs" id="notification-tabs">
                         <button type="button" class="tab-btn active" data-tab="all">All</button>
                         <button type="button" class="tab-btn" data-tab="unread">Unread</button>
+                        <button type="button" class="btn-mark-all-read" id="dropdown-mark-all-read-btn">
+                            Mark all as read
+                        </button>
                     </div>
+                    
                 </div>
 
                 <div class="notification-list" id="notification-list">
@@ -161,6 +165,29 @@
                 }
             }
             return cookieValue;
+        }
+
+        // NEW: Helper function to update the bell count
+        function updateHeaderCount(newCount) {
+            const bellButton = document.getElementById('notification-bell-btn');
+            if (!bellButton) return;
+            let countElement = bellButton.querySelector('.notification-count');
+            
+            if (newCount > 0) {
+                if (!countElement) {
+                    countElement = document.createElement('span');
+                    countElement.className = 'notification-count';
+                    bellButton.appendChild(countElement);
+                }
+                countElement.textContent = newCount;
+            } else {
+                if (countElement) {
+                    // Fade out and remove
+                    countElement.style.transition = 'opacity 0.3s ease';
+                    countElement.style.opacity = '0';
+                    setTimeout(() => countElement.remove(), 300);
+                }
+            }
         }
     </script>
 
@@ -327,14 +354,76 @@
                 });
             }
 
+            // --- NEW: Mark All as Read Logic ---
+            const markAllReadBtn = document.getElementById('dropdown-mark-all-read-btn');
+            if (markAllReadBtn) {
+                markAllReadBtn.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Stop dropdown from closing
+
+                    // We check inside notificationList directly
+                    const unreadItems = notificationList.querySelectorAll('.notification-item.notification-unread');
+                    if (unreadItems.length === 0) {
+                        return; // Do nothing if there's nothing to mark as read
+                    }
+
+                    // Disable button to prevent double clicks
+                    markAllReadBtn.disabled = true;
+                    markAllReadBtn.textContent = 'Processing...';
+
+                    fetch("{% url 'mark_all_as_read_header_view' %}", {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCsrfToken(),
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // 1. Update the header count
+                            updateHeaderCount(data.new_unread_count);
+                            
+                            // 2. Find the current active tab
+                            const currentTab = notificationTabs.querySelector('.tab-btn.active').dataset.tab;
+                            
+                            // 3. Update all items in the dropdown
+                            dropdown.querySelectorAll('.notification-item.notification-unread').forEach(item => {
+                                item.classList.remove('notification-unread');
+                                item.dataset.read = 'true'; // Update its state
+
+                                // 4. If we are on the "Unread" tab, hide the item
+                                if (currentTab === 'unread') {
+                                    item.style.display = 'none';
+                                }
+                            });
+            
+                            // 5. Check if the "Unread" tab is now empty
+                            checkDropdownEmptyState();
+                        
+                            // 6. Reset the button
+                            markAllReadBtn.textContent = 'Mark all as read';
+                            markAllReadBtn.disabled = false;
+
+                        } else {
+                            console.error('Failed to mark all as read:', data.error);
+                            markAllReadBtn.textContent = 'Error!';
+                            markAllReadBtn.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                        markAllReadBtn.textContent = 'Error!';
+                        markAllReadBtn.disabled = false;
+                    });
+                });
+            }
+
             // --- NEW HELPER FUNCTION ---
         const dynamicEmptyState = document.getElementById('dynamic-empty-state');
+        const staticEmptyState = notificationList.querySelector('.empty-state:not(#dynamic-empty-state)');
 
         function checkDropdownEmptyState() {
             if (!notificationList || !dynamicEmptyState) return;
-
-            // Find the "All Clear!" message
-            const staticEmptyState = notificationList.querySelector('.empty-state:not(#dynamic-empty-state)');
             
             // If "All Clear!" is showing, don't do anything
             if (staticEmptyState && staticEmptyState.offsetParent !== null) {
