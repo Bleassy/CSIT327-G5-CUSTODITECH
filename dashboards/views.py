@@ -76,8 +76,6 @@ def mark_all_as_read_header_view(request):
         return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
     
     try:
-        # This update respects RLS, so the user can only
-        # update their own notifications.
         supabase.table('notifications') \
             .update({'is_read': True}) \
             .eq('user_id', request.user.id) \
@@ -102,8 +100,6 @@ def mark_notification_read_and_redirect(request, notification_id):
     fallback_url = '/dashboard/student/my-orders/' 
     
     try:
-        # First, get the notification's link_url
-        # This respects RLS, so a user can only get their own notification
         response = supabase.table('notifications') \
             .select('link_url') \
             .eq('id', notification_id) \
@@ -187,8 +183,6 @@ def batch_update_notifications(request):
 
         new_status = True if action == 'mark_read' else False
         
-        # This update respects RLS, so the user can only
-        # update their own notifications.
         supabase.table('notifications') \
             .update({'is_read': new_status}) \
             .in_('id', notification_ids) \
@@ -230,10 +224,6 @@ def batch_delete_notifications(request):
         if not notification_ids:
             raise ValueError("No valid notification IDs provided.")
         
-        # We need to create a special policy to allow deletion.
-        # But for now, let's use the service client to delete.
-        # This is safe because we get the user_id from the *authenticated* request
-        # and add it to the query.
         supabase_service.table('notifications') \
             .delete() \
             .in_('id', notification_ids) \
@@ -266,8 +256,6 @@ def mark_all_as_read_view(request):
         return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
     
     try:
-        # This update respects RLS, so the user can only update their own notifications.
-        # It finds all notifications that are 'is_read: False' and sets them to 'True'.
         supabase.table('notifications') \
             .update({'is_read': True}) \
             .eq('user_id', request.user.id) \

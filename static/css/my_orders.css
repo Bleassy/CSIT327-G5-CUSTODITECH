@@ -1,12 +1,12 @@
-
+/* --- Icon Styles --- */
 .welcome-title i {
     margin-right: 10px;
-    color: #800000; 
+    color: #800000;
 }
 
-/* --- General Modal Styles --- */
+/* --- Base Modal Layout --- */
 .modal {
-    display: none; /* Hidden by default - JS will change this to 'flex' to show */
+    display: none;
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -25,7 +25,7 @@
     background-color: #ffffff;
     border-radius: 12px;
     width: 100%;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     animation: slideIn 0.3s;
     display: flex;
     flex-direction: column;
@@ -40,11 +40,13 @@
     justify-content: space-between;
     align-items: center;
 }
+
 .modal-header h2 {
     margin: 0;
     font-size: 20px;
     font-weight: 600;
 }
+
 .close-btn {
     font-size: 28px;
     font-weight: bold;
@@ -71,36 +73,48 @@
     flex-shrink: 0;
 }
 
-/* Modal Animations */
+/* --- Modal Animations --- */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-@keyframes slideIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
-/* --- Search Bar --- */
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* --- Page Search Bar --- */
 .search-container {
     margin-bottom: 2.5rem;
 }
+
 .search-input {
     width: 100%;
     padding: 14px 20px;
     font-size: 16px;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
+
 .search-input:focus {
     outline: none;
     border-color: #800000;
     box-shadow: 0 0 0 3px rgba(128, 0, 0, 0.1);
 }
 
-/* --- Section and Card Styles --- */
-/* Title for sections like "Pending", "Approved" */
+/* --- Section Title & Order Card Layout --- */
 .section-title {
     font-size: 24px;
     font-weight: 600;
@@ -110,14 +124,12 @@
     border-bottom: 1px solid #e2e8f0;
 }
 
-/* Grid container for the order cards */
 .orders-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1.5rem;
 }
 
-/* Individual order card */
 .order-card {
     background: white;
     border-radius: 12px;
@@ -128,12 +140,12 @@
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
 .order-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 }
 
-/* Image on the left of the card */
 .product-image {
     width: 200px;
     height: auto;
@@ -142,7 +154,6 @@
     border-right: 1px solid #f1f5f9;
 }
 
-/* Main content area on the right of the card */
 .card-body {
     padding: 1.5rem;
     display: flex;
@@ -150,7 +161,6 @@
     width: 100%;
 }
 
-/* Header inside the card body */
 .card-header {
     display: flex;
     justify-content: space-between;
@@ -164,7 +174,6 @@
     margin: 0;
 }
 
-/* Grid for details like "Order ID", "Quantity" */
 .details-grid {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -173,12 +182,13 @@
     color: #64748b;
     margin-bottom: 1.5rem;
 }
+
 .details-grid strong {
     font-weight: 600;
     color: #1e293b;
 }
 
-/* Status badge (e.g., "Pending", "Approved") */
+/* --- Status Badges & Info Notes --- */
 .status-badge {
     padding: 4px 12px;
     border-radius: 999px;
@@ -188,68 +198,71 @@
     white-space: nowrap;
 }
 
-/* Small info box at the bottom of some cards */
 .info-note {
-    background-color: #fefce8; /* Light yellow background */
-    color: #a16207; /* Dark yellow text */
+    background-color: #fefce8;
+    color: #a16207;
     padding: 0.75rem 1rem;
     border-radius: 8px;
     font-size: 13px;
-    margin-top: auto; /* Pushes the note to the bottom on the card */
+    margin-top: auto;
 }
+
 .info-note p {
     margin: 0;
 }
 
-/* Color variations for status badges */
 .status-badge.status-pending {
     background-color: #fef3c7;
     color: #92400e;
 }
+
 .status-badge.status-approved {
     background-color: #dcfce7;
     color: #166534;
 }
+
 .status-badge.status-completed {
     background-color: #dbeafe;
     color: #1e40af;
 }
+
 .status-badge.status-rejected {
     background-color: #fee2e2;
     color: #991b1b;
 }
+
 .status-badge.status-cancelled {
     background-color: #e5e7eb;
     color: #4b5563;
 }
 
-/* Style for completed/cancelled orders */
 .order-card.history {
     opacity: 0.8;
 }
 
-/* Message shown when no orders are found */
-.no-items-message { 
-    color: #64748b; 
-    padding: 2rem; 
-    text-align: center; 
-    background-color: #f8fafc; 
-    border-radius: 8px; 
+.no-items-message {
+    color: #64748b;
+    padding: 2rem;
+    text-align: center;
+    background-color: #f8fafc;
+    border-radius: 8px;
 }
 
-/* --- Order Details Modal --- */
-/* Specific styling for the order details popup */
+/* --- Order Details Modal Layout --- */
 #order-details-modal .modal-content {
     max-width: 1000px;
 }
+
 .details-layout {
     display: flex;
     gap: 1.5rem;
 }
+
 .details-image-container {
     flex-basis: 40%;
     flex-shrink: 0;
 }
+
 .details-image {
     width: 100%;
     height: auto;
@@ -257,14 +270,17 @@
     background-color: #f8fafc;
     border: 1px solid #e2e8f0;
 }
+
 .details-info {
     flex-basis: 60%;
 }
+
 .details-name {
     font-size: 22px;
     font-weight: 700;
     margin: 0 0 1rem 0;
 }
+
 .details-description {
     font-size: 14px;
     color: #64748b;
@@ -274,6 +290,7 @@
     overflow-y: auto;
     padding-right: 5px;
 }
+
 .details-summary-grid {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -282,9 +299,11 @@
     padding-top: 1rem;
     border-top: 1px solid #f1f5f9;
 }
+
 .details-summary-grid span {
     color: #64748b;
 }
+
 .details-summary-grid strong {
     font-weight: 600;
     color: #1e293b;
@@ -294,7 +313,6 @@
     margin-left: 10px;
 }
 
-/* Info note inside the details modal */
 #order-details-modal .info-note {
     display: none;
     margin-top: 1.5rem;
@@ -305,27 +323,25 @@
     font-size: 13px;
 }
 
-/* Cancel button inside the modal footer */
 .modal-footer .cancel-modal-btn {
-    background-color: #e2e8f0; /* Light gray background */
-    color: #475569; /* Dark gray text */
-    padding: 0.75rem 1rem; /* Match other buttons */
-    border-radius: 8px; /* Match other buttons */
-    font-weight: 600; /* Match other buttons */
+    background-color: #e2e8f0;
+    color: #475569;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
     cursor: pointer;
     border: none;
     transition: background-color 0.2s;
     font-size: 14px;
-    width: auto; /* Allow button to size naturally */
-    margin-top: 0; /* Override default button margin */
+    width: auto;
+    margin-top: 0;
 }
 
 .modal-footer .cancel-modal-btn:hover {
-    background-color: #cbd5e1; /* Slightly darker gray on hover */
+    background-color: #cbd5e1;
 }
 
-/* --- Confirmation Modals (Cancel/Delete) --- */
-/* Sizing for the smaller confirmation popups */
+/* --- Confirmation Modal Layouts --- */
 #cancel-confirm-modal .modal-content,
 #delete-confirm-modal .modal-content,
 #batch-delete-confirm-modal .modal-content {
@@ -338,10 +354,9 @@
     text-align: center;
 }
 
-/* Summary box inside confirmation modals */
 #cancel-confirm-modal .summary,
 #delete-confirm-modal .summary {
-    text-align: left; /* Keep the summary part left-aligned */
+    text-align: left;
     padding: 1rem;
     background-color: #f8fafc;
     border: 1px solid #f1f5f9;
@@ -349,54 +364,52 @@
     margin-top: 1rem;
 }
 
-/* --- Checkbox Styles (for Batch Actions) --- */
+/* --- Batch Action Checkbox Styles --- */
 .order-card {
-    position: relative; /* Needed for absolute positioning of checkbox */
-    padding-left: 3rem; /* Make space for the checkbox */
+    position: relative;
+    padding-left: 3rem;
 }
 
 .order-checkbox {
     position: absolute;
     left: 1rem;
-    top: 1.5rem; /* Align vertically with card content */
+    top: 1.5rem;
     width: 1.2rem;
     height: 1.2rem;
     cursor: pointer;
 }
 
-/* --- Select All Checkbox --- */
 .select-all-container {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 1rem;
-    padding-left: 1rem; /* Align with card checkboxes */
+    padding-left: 1rem;
 }
+
 .select-all-container label {
     font-weight: 500;
     font-size: 14px;
     cursor: pointer;
 }
 
-/* Visual feedback for selected cards */
 .order-card.selected {
-    background-color: #eff6ff; /* Light blue background */
-    border-color: #60a5fa; /* Blue border */
+    background-color: #eff6ff;
+    border-color: #60a5fa;
 }
 
-/* --- Batch Action Bar --- */
-/* The bar that slides up from the bottom when items are selected */
+/* --- Floating Batch Action Bar --- */
 .batch-action-bar {
     position: fixed;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     width: auto;
-    background-color: #1e293b;
-    color: white;
+    background-color: #fff;
+    color: black;
     padding: 1rem 1.5rem;
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     display: flex;
     justify-content: space-between;
     gap: 2rem;
@@ -418,24 +431,24 @@
     font-weight: 500;
 }
 
-/* Buttons inside the batch action bar */
 .batch-action-bar .btn {
-    width: auto; /* Allow button to size naturally */
-    margin-top: 0; /* Override default button margin */
+    width: auto;
+    margin-top: 0;
 }
 
 .batch-action-bar .btn-danger {
-     background-color: #dc2626; /* Red */
-     color: white;
+    background-color: #dc2626;
+    color: white;
 }
+
 .batch-action-bar .btn-danger:hover {
-     background-color: #b91c1c;
+    background-color: #b91c1c;
 }
 
 .batch-action-bar .btn {
     width: auto;
     margin-top: 0;
-    padding: 0.75rem 1rem; /* Adjust if needed */
+    padding: 0.75rem 1rem;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
@@ -444,9 +457,8 @@
     font-size: 14px;
 }
 
-/* Delete button inside the details modal */
 #details-delete-btn {
-    background-color: #dc2626; /* Red */
+    background-color: #dc2626;
     color: white;
     padding: 0.75rem 1rem;
     border-radius: 8px;
@@ -455,16 +467,15 @@
     border: none;
     transition: background-color 0.2s;
     font-size: 14px;
-    width: auto; /* Allow button to size naturally */
-    margin-top: 0; /* Override any potential default margins */
+    width: auto;
+    margin-top: 0;
 }
 
 #details-delete-btn:hover {
-    background-color: #b91c1c; /* Darker red on hover */
+    background-color: #b91c1c;
 }
 
 /* --- General Button Color Styles --- */
-/* Base button style */
 .btn {
     padding: 0.75rem 1rem;
     border-radius: 8px;
@@ -473,36 +484,35 @@
     border: none;
     transition: background-color 0.2s;
     font-size: 14px;
-    width: auto; /* Allow buttons in footers to size naturally */
-    margin-top: 0; /* Override default button margin */
+    width: auto;
+    margin-top: 0;
 }
 
-/* Danger button (e.g., Delete) */
 .btn-danger {
-    background-color: #dc2626; /* Red background */
-    color: white; /* White text */
+    background-color: #dc2626;
+    color: white;
 }
 
 .btn-danger:hover {
-    background-color: #b91c1c; /* Darker red on hover */
+    background-color: #b91c1c;
 }
 
-/* Secondary button (e.g., Cancel) */
 .btn-secondary {
     background-color: #e2e8f0;
     color: #475569;
 }
+
 .btn-secondary:hover {
-     background-color: #cbd5e1;
+    background-color: #cbd5e1;
 }
 
-/* --- Django Messages --- */
-/* Container for success/error messages */
+/* --- Django Message Alerts --- */
 .messages {
     list-style: none;
     padding: 0;
     margin-bottom: 1.5rem;
 }
+
 .messages li {
     padding: 1rem;
     margin-bottom: 1rem;
@@ -516,95 +526,88 @@
 }
 
 .messages li.success {
-    color: #15803d; /* Darker green text */
-    background-color: #dcfce7; /* Light green background */
-    padding: 1rem 1.5rem; /* Padding around text */
-    margin-bottom: 1rem; /* Space if multiple messages appear */
-    border-radius: 8px; /* Rounded corners */
-    border: 1px solid #86efac; /* Slightly darker green border */
+    color: #15803d;
+    background-color: #dcfce7;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    border: 1px solid #86efac;
     font-weight: 500;
-    display: flex; /* Use flexbox for alignment */
-    align-items: center; /* Center icon and text vertically */
-    gap: 0.75rem; /* Space between icon and text */
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     transition: opacity 0.5s ease;
 }
 
 /* --- Mobile Responsive Fixes --- */
 @media (max-width: 768px) {
-    /* 1. Fix Order Card layout */
     .order-card {
-        flex-direction: column; /* Stack image on top of details */
-        padding-left: 0; /* Remove side padding */
+        flex-direction: column;
+        padding-left: 0;
     }
 
     .product-image {
-        width: 100%; /* Make image full-width */
-        height: 180px; /* Give it a consistent height */
+        width: 100%;
+        height: 180px;
         object-fit: cover;
-        border-right: none; /* Remove border */
-        border-bottom: 1px solid #f1f5f9; /* Add border below */
+        border-right: none;
+        border-bottom: 1px solid #f1f5f9;
     }
 
     .card-body {
-        padding: 1rem; /* Slightly reduce padding */
+        padding: 1rem;
     }
 
-    /* 2. Fix Checkbox position */
     .order-checkbox {
-        top: 1rem; /* Adjust position */
+        top: 1rem;
         left: 1rem;
     }
-    
-    /* On mobile, cards with checkboxes need padding again */
+
     .order-card.history {
-        padding-left: 3rem; /* Re-add padding */
-    }
-    .order-card.history .product-image {
-        width: 100%; /* Keep it 100% */
-    }
-    .order-card.history .card-body {
-         padding-left: 1rem; /* Keep padding */
+        padding-left: 3rem;
     }
 
-    /* 3. Fix Modal Details Layout */
+    .order-card.history .product-image {
+        width: 100%;
+    }
+
+    .order-card.history .card-body {
+        padding-left: 1rem;
+    }
+
     .details-layout {
-        flex-direction: column; /* Stack image on top of details */
+        flex-direction: column;
     }
 
     .details-image-container,
     .details-info {
-        /* Remove the flex-basis so they stack */
-        flex-basis: auto; 
+        flex-basis: auto;
     }
 
-    /* 4. Fix Batch Action Bar padding */
     .batch-action-bar {
         padding: 1rem;
     }
 
-    /* 5. Fix card header wrapping */
     .card-header {
         flex-direction: column;
         gap: 0.75rem;
     }
 
     .status-badge {
-        align-self: flex-start; /* Align badge to the left */
+        align-self: flex-start;
     }
 }
 
-/* --- Empty State Styles --- */
-/* Hides the old <p> tag, which we replaced */
+/* --- Empty State Card --- */
 p.no-items-message {
-    color: #64748b; 
-    padding: 2rem; 
-    text-align: center; 
-    background-color: #f8fafc; 
+    color: #64748b;
+    padding: 2rem;
+    text-align: center;
+    background-color: #f8fafc;
     border-radius: 8px;
-    display: none; /* Hide the old <p> tag */
+    display: none;
 }
 
-/* The new empty state card */
 .empty-state-container {
     background-color: #ffffff;
     border: 1px solid #f1f5f9;
@@ -613,42 +616,39 @@ p.no-items-message {
     text-align: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
     margin-top: 1rem;
-    display: block; /* Make sure it's visible */
+    display: block;
 }
 
-/* The icon circle */
 .empty-state-icon {
-    font-size: 3rem; /* 48px */
+    font-size: 3rem;
     line-height: 1;
     margin-bottom: 1.5rem;
-    background-color: #fde8e8; /* Light maroon */
-    color: #800000; /* Maroon */
+    background-color: #fde8e8;
+    color: #800000;
     width: 72px;
     height: 72px;
-    display: inline-flex; /* Use inline-flex to center icon */
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
 }
 
 .empty-state-container h3 {
-    font-size: 1.5rem; /* 24px */
+    font-size: 1.5rem;
     font-weight: 600;
     color: #1e293b;
     margin: 0 0 0.5rem 0;
 }
 
 .empty-state-container p {
-    font-size: 1rem; /* 16px */
+    font-size: 1rem;
     color: #64748b;
     line-height: 1.6;
-    max-width: 400px; /* Keep text from getting too wide */
-    margin: 0 auto 1.5rem auto; /* Center the text block */
+    max-width: 400px;
+    margin: 0 auto 1.5rem auto;
 }
 
-/* The new button style for the empty state */
 .btn-primary-empty {
-    /* Base button styles */
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
     font-weight: 600;
@@ -657,17 +657,13 @@ p.no-items-message {
     transition: all 0.2s ease-in-out;
     font-size: 15px;
     text-decoration: none;
-    
-    /* Colors */
     background-color: #800000;
     color: white;
-    
-    /* Sizing */
-    display: block; /* Make it a block element */
-    width: fit-content; /* Make its width fit its content */
-    margin: 0 auto; /* Center it horizontally */
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
 }
 
 .btn-primary-empty:hover {
-    background-color: #600000; /* Darker maroon */
+    background-color: #600000;
 }

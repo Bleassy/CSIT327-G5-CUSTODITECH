@@ -1,10 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
 
-
+/* --- Icon Styles --- */
 .welcome-text i {
     color: #FFD700;
 }
 
+/* --- Global Resets & Body Styles --- */
 * {
     margin: 0;
     padding: 0;
@@ -17,14 +18,15 @@ body {
     background-color: #f5f5f5;
 }
 
+/* --- Main Page Layout Container --- */
 .container {
     display: flex;
     width: 100%;
     min-height: 100vh;
-    flex-wrap: wrap; /* This correctly wraps the two sections on small screens if needed */
+    flex-wrap: wrap;
 }
 
-/* Left Side - Login Form */
+/* --- Left-Side Login Form Panel --- */
 .left-side {
     flex: 1;
     min-width: 300px;
@@ -54,7 +56,7 @@ body {
     font-weight: 500;
 }
 
-/* New Styles for Role Selector */
+/* --- Role Selector (Admin/Student) --- */
 .role-selector {
     display: flex;
     justify-content: center;
@@ -88,9 +90,8 @@ body {
 .role-btn:hover:not(.active) {
     background-color: #e0e0e0;
 }
-/* End of New Styles */
 
-
+/* --- Form Groups & Input Fields --- */
 .form-group {
     margin-bottom: 20px;
 }
@@ -116,6 +117,7 @@ body {
     border-color: #8B0000;
 }
 
+/* --- Form Message & Alert Styles --- */
 .error-message {
     color: #dc3545;
     background-color: #f8d7da;
@@ -126,16 +128,17 @@ body {
 }
 
 .success-message {
-    color: #155724; /* Dark green text */
-    background-color: #d4edda; /* Light green background */
+    color: #155724;
+    background-color: #d4edda;
     padding: 12px 15px;
     border-radius: 5px;
     margin-bottom: 20px;
-    border: 1px solid #c3e6cb; /* Slightly darker green border */
+    border: 1px solid #c3e6cb;
     font-weight: 500;
     text-align: center;
 }
 
+/* --- Submit Button & Form Links --- */
 .btn-login {
     width: 100%;
     padding: 15px;
@@ -168,7 +171,7 @@ body {
     text-decoration: underline;
 }
 
-/* Right Side - Branding */
+/* --- Right-Side Branding Panel --- */
 .right-side {
     flex: 1;
     min-width: 300px;
@@ -182,32 +185,36 @@ body {
     text-align: center;
 }
 
+/* --- Branding Panel: Logo Box --- */
 .logo-box {
-    border: 3px solid #FFD700;
-    border-radius: 20px;
-    padding: 40px 60px;
+    border: 3px solid #FFD700;   
+    border-radius: 20px;        
+    padding: 2.5rem;            
     margin-bottom: 30px;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: rgba(255, 255, 255, 0.05);
+
+    animation: pulseGlow 3s infinite ease-in-out;
+    
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.logo-box h1 {
-    font-size: 4rem;
-    margin: 10px 0;
-    color: white;
+.login-logo {
+    max-width: 100%;
+    max-width: 250px;
+    height: auto;
+    animation: fadeInLogo 0.8s ease-out;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
 }
 
-.logo-box h2 {
-    font-size: 1.8rem;
-    margin: 10px 0;
-}
-
-.logo-icon {
-    font-size: 3rem;
-    margin-top: 10px;
-}
-
-.logo-icon i {
-    font-size: 3rem; 
-    color: #FFD700;
+.logo-box:hover {
+    transform: scale(1.03);
+    animation-play-state: paused;
+    box-shadow: 0 0 35px rgba(255, 215, 0, 0.8);
 }
 
 .tagline {
@@ -216,35 +223,65 @@ body {
     font-weight: 500;
 }
 
-/* Responsive Design */
+@keyframes fadeInLogo {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* --- Animation for Pulsing Glow --- */
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); /* #FFD700 at 30% */
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.7); /* #FFD700 at 70% */
+    }
+    100% {
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+    }
+}
+
+/* --- Responsive Media Queries --- */
 @media (max-width: 768px) {
     .container {
         flex-direction: column;
     }
-    
-    .left-side, .right-side {
-        flex: 0 1 auto; /* Stop them from growing (0), let them shrink (1), and set base size to auto (auto) */
-        width: 100%;   /* Make them full width */
-        min-width: 100%; /* Override the 300px min-width */
-        padding: 40px 20px; /* Increase vertical padding for mobile */
+
+    .left-side{
+        order: 2;
+        flex: 0 1 auto;
+        width: 100%;
+        min-width: 100%;
+        padding: 40px 20px;
     }
 
     .right-side {
-    min-height: 300px; /* Match the register page */
+        order: 1;
+        flex: 0 1 auto;
+        width: 100%;
+        min-width: 100%;
+        padding: 50px 20px;
+        min-height: auto;
     }
-    
+
     .logo-box {
         padding: 30px 40px;
     }
-    
+
     .logo-box h1 {
         font-size: 3rem;
     }
-    
+
     .logo-box h2 {
         font-size: 1.5rem;
     }
-    
+
     .left-side h1 {
         font-size: 1.8rem;
     }
@@ -254,40 +291,40 @@ body {
     .logo-box {
         padding: 20px 30px;
     }
-    
+
     .logo-box h1 {
         font-size: 2.5rem;
     }
-    
+
     .logo-box h2 {
         font-size: 1.2rem;
     }
-    
+
     .left-side h1 {
         font-size: 1.5rem;
     }
-    
+
     .welcome-text {
         font-size: 1rem;
     }
 }
 
-.error-message, .success-message {
+/* --- Message Fade-Out Animation --- */
+.error-message,
+.success-message {
     transition: opacity 0.5s ease-out;
 }
-.error-message.fade-out, .success-message.fade-out {
+
+.error-message.fade-out,
+.success-message.fade-out {
     opacity: 0;
 }
-/* Style for the AJAX container */
+
 #ajax-error-container .error-message {
-    /* Inherit or add specific styles here */
-    margin-bottom: 1rem; /* Example */
+    margin-bottom: 1rem;
 }
 
-/* Style for the icon in the success message */
 .success-message i {
     margin-right: 8px;
     font-size: 0.9em;
 }
-
-

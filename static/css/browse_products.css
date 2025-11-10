@@ -1,25 +1,24 @@
-/* --- Product Grid and Card Styles --- */
-
-/* --- Icon style for Page Header --- */
+/* --- Icon Styles --- */
 .page-header h1 i {
     margin-right: 10px;
-    font-size: 24px; /* A bit smaller than the h1's 28px */
-    color: #1e40af; 
-    vertical-align: middle; /* Aligns it nicely with the text */
+    font-size: 24px;
+    color: #1e40af;
+    vertical-align: middle;
 }
 
 .welcome-title i {
     margin-right: 10px;
-    color: #800000; 
+    color: #800000;
 }
 
-
+/* --- Product Grid Layout --- */
 .product-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 2rem;
 }
 
+/* --- Base Product Card --- */
 .product-card {
     background: white;
     border-radius: 12px;
@@ -36,6 +35,7 @@
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
 }
 
+/* --- Product Card: Image --- */
 .product-image-container {
     position: relative;
     height: 200px;
@@ -54,6 +54,7 @@
     transform: scale(1.05);
 }
 
+/* --- Product Card: Stock Overlay --- */
 .stock-overlay {
     position: absolute;
     top: 1rem;
@@ -74,6 +75,7 @@
     background-color: #f59e0b;
 }
 
+/* --- Product Card: Info Section --- */
 .product-info {
     padding: 1.25rem;
     flex-grow: 1;
@@ -97,6 +99,7 @@
     flex-grow: 1;
 }
 
+/* --- Product Card: Meta (Price/Stock) --- */
 .product-meta {
     display: flex;
     justify-content: space-between;
@@ -117,60 +120,115 @@
     color: #475569;
 }
 
+/* --- Product Card: Action Buttons --- */
 .product-actions {
     padding: 0 1.25rem 1.25rem 1.25rem;
     display: flex;
     gap: 0.75rem;
 }
 
-/* This rule must be separate, not nested */
 .product-actions .btn {
-    width: auto; /* Removes the 100% width */
-    flex: 1;     /* Tells each button to take up 1 equal share of the space */
-    margin-top: 0; /* Removes extra spacing */
+    width: auto;
+    flex: 1;
+    margin-top: 0;
 }
 
+/* --- Buttons (REFACTORED) --- */
+
+/* 1. Base Button Style */
 .btn {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: background-color 0.2s;
-    font-size: 14px;
+  display: inline-block;
+  font-family: inherit;
+  text-decoration: none;
+  
+  /* Standardized Sizing & Spacing */
+  padding: 0.75rem 1.5rem; /* Standardized padding */
+  font-size: 15px;         /* Standardized font size */
+  
+  /* Standardized Visuals */
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  
+  /* Default Layout (for forms/single buttons in modals) */
+  width: 100%;
+  margin-top: 1.5rem;
 }
 
+/* 2. Color Variants */
+
+/* Primary (Maroon) */
 .btn-primary {
-    background-color: #800000;
-    color: white;
+  background-color: #800000;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
-
 .btn-primary:hover {
-    background-color: #600000;
+  background-color: #600000;
+  box-shadow: 0 4px 10px rgba(128, 0, 0, 0.2);
+  transform: translateY(-2px);
 }
 
+/* Secondary (Gray) */
 .btn-secondary {
-    background-color: #e2e8f0;
-    color: #475569;
+  background-color: #e2e8f0;
+  color: #475569;
 }
-
 .btn-secondary:hover {
-    background-color: #cbd5e1;
+  background-color: #cbd5e1;
 }
 
+/* Danger (Red) - For future use, like a "Remove" button */
+.btn-danger {
+  background-color: #dc2626;
+  color: white;
+}
+.btn-danger:hover {
+  background-color: #b91c1c;
+}
+
+/* Disabled State */
 .btn:disabled {
-    background-color: #94a3b8;
-    cursor: not-allowed;
+  background-color: #94a3b8;
+  color: white;
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
+/* 3. Layout Overrides */
+/* These rules fix the button widths in specific containers */
+
+/* For buttons in the product card */
+.product-actions .btn {
+  width: auto;   /* Remove 100% width */
+  flex: 1;       /* Make them share space */
+  margin-top: 0; /* Remove top margin */
+  
+  /* Use smaller padding for these card buttons */
+  padding: 0.75rem 1rem; 
+  font-size: 14px;
+}
+
+/* For buttons in the modal footer */
+.modal-footer .btn {
+  width: auto;   /* Remove 100% width */
+  flex: 0 1 auto;/* Don't grow, just fit content */
+  margin-top: 0; /* Remove top margin */
+}
+
+/* --- Empty State Message --- */
 .no-products-message p {
     font-size: 1.2rem;
     color: #64748b;
     margin: 0;
 }
 
-/* === General Modal Styles === */
+/* --- Base Modal Layout --- */
 .modal {
     position: fixed;
     z-index: 1000;
@@ -192,7 +250,7 @@
     border-radius: 12px;
     width: 100%;
     max-width: 500px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     animation: slideIn 0.3s;
     display: flex;
     flex-direction: column;
@@ -221,17 +279,18 @@
     cursor: pointer;
 }
 
+/* --- Modal Structure (Form, Body, Footer) --- */
 .modal-form {
     display: flex;
     flex-direction: column;
-    flex-grow: 1; /* Allows the form to grow */
-    min-height: 0; /* Prevents flexbox overflow issues */
+    flex-grow: 1;
+    min-height: 0;
 }
 
 .modal-body {
     padding: 24px;
-    overflow-y: auto; /* Adds a scrollbar ONLY when content is too tall */
-    flex-grow: 1;     /* Makes this area fill the available vertical space */
+    overflow-y: auto;
+    flex-grow: 1;
     min-height: 0;
 }
 
@@ -247,6 +306,7 @@
     flex-shrink: 0;
 }
 
+/* --- Modal: Product Description --- */
 .modal-product-description {
     font-size: 14px;
     color: #64748b;
@@ -257,7 +317,7 @@
     padding-top: 1rem;
 }
 
-/* --- Styles for elements inside the modals --- */
+/* --- Modal: Form Elements --- */
 .modal-product-image {
     width: 80%;
     max-width: 200px;
@@ -291,6 +351,7 @@
     box-sizing: border-box;
 }
 
+/* --- Modal: Order Summary --- */
 .item-name-modal {
     margin-top: 0;
     font-size: 16px;
@@ -316,6 +377,7 @@
     color: #800000;
 }
 
+/* --- Modal: Specific Components --- */
 .payment-options {
     display: flex;
     gap: 1.5rem;
@@ -378,6 +440,7 @@
     text-align: center;
 }
 
+/* --- Modal Animations --- */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -398,18 +461,19 @@
     }
 }
 
+/* --- Success Message --- */
 .success-message {
-    color: #155724; /* Dark green text */
-    background-color: #d4edda; /* Light green background */
+    color: #155724;
+    background-color: #d4edda;
     padding: 12px 15px;
     border-radius: 5px;
     margin-bottom: 20px;
-    border: 1px solid #c3e6cb; /* Slightly darker green border */
+    border: 1px solid #c3e6cb;
     font-weight: 500;
     text-align: center;
 }
 
-/* --- Search Bar --- */
+/* --- Page Search Bar --- */
 .search-container {
     margin-bottom: 2.5rem;
 }
@@ -420,7 +484,7 @@
     font-size: 16px;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .search-input:focus {
@@ -440,9 +504,9 @@
     border-bottom: 2px solid #f1f5f9;
 }
 
-/* --- Product Card Interaction --- */
+/* --- Product Card Animations --- */
 .product-card {
-    cursor: pointer; /* Indicates the card is clickable */
+    cursor: pointer;
 }
 
 .product-card.moving {
@@ -460,7 +524,7 @@
     }
 }
 
-/* --- Product Details Modal --- */
+/* --- Product Details Modal Layout --- */
 .details-layout {
     display: flex;
     gap: 2rem;
@@ -513,10 +577,10 @@
 }
 
 #product-details-modal .modal-content {
-    max-width: 700px; /* Or any other size you prefer */
+    max-width: 700px;
 }
 
-/* --- Message Styling --- */
+/* --- Django Message List --- */
 .messages {
     list-style: none;
     padding: 0;
@@ -524,12 +588,12 @@
 }
 
 .messages li.success {
-    color: #15803d; /* Dark green text */
-    background-color: #dcfce7; /* Light green background */
+    color: #15803d;
+    background-color: #dcfce7;
     padding: 1rem 1.5rem;
     margin-bottom: 1rem;
     border-radius: 8px;
-    border: 1px solid #86efac; /* Green border */
+    border: 1px solid #86efac;
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -538,12 +602,12 @@
 }
 
 .messages li.error {
-    color: #991b1b; /* Dark red text */
-    background-color: #fee2e2; /* Light red background */
+    color: #991b1b;
+    background-color: #fee2e2;
     padding: 1rem 1.5rem;
     margin-bottom: 1rem;
     border-radius: 8px;
-    border: 1px solid #fca5a5; /* Red border */
+    border: 1px solid #fca5a5;
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -551,56 +615,50 @@
     transition: opacity 0.5s ease;
 }
 
-/* --- Mobile Modal Fix --- */
+/* --- Mobile Responsive (768px) --- */
 @media (max-width: 768px) {
     .details-layout {
-        flex-direction: column; /* Stack image on top of info */
+        flex-direction: column;
     }
 
     .details-image-container,
     .details-info {
-        flex-basis: auto; /* Remove the 40%/60% split */
+        flex-basis: auto;
     }
 
-    /* Make modal buttons stack */
     .modal-footer {
         display: flex;
         gap: 0.75rem;
-        margin-top: 1rem; /* Add some space above the buttons */
-        margin-bottom: 1rem; /* Add some space below the buttons */
+        margin-top: 1rem;
+        margin-bottom: 1rem;
     }
+
     .modal-footer .btn {
-        width: auto;  /* Remove 100% width */
-        flex: 1;      /* Make them share space equally */
+        width: auto;
+        flex: 1;
         margin-top: 0;
+        padding: 0.75rem 1rem;  
+        font-size: 14px;        
     }
 }
 
-/* --- Search Filter Component --- */
-
+/* --- Search with Category Filter --- */
 .search-filter-container {
     display: flex;
     width: 100%;
-    margin-bottom: 2.5rem; /* Same margin as old search-container */
+    margin-bottom: 2.5rem;
 }
 
-/* Style the new dropdown */
 .category-filter-select {
-    width: 200px; /* Give the category dropdown a set width */
+    width: 200px;
     padding: 14px 16px;
     font-size: 16px;
     border: 1px solid #e2e8f0;
-    border-right: none; /* Remove border between select and input */
-    
-    /* Make it match the input field */
+    border-right: none;
     background-color: #fff;
     color: #475569;
     font-weight: 500;
-    
-    /* Round the left corners */
     border-radius: 10px 0 0 10px;
-    
-    /* Remove default arrow (optional, but cleaner) */
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
@@ -611,16 +669,12 @@
     cursor: pointer;
 }
 
-/* Adjust the existing search input */
 .search-filter-container .search-input {
-    flex: 1; /* Make the search bar fill the remaining space */
-    margin-bottom: 0; /* Remove margin, as container has it */
-    
-    /* Round the right corners */
+    flex: 1;
+    margin-bottom: 0;
     border-radius: 0 10px 10px 0;
 }
 
-/* Fix focus states */
 .category-filter-select:focus,
 .search-filter-container .search-input:focus {
     outline: none;
@@ -630,32 +684,24 @@
     position: relative;
 }
 
-/* --- Fix for Mobile Search Filter --- */
+/* --- Mobile Search Filter Responsive --- */
 @media (max-width: 768px) {
-    
-    /* 1. Stack the container */
     .search-filter-container {
         flex-direction: column;
-        gap: 0.75rem; /* Add a small gap between them */
+        gap: 0.75rem;
         position: relative;
         z-index: 2;
     }
 
-    /* 2. Make the dropdown full-width */
     .category-filter-select {
         width: 100%;
-        /* Fix the borders that we removed for desktop */
         border-right: 1px solid #e2e8f0;
-        border-radius: 10px; /* Make all corners round */
+        border-radius: 10px;
         font-size: 16px;
     }
 
-    /* 3. Make the search input full-width */
     .search-filter-container .search-input {
         width: 100%;
-        border-radius: 10px; /* Make all corners round */
+        border-radius: 10px;
     }
 }
-
-
-

@@ -1,8 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
 
-/* static/css/student_base.css */
-
-/* --- General Styles --- */
+/* --- General Page Styles --- */
 .buyer-dashboard {
     min-height: 100vh;
     background-color: #f5f7fa;
@@ -10,7 +8,7 @@
     margin: 0;
 }
 
-/* --- Header Styles --- */
+/* --- Main Header & Logo --- */
 .dashboard-header {
     background: white;
     border-bottom: 1px solid #e1e5e9;
@@ -18,7 +16,7 @@
     align-items: center;
     padding: 0 2rem;
     height: 70px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -39,7 +37,7 @@
     font-size: 24px;
 }
 
-/* --- Main Navigation --- */
+/* --- Header Navigation Links --- */
 .main-nav {
     display: flex;
     gap: 0;
@@ -57,7 +55,7 @@
     border-bottom: 3px solid transparent;
     transition: all 0.2s ease-in-out;
     text-decoration: none;
-    white-space: nowrap; 
+    white-space: nowrap;
     flex-shrink: 0;
 }
 
@@ -71,7 +69,7 @@
     border-bottom-color: #800000;
 }
 
-/* --- Header Right Side (Profile/Logout) --- */
+/* --- Header: User & Logout --- */
 .header-right-desktop,
 .header-right-mobile {
     display: flex;
@@ -83,6 +81,7 @@
 .header-right-mobile {
     display: none;
 }
+
 .student-name {
     width: 32px;
     height: 32px;
@@ -115,7 +114,7 @@
     color: #dc2626;
 }
 
-/* --- Main Page Container --- */
+/* --- Main Page Content Container --- */
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -129,16 +128,15 @@
     margin: 0 0 3rem 0;
 }
 
-/* Desktop styles for the mobile menu wrapper */
 .mobile-menu-wrapper {
     display: flex;
     align-items: center;
     flex: 1;
 }
 
-/* --- Hamburger Menu Styles --- */
+/* --- Mobile Hamburger Menu --- */
 .hamburger-btn {
-    display: none; /* Hidden on desktop */
+    display: none;
     background: none;
     border: none;
     font-size: 28px;
@@ -155,7 +153,7 @@
     gap: 0.40rem;
 }
 
-/* --- Responsive Breakpoint (992px) --- */
+/* --- Responsive Styles (Mobile) --- */
 @media (max-width: 992px) {
     .notifications-header {
         flex-direction: column;
@@ -163,7 +161,7 @@
         gap: 1rem;
     }
 
-     .header-controls {
+    .header-controls {
         width: 100%;
         flex-direction: column;
         gap: 0.75rem;
@@ -172,28 +170,29 @@
     .tabs {
         width: 100%;
     }
-    
+
     .tab-btn {
-        flex: 1; /* Make tabs equal width */
+        flex: 1;
     }
-    
+
     .btn-mark-all {
         width: 100%;
         text-align: center;
     }
-    
+
     .dashboard-header {
         padding: 0 0.5rem;
-        height: 60px; /* Slightly smaller header on mobile */
+        height: 60px;
     }
 
     .header-left {
         flex: 1;
-      }
+    }
 
     .hamburger-btn {
         display: block;
     }
+
     .header-right-desktop {
         display: none;
     }
@@ -205,13 +204,11 @@
         left: 0;
         right: 0;
         height: auto;
-        
         background: #ffffff;
         z-index: 1000;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
         border-bottom-left-radius: 8px;
         border-bottom-right-radius: 8px;
-
         flex-direction: column;
         justify-content: flex-start;
         align-items: stretch;
@@ -223,29 +220,27 @@
         gap: 0.5rem;
     }
 
-     .notification-btn {
+    .notification-btn {
         padding: 6px;
         font-size: 18px;
     }
-    
+
     .header-left .logo {
         font-size: 14px;
     }
-    
 
-    /* "Open" State */
-    .dashboard-header.menu-is-open .mobile-menu-wrapper{
-        display: flex; /* Show the menu AND the profile/logout section */
+    .dashboard-header.menu-is-open .mobile-menu-wrapper {
+        display: flex;
     }
-    
-    /* Change hamburger icon to an "X" when open */
+
     .dashboard-header.menu-is-open .hamburger-icon {
         font-family: monospace;
         font-weight: bold;
         content: "X";
     }
+
     .dashboard-header.menu-is-open .hamburger-btn {
-        color: #333; /* Make X icon darker */
+        color: #333;
     }
 
     .main-nav {
@@ -261,6 +256,7 @@
         border-bottom: none;
         border-radius: 0;
     }
+
     .nav-btn.active {
         border-bottom: none;
         background: #fde8e8;
@@ -285,7 +281,7 @@
         font-size: 15px;
         padding: 10px 16px;
         background: #f8f9fa;
-        color: #dc2626; /* Red text */
+        color: #dc2626;
         border: 1px solid #e1e5e9;
         text-align: center;
     }
@@ -297,7 +293,6 @@
     }
 }
 
-/* Show abbreviated logo text on medium mobile */
 @media (max-width: 768px) and (min-width: 481px) {
     .logo-text {
         display: block;
@@ -305,7 +300,7 @@
     }
 }
 
-/* --- Django Messages --- */
+/* --- Django Flash Messages --- */
 .messages {
     list-style: none;
     padding: 0;
@@ -352,20 +347,20 @@
     opacity: 0;
 }
 
-
-/* --- Profile Name & Avatar Link --- */
+/* --- Header: Profile Avatar Link --- */
 .student-name-link {
     display: flex;
     align-items: center;
-    gap: 0.75rem; 
+    gap: 0.75rem;
     padding: 0.5rem;
     border-radius: 6px;
     transition: background-color 0.2s ease-in-out;
     text-decoration: none;
 }
+
 .student-name-link:hover,
 .student-name-link.active {
-    background-color: rgba(128, 0, 0, 0.1); /* Light maroon */
+    background-color: rgba(128, 0, 0, 0.1);
 }
 
 .student-name-text {
@@ -393,8 +388,7 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-
-/* --- Page Loader Styles --- */
+/* --- Full Page Loader Overlay --- */
 .loader-overlay {
     display: none;
     position: fixed;
@@ -423,12 +417,15 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
-
-/* --- Accessibility Focus Styles --- */
+/* --- Accessibility Focus States --- */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
@@ -437,15 +434,14 @@ textarea:focus-visible {
     outline-offset: 2px;
     outline: 2px solid #800000;
     box-shadow: 0 0 0 4px rgba(128, 0, 0, 0.1);
-    border-radius: 4px; 
+    border-radius: 4px;
 }
 
 .student-name-link:focus-visible {
     border-radius: 50%;
 }
 
-
-/* --- ✅ START: Notification Bell Styles (Consolidated & Fixed) --- */
+/* --- Notification Bell & Dropdown --- */
 .notification-bell-wrapper {
     position: relative;
 }
@@ -462,9 +458,11 @@ textarea:focus-visible {
     position: relative;
     transition: background-color 0.2s ease;
 }
+
 .notification-btn:hover {
     background-color: #f8f9fa;
 }
+
 .notification-btn.active {
     background-color: rgba(128, 0, 0, 0.1);
 }
@@ -488,28 +486,29 @@ textarea:focus-visible {
 
 .notification-dropdown {
     display: none;
-    flex-direction: column; /* This is key */
+    flex-direction: column;
     position: absolute;
     top: 130%;
     right: 0;
-    width: 380px; /* Made wider for the picture */
-    max-height: 450px; /* Max height before *list* scrolls */
+    width: 380px;
+    max-height: 450px;
     background: white;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     border: 1px solid #e2e8f0;
     z-index: 1001;
 }
 
 .notification-dropdown.visible {
-    display: flex; /* ✅ Use flex to make the layout work */
+    display: flex;
 }
 
 .dropdown-header {
     padding: 1rem;
     border-bottom: 1px solid #f1f5f9;
-    flex-shrink: 0; /* Prevents header from shrinking */
+    flex-shrink: 0;
 }
+
 .dropdown-header strong {
     font-size: 16px;
     color: #1e293b;
@@ -517,9 +516,6 @@ textarea:focus-visible {
     margin-bottom: 0.75rem;
 }
 
-
-
-/* Tab Styles */
 .notification-dropdown .tabs {
     display: flex;
     gap: 0.5rem;
@@ -528,6 +524,7 @@ textarea:focus-visible {
     padding: 0.25rem;
     width: fit-content;
 }
+
 .notification-dropdown .tab-btn {
     background: transparent;
     border: none;
@@ -539,16 +536,17 @@ textarea:focus-visible {
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
 }
+
 .notification-dropdown .tab-btn:hover {
     background-color: #e2e8f0;
 }
+
 .notification-dropdown .tab-btn.active {
     background-color: #fff;
     color: #800000;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* START: Add these new styles */
 .dropdown-header-row {
     display: flex;
     justify-content: space-between;
@@ -574,23 +572,22 @@ textarea:focus-visible {
     border-radius: 6px;
     transition: background-color 0.2s ease;
 }
+
 .btn-mark-all-read:hover {
-    background-color: #fde8e8; /* Light maroon */
+    background-color: #fde8e8;
 }
+
 .btn-mark-all-read:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
-/* END: Add these new styles */
 
-/* This is the ONLY scrollable part */
 .notification-dropdown .notification-list {
     max-height: 300px;
     overflow-y: auto;
-    flex-shrink: 1; /* Allows the list to shrink and grow */
+    flex-shrink: 1;
 }
 
-/* Notification Item Layout */
 .notification-item {
     display: flex;
     gap: 0.75rem;
@@ -606,6 +603,7 @@ textarea:focus-visible {
     transition: background-color 0.2s ease, opacity 0.3s ease;
     position: relative;
 }
+
 .notification-item:hover {
     background-color: #f8fafc;
 }
@@ -621,7 +619,7 @@ textarea:focus-visible {
 
 .notification-content {
     flex-grow: 1;
-    padding-right: 1rem; /* Space for the dot */
+    padding-right: 1rem;
 }
 
 .unread-dot {
@@ -636,15 +634,17 @@ textarea:focus-visible {
 }
 
 .notification-item.notification-unread::before {
-    display: none; /* Hide old dot */
+    display: none;
 }
 
 .notification-item:not(.notification-unread) {
     opacity: 0.7;
 }
+
 .notification-item:not(.notification-unread) .unread-dot {
     display: none;
 }
+
 .notification-item:not(.notification-unread):hover {
     opacity: 1;
 }
@@ -663,7 +663,6 @@ textarea:focus-visible {
     color: #64748b;
 }
 
-/* --- Empty State (for Dropdown) --- */
 .notification-list .empty-state {
     padding: 2rem 1rem;
     text-align: center;
@@ -673,16 +672,14 @@ textarea:focus-visible {
     font-size: 2.5rem;
     line-height: 1;
     margin-bottom: 1rem;
-
     width: 60px;
     height: 60px;
     border-radius: 50%;
     background-color: #fde8e8;
-
+    color: #800000;
     display: flex;
     align-items: center;
     justify-content: center;
-
     margin-left: auto;
     margin-right: auto;
 }
@@ -705,89 +702,86 @@ textarea:focus-visible {
     text-align: center;
     background-color: #f8fafc;
     border-top: 1px solid #f1f5f9;
-    flex-shrink: 0; /* Prevents footer from shrinking */
+    flex-shrink: 0;
 }
+
 .dropdown-footer a {
     font-size: 14px;
     font-weight: 500;
     color: #800000;
     text-decoration: none;
 }
+
 .dropdown-footer a:hover {
     text-decoration: underline;
 }
-/* --- ✅ END: Notification Bell Styles --- */
 
 /* --- Mobile Notification Dropdown Fixes --- */
 @media (max-width: 992px) {
     .notification-bell-wrapper {
-        position: static; /* Change from relative to contain dropdown properly */
+        position: static;
     }
-    
+
     .notification-dropdown {
-        position: fixed; /* Change from absolute to fixed for mobile */
-        top: 70px; /* Position below header */
+        position: fixed;
+        top: 70px;
         left: 50%;
         transform: translateX(-50%);
-        width: 95vw; /* Use viewport width */
+        width: 95vw;
         max-width: 400px;
-        max-height: 70vh; /* Limit height to viewport */
-        z-index: 1002; /* Higher z-index to appear above menu */
+        max-height: 70vh;
+        z-index: 1002;
     }
-    
+
     .notification-list {
-        max-height: 50vh !important; /* Reduce list height on mobile */
+        max-height: 50vh !important;
     }
-    
-    /* Ensure dropdown appears above mobile menu */
+
     .dashboard-header.menu-is-open .notification-dropdown.visible {
         z-index: 1003;
     }
 }
 
-/* Additional mobile optimizations */
 @media (max-width: 480px) {
     .notification-dropdown {
         width: 98vw;
         max-width: 98vw;
         margin: 0 1vw;
     }
-    
+
     .notification-item {
         padding: 0.75rem;
     }
-    
+
     .notification-product-image {
         width: 35px;
         height: 35px;
     }
-    
+
     .notification-message {
         font-size: 13px;
     }
-    
+
     .dropdown-header {
         padding: 0.75rem;
     }
 }
 
-/* --- Icon Spacing --- */
+/* --- Icon Spacing Utilities --- */
 .nav-btn i,
 .student-name-link i,
 .notification-btn i {
-    margin-right: 8px; /* Adds space between the icon and the text */
-    width: 20px; /* Gives all icons a consistent width */
+    margin-right: 8px;
+    width: 20px;
     text-align: center;
 }
 
-/* Make the bell icon slightly larger */
 .notification-btn i {
     font-size: 1.4rem;
     margin-right: 0;
 }
 
-/* Adjust the logo icon size */
 .logo-icon i {
-    font-size: 22px; /* A bit smaller than the emoji */
+    font-size: 22px;
     margin-right: 0;
 }

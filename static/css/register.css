@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
 
-/* --- General Styles --- */
+/* --- Global Resets & Body Styles --- */
 * {
     margin: 0;
     padding: 0;
@@ -13,7 +13,7 @@ body {
     background-color: #f5f5f5;
 }
 
-/* --- Main Layout Container --- */
+/* --- Main Page Layout Container --- */
 .container {
     display: flex;
     width: 100%;
@@ -21,7 +21,7 @@ body {
     flex-wrap: wrap;
 }
 
-/* --- Left Side - Branding --- */
+/* --- Left-Side Branding Panel --- */
 .left-side {
     flex: 1;
     min-width: 300px;
@@ -35,28 +35,37 @@ body {
     text-align: center;
 }
 
+/* --- Branding Panel: Logo Box --- */
 .logo-box {
-    border: 3px solid #FFD700;
-    border-radius: 20px;
-    padding: 40px 60px;
+    border: 3px solid #FFD700;   
+    border-radius: 20px;        
+    padding: 2.5rem;            
     margin-bottom: 30px;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: rgba(255, 255, 255, 0.05);
+
+    animation: pulseGlow 3s infinite ease-in-out;
+    
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
 }
 
-.logo-box h1 {
-    font-size: 4rem;
-    margin: 10px 0;
-    color: white;
+.register-logo {
+    max-width: 100%;
+    max-width: 250px;
+    height: auto;
+    animation: fadeInLogo 0.8s ease-out;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
 }
 
-.logo-box h2 {
-    font-size: 1.8rem;
-    margin: 10px 0;
-}
-
-.logo-icon {
-    font-size: 3rem;
-    margin-top: 10px;
-    color: #FFD700;
+.logo-box:hover {
+    transform: scale(1.03);
+    animation-play-state: paused;
+    box-shadow: 0 0 35px rgba(255, 215, 0, 0.8);
 }
 
 .tagline {
@@ -65,17 +74,44 @@ body {
     font-weight: 500;
 }
 
-/* --- Right Side - Registration Form --- */
+@keyframes fadeInLogo {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* --- Animation for Pulsing Glow --- */
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); /* #FFD700 at 30% */
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.7); /* #FFD700 at 70% */
+    }
+    100% {
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+    }
+}
+
+/* --- Right-Side Form Panel --- */
 .right-side {
-    flex: 1.5; /* Give the form side more width on desktop */
+    flex: 1;
     min-width: 300px;
     padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     background-color: #f5f5f5;
-    overflow-y: auto; /* Allow form to scroll on short screens */
 }
 
 .form-container {
-    max-width: 600px;
+    max-width: 500px;
+    width: 100%;
     margin: 0 auto;
 }
 
@@ -85,7 +121,7 @@ body {
     margin-bottom: 20px;
 }
 
-/* --- Tab Styles (if used) --- */
+/* --- Tab Navigation (Login/Register) --- */
 .tabs {
     display: flex;
     margin-bottom: 30px;
@@ -118,7 +154,7 @@ body {
     opacity: 0.8;
 }
 
-/* --- Form Group & Input Styles --- */
+/* --- Form Groups & Input Fields --- */
 .form-group {
     margin-bottom: 18px;
 }
@@ -147,7 +183,6 @@ body {
     box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.1);
 }
 
-/* Smaller address field */
 .form-group input[name="address"] {
     height: 40px;
 }
@@ -159,13 +194,12 @@ body {
     display: block;
 }
 
-/* Required field indicator */
 label .required {
     color: #dc3545;
     font-weight: bold;
 }
 
-/* --- Form Message & Error Styles --- */
+/* --- Form Message & Error Styling --- */
 .error-message {
     color: #dc3545;
     background-color: #f8d7da;
@@ -188,21 +222,21 @@ label .required {
     margin-top: 3px;
 }
 
-/* Container for AJAX errors */
 #ajax-error-container .error-message {
     margin-bottom: 1rem;
 }
 
-/* Success/Error message fade-out animation */
-.error-message, .success-message {
+.error-message,
+.success-message {
     transition: opacity 0.5s ease-out;
 }
-.error-message.fade-out, .success-message.fade-out {
+
+.error-message.fade-out,
+.success-message.fade-out {
     opacity: 0;
 }
 
-
-/* --- Button & Link Styles --- */
+/* --- Submit Button & Form Links --- */
 .btn-register {
     width: 100%;
     padding: 14px;
@@ -237,7 +271,7 @@ label .required {
     text-decoration: underline;
 }
 
-/* --- Input Validation --- */
+/* --- Browser Input Validation --- */
 input:invalid:not(:placeholder-shown) {
     border-color: #dc3545;
 }
@@ -246,43 +280,45 @@ input:valid:not(:placeholder-shown) {
     border-color: #28a745;
 }
 
-/* --- Responsive Design --- */
+/* --- Responsive Media Queries --- */
 @media (max-width: 968px) {
     .container {
         flex-direction: column;
     }
-    
+
     .left-side {
-        min-height: 300px; /* Gives the top banner a set height */
+        min-height: 300px;
     }
 
-    .left-side, .right-side {
-        flex: 0 1 auto; /* Stop them from growing, let them shrink, base size auto */
-        min-width: 100%; /* Override the 300px min-width */
+    .left-side,
+    .right-side {
+        flex: 0 1 auto;
+        min-width: 100%;
     }
 }
 
 @media (max-width: 768px) {
-    .left-side, .right-side {
+    .left-side,
+    .right-side {
         padding: 30px 20px;
     }
-    
+
     .logo-box {
         padding: 30px 40px;
     }
-    
+
     .logo-box h1 {
         font-size: 3rem;
     }
-    
+
     .logo-box h2 {
         font-size: 1.5rem;
     }
-    
+
     .right-side h1 {
         font-size: 1.8rem;
     }
-    
+
     .form-group {
         margin-bottom: 16px;
     }
@@ -292,33 +328,33 @@ input:valid:not(:placeholder-shown) {
     .logo-box {
         padding: 20px 30px;
     }
-    
+
     .logo-box h1 {
         font-size: 2.5rem;
     }
-    
+
     .logo-box h2 {
         font-size: 1.2rem;
     }
-    
+
     .right-side h1 {
         font-size: 1.5rem;
     }
-    
+
     .tabs {
         flex-direction: column;
     }
-    
+
     .tab {
         padding: 12px 15px;
     }
-    
+
     .form-group {
         margin-bottom: 14px;
     }
 }
 
 .logo-icon i {
-    font-size: 3rem; 
+    font-size: 3rem;
     color: #FFD700;
 }

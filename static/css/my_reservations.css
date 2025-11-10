@@ -1,18 +1,15 @@
-
-
 /* --- Icon Styles --- */
 .welcome-title i {
     margin-right: 10px;
-    color: #800000; 
+    color: #800000;
 }
 
 .empty-state-icon i {
-    font-size: 3rem; 
+    font-size: 3rem;
     line-height: 1;
 }
 
-/* --- Page & Section --- */
-
+/* --- Section Title --- */
 .section-title {
     font-size: 24px;
     font-weight: 600;
@@ -22,14 +19,14 @@
     border-bottom: 1px solid #e2e8f0;
 }
 
-/* --- Card Grid --- */
+/* --- Reservations Grid Layout --- */
 .reservations-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 2rem;
 }
 
-/* --- Reservation Card --- */
+/* --- Base Reservation Card Styles --- */
 .reservation-card {
     background: white;
     border-radius: 12px;
@@ -40,17 +37,18 @@
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
 .reservation-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 }
 
-/* Style for backordered items */
 .reservation-card.backorder {
-    opacity: 1; /* Make it fully opaque to match other cards */
-    background-color: #f8fafc; /* A slightly different background */
+    opacity: 1;
+    background-color: #f8fafc;
 }
 
+/* --- Card Internal Layout (Image, Body, Details) --- */
 .product-image {
     width: 120px;
     height: 100%;
@@ -71,7 +69,6 @@
     margin: 0 0 1rem 0;
 }
 
-/* Grid for details inside the card */
 .details-grid {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -80,20 +77,20 @@
     color: #64748b;
     flex-grow: 1;
 }
+
 .details-grid strong {
-    color: #1e293b; /* Dark gray */
+    color: #1e293b;
 }
 
-/* Status text colors within the card grid */
-.details-grid .status-available { 
-    color: #16a34a; /* Green */
+/* --- Card Status Text & Instructions --- */
+.details-grid .status-available {
+    color: #16a34a;
 }
 
-.details-grid .status-unavailable { 
-    color: #f59e0b; /* Yellow/Orange */
+.details-grid .status-unavailable {
+    color: #f59e0b;
 }
 
-/* Message shown when no items are found */
 .no-items-message {
     color: #64748b;
     padding: 2rem;
@@ -101,7 +98,6 @@
     border-radius: 8px;
 }
 
-/* Small italicized text */
 .instructions {
     font-size: 13px;
     color: #16a34a;
@@ -109,44 +105,48 @@
     margin-top: 1rem;
 }
 
-/* --- General Modal Styles --- */
-.modal { 
-    display: none; 
-    position: fixed; 
-    z-index: 1000; 
-    left: 0; 
-    top: 0; 
-    width: 100%; 
-    height: 100%; 
-    background-color: rgba(0,0,0,0.5); 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
+/* --- Base Modal Layout (Overlay, Content, Header) --- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-.modal-content { 
-    background-color: #fff; 
-    border-radius: 12px; 
-    width: 90%; 
-    max-width: 500px; 
+
+.modal-content {
+    background-color: #fff;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
     display: flex;
     flex-direction: column;
-    max-height: 90vh; /* Don't allow modal to be taller than 90% of screen */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    max-height: 90vh;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     animation: slideIn 0.3s;
 }
-.modal-header { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    border-bottom: 1px solid #e2e8f0; 
-    padding-bottom: 16px; 
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 16px;
     padding: 24px 24px 16px 24px;
     flex-shrink: 0;
 }
+
 .modal-header h2 {
     margin: 0;
     font-size: 20px;
 }
+
 .close-btn {
     font-size: 28px;
     cursor: pointer;
@@ -154,12 +154,12 @@
 
 .modal-body {
     padding: 24px;
-    overflow-y: auto; /* This makes *only* the body scroll */
+    overflow-y: auto;
     flex-grow: 1;
-    min-height: 0; /* Flexbox fix */
+    min-height: 0;
 }
 
-/* Summary box inside modals */
+/* --- Modal Body & Footer Elements --- */
 .summary {
     background-color: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -167,30 +167,31 @@
     border-radius: 8px;
     margin: 1rem 0;
 }
+
 .summary p {
     margin: 0 0 0.5rem 0;
 }
 
-.modal-footer { 
-    display: flex; 
-    justify-content: flex-end; 
-    gap: 1rem; 
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
     padding: 16px 24px 24px 24px;
-    border-top: 1px solid #e2e8f0; 
+    border-top: 1px solid #e2e8f0;
     flex-shrink: 0;
     background-color: #f8fafc;
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;
 }
 
-/* --- Django Messages --- */
+/* --- Django Message & Alert Styles --- */
 .success-message {
-    color: #155724; /* Dark green text */
-    background-color: #d4edda; /* Light green background */
+    color: #155724;
+    background-color: #d4edda;
     padding: 12px 15px;
     border-radius: 5px;
     margin-bottom: 20px;
-    border: 1px solid #c3e6cb; /* Slightly darker green border */
+    border: 1px solid #c3e6cb;
     font-weight: 500;
     text-align: center;
 }
@@ -200,6 +201,7 @@
     padding: 0;
     margin-bottom: 1.5rem;
 }
+
 .messages li {
     padding: 1rem;
     margin-bottom: 1rem;
@@ -213,67 +215,58 @@
 }
 
 .messages li.success {
-    color: #15803d; /* Darker green text */
-    background-color: #dcfce7; /* Light green background */
-    padding: 1rem 1.5rem; /* Padding around text */
-    margin-bottom: 1rem; /* Space if multiple messages appear */
-    border-radius: 8px; /* Rounded corners */
-    border: 1px solid #86efac; /* Slightly darker green border */
+    color: #15803d;
+    background-color: #dcfce7;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    border: 1px solid #86efac;
     font-weight: 500;
-    display: flex; /* Use flexbox for alignment */
-    align-items: center; /* Center icon and text vertically */
-    gap: 0.75rem; /* Space between icon and text */
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     transition: opacity 0.5s ease;
 }
 
-
-/* --- Buttons --- */
+/* --- Reusable Button Styles & Variants --- */
 .action-buttons-group {
     margin-top: 1.5rem;
     display: flex;
     gap: 0.5rem;
 }
 
-/* Targets buttons inside the group */
 .action-buttons-group .btn {
-    width: auto;      /* This removes the 100% width */
-    flex: 1;          /* This tells each button to take up 1 equal share of the space */
-    margin-top: 0;    /* This removes the extra margin that .btn has */
+    width: auto;
+    flex: 1;
+    margin-top: 0;
 }
 
-/* Base button style */
 .btn {
-    margin-top: 1.5rem;
-    width: 100%;
-    padding: 10px;
+    display: inline-block;
+    font-family: inherit;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 15px;
     border: none;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
-    font-size: 14px;
-}
-
-/* Button color variations */
-.btn.checkout-btn {
-    margin-top: 1.5rem;
+    text-align: center;
+    transition: all 0.2s ease-in-out;
     width: 100%;
-    padding: 10px;
-    background-color: #800000;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
+    margin-top: 1.5rem;
 }
 
 .btn-primary {
     background-color: #800000;
     color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.btn-danger {
-    background-color: #dc2626; /* Red */
-    color: white;
+.btn-primary:hover {
+    background-color: #600000;
+    box-shadow: 0 4px 10px rgba(128, 0, 0, 0.2);
+    transform: translateY(-2px);
 }
 
 .btn-secondary {
@@ -281,23 +274,46 @@
     color: #475569;
 }
 
+.btn-secondary:hover {
+    background-color: #cbd5e1;
+}
+
+.btn-danger {
+    background-color: #dc2626;
+    color: white;
+}
+
 .btn-danger:hover {
     background-color: #b91c1c;
 }
 
-/* --- Reservation Details Modals --- */
+.action-buttons-group .btn,
+.modal-footer .btn {
+    width: auto;
+    flex: 1;
+    margin-top: 0;
+}
+
+.modal-footer .btn {
+    flex: 0 1 auto;
+}
+
+/* --- Reservation Details Modal Layout --- */
 #reservation-details-modal .modal-content,
 #backorder-details-modal .modal-content {
-    max-width: 600px; /* Make these modals a bit wider */
+    max-width: 600px;
 }
+
 .details-layout {
     display: flex;
     gap: 1.5rem;
 }
+
 .details-image-container {
     flex-basis: 40%;
     flex-shrink: 0;
 }
+
 .details-image {
     width: 100%;
     height: auto;
@@ -305,14 +321,17 @@
     background-color: #f8fafc;
     border: 1px solid #e2e8f0;
 }
+
 .details-info {
     flex-basis: 60%;
 }
+
 .details-name {
     font-size: 22px;
     font-weight: 700;
     margin: 0 0 1rem 0;
 }
+
 .details-description {
     font-size: 14px;
     color: #64748b;
@@ -321,6 +340,7 @@
     max-height: 100px;
     overflow-y: auto;
 }
+
 .details-summary-grid {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -329,19 +349,22 @@
     padding-top: 1rem;
     border-top: 1px solid #f1f5f9;
 }
+
 .details-summary-grid span {
     color: #64748b;
 }
+
 .details-summary-grid strong {
     font-weight: 600;
     color: #1e293b;
 }
 
-/* Status text inside the backorder modal */
+/* --- Backorder Modal Status Colors --- */
 #backorder-details-modal .status-available {
     color: #16a34a;
     font-weight: 700;
 }
+
 #backorder-details-modal .status-unavailable {
     color: #ef4444;
     font-weight: 700;
@@ -349,77 +372,69 @@
 
 /* --- Card Removal Animation --- */
 .reservation-card.removing {
-    /* Animate these properties over 0.4 seconds */
-    transition:
-        opacity 0.4s ease-out,
-        max-height 0.4s ease-out,
-        margin-top 0.4s ease-out,
-        margin-bottom 0.4s ease-out,
-        padding-top 0.4s ease-out,
-        padding-bottom 0.4s ease-out,
-        border-width 0.4s ease-out; /* Smoothly collapse border */
-
-    /* Target state */
+    transition: opacity 0.4s ease-out, max-height 0.4s ease-out, margin-top 0.4s ease-out, margin-bottom 0.4s ease-out, padding-top 0.4s ease-out, padding-bottom 0.4s ease-out, border-width 0.4s ease-out;
     opacity: 0;
-    max-height: 0;        /* Collapse the height */
+    max-height: 0;
     margin-top: 0;
     margin-bottom: 0;
     padding-top: 0;
     padding-bottom: 0;
-    border-top-width: 0;  /* Collapse borders */
+    border-top-width: 0;
     border-bottom-width: 0;
-    overflow: hidden;     /* Crucial: Prevent content spill during collapse */
+    overflow: hidden;
 }
 
-/* --- Mobile Responsive Fixes --- */
+/* --- Mobile Responsive (768px) --- */
 @media (max-width: 768px) {
-    /* 1. Fix Reservation Card layout */
     .reservation-card {
-        flex-direction: column; /* Stack image on top of details */
+        flex-direction: column;
     }
 
     .product-image {
-        width: 100%; /* Make image full-width */
-        height: 150px; /* Give it a consistent height */
+        width: 100%;
+        height: 150px;
         object-fit: cover;
     }
 
     .card-body {
-        padding: 1rem; /* Slightly reduce padding */
+        padding: 1rem;
     }
 
-    /* 2. Fix Modal Details Layout */
     .details-layout {
-        flex-direction: column; /* Stack image on top of details */
+        flex-direction: column;
     }
 
     .details-image-container,
     .details-info {
-        /* Remove the flex-basis so they stack */
-        flex-basis: auto; 
+        flex-basis: auto;
     }
 
-    /* 3. Make modal footer buttons stack */
     .modal-footer {
         display: flex;
         gap: 0.75rem;
-        margin-top: 1rem; /* Add some space above the buttons */
-        margin-bottom: 1rem; /* Add some space below the buttons */
+        margin-top: 1rem;
+        margin-bottom: 1rem;
     }
+
     .modal-footer .btn {
-        width: auto;  /* Remove 100% width */
-        flex: 1;      /* Make them share space equally */
+        width: auto;
+        flex: 1;
         margin-top: 0;
+        padding: 0.75rem 1rem;
+        font-size: 14px;
+    }
+
+    .action-buttons-group .btn {
+        padding: 0.75rem 1rem;
+        font-size: 14px;
     }
 }
 
-/* --- Empty State Styles --- */
-/* Hides the old <p> tag just in case it's left over */
+/* --- Empty State Card Styles --- */
 p.no-items-message {
-    display: none !important; 
+    display: none !important;
 }
 
-/* The new empty state card */
 .empty-state-container {
     background-color: #ffffff;
     border: 1px solid #f1f5f9;
@@ -428,64 +443,39 @@ p.no-items-message {
     text-align: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
     margin-top: 1rem;
-    
-    /* This will be set to 'display: block' by your JS.
-       Because text-align is center, its children will be centered.
-    */
 }
 
-/* The icon circle */
 .empty-state-icon {
-    font-size: 3rem; /* 48px */
+    font-size: 3rem;
     line-height: 1;
     margin-bottom: 1.5rem;
-    background-color: #fde8e8; /* Light maroon */
-    color: #800000; /* Maroon */
+    background-color: #fde8e8;
+    color: #800000;
     width: 72px;
     height: 72px;
-    display: inline-flex; /* Use inline-flex to center icon */
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
 }
 
 .empty-state-container h3 {
-    font-size: 1.5rem; /* 24px */
+    font-size: 1.5rem;
     font-weight: 600;
     color: #1e293b;
     margin: 0 0 0.5rem 0;
 }
 
 .empty-state-container p {
-    font-size: 1rem; /* 16px */
+    font-size: 1rem;
     color: #64748b;
     line-height: 1.6;
-    max-width: 400px; /* Keep text from getting too wide */
-    margin: 0 auto 1.5rem auto; /* Center the text block */
+    max-width: 400px;
+    margin: 0 auto 1.5rem auto;
 }
 
-/* The new button style for the empty state */
-.btn-primary-empty {
-    /* Base button styles */
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s ease-in-out;
-    font-size: 15px;
-    text-decoration: none;
-    
-    /* Colors */
-    background-color: #800000;
-    color: white;
-    
-    /* Sizing */
-    display: block; /* Make it a block element */
-    width: fit-content; /* Make its width fit its content */
-    margin: 0 auto; /* Center it horizontally */
-}
-
-.btn-primary-empty:hover {
-    background-color: #600000; /* Darker maroon */
+.empty-state-container .btn {
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
 }

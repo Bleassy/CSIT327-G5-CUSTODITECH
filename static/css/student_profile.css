@@ -1,6 +1,4 @@
-/* static/css/student_profile.css */
-
-/* --- Main Profile Layout (Original) --- */
+/* --- Main Profile Layout Grid --- */
 .profile-layout {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -62,21 +60,48 @@
 
 /* --- General Button Styling --- */
 .btn {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    font-size: 15px;
+  display: inline-block;
+  font-family: inherit;
+  text-decoration: none;
+  
+  padding: 0.75rem 1.5rem; 
+  font-size: 15px;
+  
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  
+  width: 100%;
+  margin-top: 1.5rem; 
 }
 
 .btn-primary {
-    background-color: #800000;
-    color: white;
+  background-color: #800000;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 .btn-primary:hover {
-    background-color: #600000;
+  background-color: #600000;
+  box-shadow: 0 4px 10px rgba(128, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: #e2e8f0;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+.btn-secondary:hover {
+  background-color: #cbd5e1;
+  border-color: #cbd5e1;
+}
+
+.form-footer .btn {
+  width: auto;   
+  margin-top: 0; 
 }
 
 /* --- Message & Error Styling --- */
@@ -110,7 +135,6 @@
 }
 
 /* --- Profile View/Edit Mode --- */
-/* This holds the plain-text value */
 .form-view-text {
     font-size: 16px;
     color: #333;
@@ -118,17 +142,15 @@
     min-height: 42px;
     line-height: 1.5;
     word-break: break-word;
-    display: none; /* Hidden by default */
+    display: none;
 }
 
-/* Hides inputs/textareas when .view-mode is active */
 .profile-card.view-mode .form-group input[type="text"],
 .profile-card.view-mode .form-group input[type="email"],
 .profile-card.view-mode .form-group textarea {
     display: none;
 }
 
-/* Shows plain text when .view-mode is active */
 .profile-card.view-mode .form-view-text {
     display: block;
 }
@@ -143,24 +165,20 @@
     gap: 0.5rem;
 }
 
-/* HIDE Save/Cancel when in view-mode */
 .profile-card.view-mode #save-details-btn,
 .profile-card.view-mode #cancel-edit-btn {
     display: none;
 }
 
-/* SHOW Edit when in view-mode */
 .profile-card.view-mode #edit-profile-btn {
     display: inline-block;
 }
 
-/* SHOW Save/Cancel when NOT in view-mode */
 #save-details-btn,
 #cancel-edit-btn {
     display: inline-block;
 }
 
-/* HIDE Edit when NOT in view-mode */
 #edit-profile-btn {
     display: none;
 }
@@ -179,14 +197,14 @@
     border-radius: 50%;
     background-color: #f1f5f9;
     border: 3px solid white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 3rem;
     font-weight: 600;
     color: #800000;
-    overflow: hidden; /* This makes the image fit the circle */
+    overflow: hidden;
 }
 
 .avatar-preview img {
@@ -205,15 +223,13 @@
 }
 
 #avatar_image {
-    display: none; /* Hide the file input */
+    display: none;
 }
 
-/* HIDE upload elements in view mode */
 .profile-card.view-mode .avatar-edit-label {
     display: none;
 }
 
-/* SHOW upload elements in edit mode */
 .profile-card:not(.view-mode) .avatar-edit-label {
     display: block;
 }
@@ -226,7 +242,7 @@
     align-items: flex-start;
 }
 
-/* Left-Side Navigation Menu */
+/* --- Tab Navigation Menu --- */
 .profile-nav {
     background: white;
     border-radius: 12px;
@@ -255,13 +271,13 @@
     font-weight: 600;
 }
 
-/* Right-Side Content Area (for Tabs) */
+/* --- Tab Content Area --- */
 .profile-content .profile-card {
-    display: none; /* Hide all content cards by default */
+    display: none;
 }
 
 .profile-content .profile-card.active {
-    display: block; /* Show only the active one */
+    display: block;
 }
 
 /* --- Validation Error Box --- */
@@ -289,7 +305,6 @@
     margin-bottom: 0;
 }
 
-/* Individual field error message */
 .form-error-message {
     color: #d9534f;
     font-size: 0.875rem;
@@ -299,12 +314,10 @@
 
 /* --- Responsive Media Queries --- */
 @media (max-width: 992px) {
-    /* Stack original layout on tablets */
     .profile-layout {
         grid-template-columns: 1fr;
     }
 
-    /* Stack tabbed layout on tablets */
     .profile-layout-tabbed {
         grid-template-columns: 1fr;
     }
@@ -312,16 +325,18 @@
 
 @media (max-width: 768px) {
     .profile-card {
-        padding: 1.5rem; /* Reduce padding on mobile */
+        padding: 1.5rem;
     }
 
     .form-footer {
-        flex-direction: column; /* Stack buttons vertically */
+        flex-direction: column;
         gap: 1rem;
     }
 
     .form-footer .btn {
-        width: 100%; /* Make footer buttons full-width */
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 14px;
     }
 
     .profile-nav {
@@ -339,10 +354,11 @@
     }
 }
 
+/* --- Informational Note Box --- */
 .form-note {
     font-size: 14px;
-    color: #475569; /* Same as label color */
-    background-color: #f8fafc; /* A very light gray, like disabled input */
+    color: #475569;
+    background-color: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
     padding: 1rem;

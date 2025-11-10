@@ -1,17 +1,19 @@
+/* --- Page Header --- */
 .page-header h1 {
     font-size: 28px;
     font-weight: 700;
     margin-bottom: 2rem;
 }
 
+/* --- Main Page Layout Grid --- */
 .profile-layout-tabbed {
     display: grid;
-    grid-template-columns: 1fr 3fr; /* 1 part for nav, 3 parts for content */
+    grid-template-columns: 1fr 3fr;
     gap: 2rem;
     align-items: flex-start;
 }
 
-/* Left-Side Navigation Menu */
+/* --- Left-Side Navigation Menu --- */
 .profile-nav {
     background: white;
     border-radius: 12px;
@@ -35,24 +37,25 @@
 }
 
 .profile-nav-link.active {
-    background-color: #1e40af; /* Admin primary color */
+    background-color: #1e40af;
     color: white;
     font-weight: 600;
 }
 
-/* Content Area Styling */
+/* --- Tabbed Content Area --- */
 .profile-content .profile-card {
-    display: none; /* Hide all content cards by default */
+    display: none;
 }
 
 .profile-content .profile-card.active {
-    display: block; /* Show only the one with the 'active' class */
+    display: block;
 }
 
+/* --- Informational Note Box --- */
 .form-note {
     font-size: 14px;
-    color: #475569; /* Same as label color */
-    background-color: #f8fafc; /* A very light gray, like disabled input */
+    color: #475569;
+    background-color: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
     padding: 1rem;
@@ -65,8 +68,7 @@
     font-weight: 600;
 }
 
-
-/* (Existing styles for cards, forms, buttons) */
+/* --- Base Card Styles --- */
 .profile-card {
     background: white;
     border-radius: 12px;
@@ -82,6 +84,7 @@
     padding-bottom: 1rem;
 }
 
+/* --- Base Form Styles --- */
 .form-group {
     margin-bottom: 1.5rem;
 }
@@ -117,43 +120,72 @@
     resize: vertical;
 }
 
+/* --- Base Button Styles --- */
 .btn {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    font-size: 15px;
+  display: inline-block;
+  font-family: inherit;
+  text-decoration: none;
+  
+  padding: 0.75rem 1.5rem; 
+  font-size: 15px;
+  
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  
+  width: auto;
+  margin-top: 0;
 }
 
 .btn-primary {
-    background-color: #1e40af;
-    color: white;
+  background-color: #1e40af; 
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 .btn-primary:hover {
-    background-color: #1c3d90;
+  background-color: #1c3d90; 
+  box-shadow: 0 4px 10px rgba(2, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
-/* Responsive layout */
+.btn-secondary {
+  background-color: #e2e8f0;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+.btn-secondary:hover {
+  background-color: #cbd5e1;
+  border-color: #cbd5e1;
+}
+
+.btn-block {
+    width: 100%;
+    margin-top: 1.5rem;
+}
+
+/* --- Responsive Layout (Tablet/Mobile) --- */
 @media (max-width: 992px) {
     .profile-layout-tabbed {
         grid-template-columns: 1fr;
     }
 }
 
+/* --- Success Message Alert --- */
 .success-message {
-    color: #155724; /* Dark green text */
-    background-color: #d4edda; /* Light green background */
+    color: #155724;
+    background-color: #d4edda;
     padding: 12px 15px;
     border-radius: 5px;
     margin-bottom: 20px;
-    border: 1px solid #c3e6cb; /* Slightly darker green border */
+    border: 1px solid #c3e6cb;
     font-weight: 500;
     text-align: center;
 }
 
-/* --- New Avatar Styles --- */
+/* --- Avatar Upload & Preview --- */
 .avatar-upload-container {
     display: flex;
     flex-direction: column;
@@ -167,13 +199,13 @@
     border-radius: 50%;
     background-color: #f1f5f9;
     border: 3px solid white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 3rem;
     font-weight: 600;
-    color: #1e40af; /* Admin primary color */
+    color: #1e40af;
     overflow: hidden;
 }
 
@@ -187,16 +219,16 @@
     margin-top: 1rem;
     font-size: 14px;
     font-weight: 500;
-    color: #1e40af; /* Admin primary color */
+    color: #1e40af;
     cursor: pointer;
     text-decoration: underline;
 }
 
 #avatar_image {
-    display: none; /* Hide the file input */
+    display: none;
 }
 
-/* --- View/Edit Mode Styles --- */
+/* --- View/Edit Mode Toggling --- */
 .form-view-text {
     font-size: 16px;
     color: #333;
@@ -204,27 +236,24 @@
     min-height: 42px;
     line-height: 1.5;
     word-break: break-word;
-    display: none; /* Hidden by default */
+    display: none;
 }
 
-/* When in view-mode, hide inputs... */
 .profile-card.view-mode .form-group input[type="text"],
 .profile-card.view-mode .form-group input[type="email"],
 .profile-card.view-mode .form-group textarea {
     display: none;
 }
 
-/* ...and show the plain text */
 .profile-card.view-mode .form-view-text {
     display: block;
 }
 
-/* ...and hide the upload button */
 .profile-card.view-mode .avatar-edit-label {
     display: none;
 }
 
-/* --- Button Swapping --- */
+/* --- Form Footer & Button Swapping --- */
 .form-footer {
     border-top: 1px solid #e2e8f0;
     padding-top: 1rem;
@@ -243,7 +272,7 @@
     display: none;
 }
 
-/* --- Password Error Box --- */
+/* --- Form Error Message Box --- */
 .form-errors {
     background-color: #fee2e2;
     color: #991b1b;
@@ -251,50 +280,58 @@
     border-radius: 8px;
     padding: 1rem 1.5rem;
     margin-bottom: 1.5rem;
-    display: none; /* Hidden by default */
+    display: none;
 }
+
 .form-errors ul {
     margin: 0;
     padding-left: 1.25rem;
 }
+
 .form-errors li {
     font-size: 14px;
     font-weight: 500;
     margin-bottom: 0.25rem;
 }
+
 .form-errors li:last-child {
     margin-bottom: 0;
 }
 
+/* --- Inline Field Error Message --- */
 .form-error-message {
-    color: #d9534f; /* A standard error red */
+    color: #d9534f;
     font-size: 0.875rem;
     margin-top: 5px;
-    min-height: 1em; /* Prevents layout shift when text appears */
+    min-height: 1em;
 }
 
 /* --- Mobile Responsive Fixes --- */
 @media (max-width: 768px) {
     .profile-card {
-        padding: 1.5rem; /* Reduce padding on mobile */
+        padding: 1.5rem;
     }
 
     .form-footer {
-        flex-direction: column; /* Stack buttons vertically */
-        gap: 1rem; /* Add space between stacked buttons */
+        flex-direction: column;
+        gap: 1rem;
     }
 
-    /* Make buttons in footer full-width */
     .form-footer .btn {
         width: 100%;
+        padding: 0.75rem 1rem;  
+        font-size: 14px;
+    }
+    .btn-block {
+      padding: 0.75rem 1rem;
+      font-size: 14px;
     }
 
-    /* Reduce padding on nav for more space */
     .profile-nav {
         padding: 0.5rem;
     }
+
     .profile-nav-link {
         padding: 0.75rem 1rem;
     }
 }
-

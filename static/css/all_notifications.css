@@ -1,17 +1,17 @@
-/* static/css/all_notifications.css */
-
+/* --- Page Layout & Main Card --- */
 .notifications-page-container {
     max-width: 800px;
-    margin: 0 auto; /* Center the card */
+    margin: 0 auto;
 }
 
 .notifications-card {
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    overflow: hidden; /* Important for rounded corners */
+    overflow: hidden;
 }
 
+/* --- Card Header & Controls --- */
 .notifications-header {
     display: flex;
     justify-content: space-between;
@@ -21,14 +21,13 @@
 }
 
 .card-title {
-    font-size: 24px;
-    font-weight: 700;
+    font-size: 28px;
+    font-weight: 600;
     color: #1e293b;
     margin: 0;
     flex-grow: 1;
 }
 
-/* Header controls wrapper */
 .header-controls {
     display: flex;
     align-items: center;
@@ -36,7 +35,7 @@
     flex-shrink: 0;
 }
 
-/* Tabs styling */
+/* --- Header: Tabs & Mark All Button --- */
 .tabs {
     display: flex;
     gap: 0.5rem;
@@ -54,7 +53,7 @@
     padding: 0.5rem 1rem;
     border-radius: 6px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     color: #475569;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
@@ -73,13 +72,12 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* --- New "Mark All Read" button style --- */
 .btn-mark-all {
     background-color: transparent;
     border: none;
     color: #800000;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
     padding: 0.5rem 1rem;
     border-radius: 6px;
@@ -93,71 +91,61 @@
     border: 1px solid transparent;
 }
 
-
 .btn-mark-all:hover {
     background-color: #fde8e8;
     border-color: #fecaca;
 }
 
-
-/* --- Action Bar (NEW FIXED STYLES) --- */
+/* --- Floating Action Bar (for selection) --- */
 .action-bar {
-    /* 1. Positioning: Fixed, centered, and floating */
     position: fixed;
-    bottom: 20px; /* Sits 20px from the bottom */
+    bottom: 20px;
     left: 50%;
-    
-    /* 2. Sizing: Matches the card container */
     max-width: 800px;
-    width: calc(100% - 40px); /* Responsive with 20px side margins */
-    z-index: 1000; 
-
-    /* 3. Styling: Matches the card style */
+    width: calc(100% - 40px);
+    z-index: 1000;
     background-color: #fff;
-    border-radius: 12px; /* Match .notifications-card */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Stronger shadow */
-
-    /* 4. Layout: (Moved back from .action-bar-inner) */
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: black;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem; 
-    box-sizing: border-box; /* Ensures padding is included in the width */
-
-    /* 5. Animation: Hidden by default (slid down & faded) */
+    padding: 1rem 1.5rem;
+    box-sizing: border-box;
     opacity: 0;
     transform: translateX(-50%) translateY(50px);
     transition: transform 0.3s ease-out, opacity 0.3s ease-out;
     visibility: hidden;
 }
 
-/* This class will be added by JavaScript to show the bar */
+/* This class is toggled by JS to show/hide the bar */
 .action-bar.is-active {
     opacity: 1;
-    transform: translateX(-50%) translateY(0); /* Slide into view */
+    transform: translateX(-50%) translateY(0);
     visibility: visible;
 }
 
-
-/* This class adds padding to the <body> so the bar doesn't hide content */
+/* This class is added to the <body> to prevent content from being hidden */
 body.action-bar-visible {
-    /* Adjust 80px to be a bit more than your action bar's height */
-    padding-bottom: 80px; 
+    padding-bottom: 80px;
     transition: padding-bottom 0.3s ease-in-out;
 }
 
-
+/* --- Action Bar: Internal Layout --- */
 .select-all-container {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
+
 .select-all-container label {
     font-size: 14px;
     font-weight: 500;
-    color: #334155;
+    color: black;
     cursor: pointer;
 }
+
 .select-all-container input[type="checkbox"] {
     cursor: pointer;
 }
@@ -167,40 +155,46 @@ body.action-bar-visible {
     gap: 0.75rem;
 }
 
-/* (These btn styles are the same as before) */
+/* --- Reusable Button Styles --- */
 .btn {
-    padding: 8px 16px;
-    border: 1px solid #e1e5e9;
-    background: white;
-    color: #475569;
-    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
     cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s ease-in-out;
-    text-decoration: none;
+    border: none;
+    transition: background-color 0.2s;
     font-size: 14px;
+    width: auto;
+    margin-top: 0;
+    text-decoration: none;
 }
+
+.btn-secondary {
+    background-color: #e2e8f0;
+    color: #475569;
+}
+
 .btn-secondary:hover {
-    background-color: #f1f5f9;
+    background-color: #cbd5e1;
 }
+
 .btn-danger {
-    background-color: #fee2e2;
-    border-color: #fca5a5;
-    color: #dc2626;
+    background-color: #dc2626;
+    color: white;
 }
+
 .btn-danger:hover {
-    background-color: #fecaca;
+    background-color: #b91c1c;
 }
+
 .btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-
-/* --- Notification List --- */
+/* --- Notification List & Items --- */
 .notification-list {
     min-height: 200px;
-    
 }
 
 .notification-item-row {
@@ -213,9 +207,11 @@ body.action-bar-visible {
     position: relative;
     transition: background-color 0.2s ease;
 }
+
 .notification-item-row:last-child {
     border-bottom: none;
 }
+
 .notification-item-row:hover {
     background-color: #f8fafc;
 }
@@ -238,11 +234,11 @@ body.action-bar-visible {
 
 .notification-content {
     flex-grow: 1;
-    margin-right: 1rem; /* Space for the dot */
+    margin-right: 1rem;
 }
 
 .notification-message {
-    font-size: 15px;
+    font-size: 16px;
     color: #1e293b;
     line-height: 1.5;
     margin: 0 0 0.25rem 0;
@@ -261,26 +257,24 @@ body.action-bar-visible {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: #3b82f6; /* Blue dot */
+    background-color: #3b82f6;
 }
 
-/* --- Empty State --- */
+/* --- Empty State (No Notifications) --- */
 .empty-state {
     padding: 3rem 1.5rem;
     text-align: center;
 }
+
 .empty-state-icon {
-    font-size: 3.5rem; /* Makes the emoji big */
+    font-size: 3.5rem;
     line-height: 1;
     margin-bottom: 0rem;
-
-    /* --- New styles for the background --- */
     width: 95px;
     height: 95px;
     border-radius: 50%;
-    background-color: #fde8e8; /* Light maroon background */
+    background-color: #fde8e8;
     color: #800000;
-
     display: flex;
     align-items: center;
     justify-content: center;
@@ -289,24 +283,25 @@ body.action-bar-visible {
 }
 
 .empty-state h3 {
-    font-size: 18px;
+    font-size: 1.5rem;
     font-weight: 600;
     color: #1e293b;
     margin: 0;
 }
+
 .empty-state p {
-    font-size: 15px;
+    font-size: 1rem;
     color: #64748b;
     margin: 0;
 }
 
-/* Mobile Responsive */
+/* --- Responsive Styles (Mobile) --- */
 @media (max-width: 768px) {
     .notifications-header {
         flex-direction: column;
-        align-items: stretch; /* Change from flex-start to stretch */
+        align-items: stretch;
         gap: 1rem;
-        padding: 1rem; /* Reduce padding on mobile */
+        padding: 1rem;
     }
 
     .notifications-card {
@@ -315,83 +310,70 @@ body.action-bar-visible {
 
     .tabs {
         width: 100%;
-        flex-wrap: nowrap; /* Keep tabs in one row */
-        overflow-x: auto; /* Allow horizontal scrolling if needed */
-        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
         padding: 0.25rem;
-        gap: 0.25rem; /* Reduce gap between tabs */
+        gap: 0.25rem;
     }
-    
+
     .tab-btn {
         flex: 1;
-        min-width: 0; /* Allow tabs to shrink */
-        padding: 0.5rem 0.75rem; /* Reduce horizontal padding */
-        font-size: 13px; /* Slightly smaller font */
+        min-width: 0;
+        padding: 0.5rem 0.75rem;
+        font-size: 12px;
         white-space: nowrap;
     }
 
     .btn-mark-all {
-        flex: none; /* Don't grow/shrink */
+        flex: none;
         padding: 0.5rem 0.75rem;
-        font-size: 13px;
+        font-size: 12px;
         white-space: nowrap;
         margin-left: 0;
-        /* Make it visually distinct but compact */
         background-color: rgba(128, 0, 0, 0.08);
         border-radius: 6px;
     }
 
     .tabs::-webkit-scrollbar {
-        display: none; /* Hide scrollbar but keep functionality */
+        display: none;
     }
 
-    /* Reduce gap between buttons */
     .action-bar .action-buttons {
-        gap: 0.5rem; /* 8px */
+        gap: 0.5rem;
     }
 
-    /* Make buttons smaller */
     .action-bar .btn {
-        padding: 8px 10px; /* Less horizontal padding */
-        font-size: 13px;  /* Smaller text */
+        padding: 8px 10px;
+        font-size: 12px;
     }
 
-    /* Make "Select All" text smaller */
     .action-bar .select-all-container label {
         font-size: 13px;
     }
-    
-    /* Reduce gap between checkbox and "Select All" */
-    .action-bar .select-all-container {
-        gap: 0.25rem; /* 4px */
-    }
 
+    .action-bar .select-all-container {
+        gap: 0.25rem;
+    }
 }
 
-
-
-/* Style for READ items: make them faded */
+/* --- Read/Unread Item States --- */
 .notification-item-row[data-read="true"] {
     opacity: 0.7;
-    background-color: #f8fafc; /* A very light gray background */
+    background-color: #f8fafc;
 }
 
-/* On hover, make read items full opacity */
 .notification-item-row[data-read="true"]:hover {
     opacity: 1;
-    background-color: #f1f5f9; /* A slightly darker hover */
+    background-color: #f1f5f9;
 }
 
-/* UNREAD items will be full opacity by default */
 .notification-item-row[data-read="false"] {
     opacity: 1;
     background-color: #fff;
 }
 
-
-/* --- START: Modal Styles (for Delete Confirmation) --- */
-
-/* Base modal styles (from my_orders.css) */
+/* --- Base Modal Styles --- */
 .modal {
     display: none;
     position: fixed;
@@ -412,7 +394,7 @@ body.action-bar-visible {
     background-color: #ffffff;
     border-radius: 12px;
     width: 100%;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     animation: slideIn 0.3s;
     display: flex;
     flex-direction: column;
@@ -456,18 +438,28 @@ body.action-bar-visible {
     border-bottom-right-radius: 12px;
 }
 
-/* Animations */
+/* --- Modal Animations --- */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes slideIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
-/* --- Specific styles for THIS modal --- */
+/* --- Specific Styles for Delete Modal --- */
 #batch-delete-confirm-modal .modal-content {
     max-width: 500px;
 }
@@ -493,9 +485,6 @@ body.action-bar-visible {
 #batch-delete-confirm-modal .modal-body p {
     margin: 0;
     color: #64748b;
-    font-size: 15px;
+    font-size: 1rem;
     line-height: 1.6;
 }
-
-/* --- END: Modal Styles --- */
-

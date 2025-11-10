@@ -75,7 +75,7 @@ This system allows students to reserve unavailable items and order available ite
 
 ### **Frontend Technologies**
 
-  - **HTML**
+  - **HTML + JAVASCRIPT**
   - **CSS**
   - **Django Template Engine**
 

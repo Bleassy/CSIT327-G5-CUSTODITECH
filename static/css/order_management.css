@@ -1,40 +1,44 @@
-
 /* --- Search Bar Styles --- */
 .page-controls {
     margin-bottom: 2.5rem;
 }
-.search-form { /* This class is now on a div, not a form */
+
+.search-form {
     display: flex;
-    max-width: 100%; /* Make it wider */
+    max-width: 100%;
 }
+
 .search-input {
     flex-grow: 1;
     padding: 14px 20px;
     font-size: 16px;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     outline: none;
     -webkit-appearance: none;
     appearance: none;
-    width: 100%; /* Ensure input fills container */
-    box-sizing: border-box; /* Include padding/border in width */
+    width: 100%;
+    box-sizing: border-box;
 }
+
 .search-input:focus {
     border-color: #1e40af;
     box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
     z-index: 2;
     position: relative;
 }
+
 .search-btn {
-    display: none; /* Hide old button */
+    display: none;
 }
 
-/* --- General Layout --- */
+/* --- General Page Layout --- */
 .page-header h1 {
     font-size: 28px;
     font-weight: 700;
 }
+
 .section-title {
     font-size: 24px;
     font-weight: 600;
@@ -43,12 +47,13 @@
     padding-bottom: 1rem;
     border-bottom: 1px solid #e2e8f0;
 }
+
 .orders-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1.5rem;
 }
-/* Message for when a section (e.g., "Pending") has no orders */
+
 .no-data-cell {
     text-align: center;
     padding: 40px;
@@ -56,6 +61,7 @@
     background-color: #f8fafc;
     border-radius: 8px;
 }
+
 .no-data-cell p {
     margin: 0;
 }
@@ -68,15 +74,17 @@
     border: 1px solid #f1f5f9;
     display: flex;
     overflow: hidden;
-    position: relative; /* For checkbox positioning */
-    padding-left: 3rem; /* Space for checkbox */
+    position: relative;
+    padding-left: 3rem;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
+
 .order-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 }
+
 .product-image {
     width: 150px;
     height: 100%;
@@ -85,24 +93,28 @@
     border-right: 1px solid #f1f5f9;
     background-color: #f8fafc;
 }
+
 .card-body {
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
 }
+
 .card-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 1rem;
 }
+
 .product-name {
     font-size: 18px;
     font-weight: 600;
     margin: 0;
-    padding-right: 100px; /* Space for the status badge */
+    padding-right: 100px;
 }
+
 .details-grid {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -111,6 +123,7 @@
     color: #64748b;
     flex-grow: 1;
 }
+
 .details-grid strong {
     font-weight: 600;
     color: #1e293b;
@@ -125,27 +138,32 @@
     display: inline-block;
     white-space: nowrap;
     position: absolute;
-    top: 1rem;   /* 16px from the top */
-    right: 1rem; /* 16px from the right */
-    z-index: 10;   /* Ensure it's on top of other content */
+    top: 1rem;
+    right: 1rem;
+    z-index: 10;
 }
+
 .status-badge.status-pending {
-    color: #92400e; /* Dark orange text */
-    background-color: #fef3c7; /* Light yellow background */
+    color: #92400e;
+    background-color: #fef3c7;
     border-color: #fcd34d;
 }
+
 .status-badge.status-approved {
     background-color: #dcfce7;
     color: #166534;
 }
+
 .status-badge.status-completed {
     background-color: #dbeafe;
     color: #1e40af;
 }
+
 .status-badge.status-rejected {
     background-color: #fee2e2;
     color: #991b1b;
 }
+
 .status-badge.status-cancelled {
     background-color: #e5e7eb;
     color: #4b5563;
@@ -161,6 +179,7 @@
     height: 1.2rem;
     cursor: pointer;
 }
+
 .select-all-container {
     display: flex;
     align-items: center;
@@ -168,17 +187,19 @@
     margin-bottom: 1rem;
     padding-left: 1rem;
 }
+
 .select-all-container label {
     font-weight: 500;
     font-size: 14px;
     cursor: pointer;
 }
+
 .order-card.selected {
     background-color: #eff6ff;
     border-color: #60a5fa;
 }
 
-/* Bar that appears at the bottom for batch actions */
+/* --- Floating Batch Action Bar --- */
 .batch-action-bar {
     position: fixed;
     bottom: 20px;
@@ -189,7 +210,7 @@
     color: white;
     padding: 1rem 1.5rem;
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     display: flex;
     justify-content: space-between;
     gap: 2rem;
@@ -197,10 +218,11 @@
     z-index: 1001;
     animation: slideUp 0.3s ease-out;
 }
-.batch-action-bar > div {
+
+.batch-action-bar>div {
     display: flex;
     align-items: center;
-    gap: 0.75rem; /* Space between label, dropdown, and button */
+    gap: 0.75rem;
 }
 
 .batch-action-bar label {
@@ -209,6 +231,7 @@
     font-weight: 500;
     color: #e2e8f0;
 }
+
 #batch-status-select,
 #batch-pending-status-select {
     padding: 10px 14px;
@@ -227,12 +250,13 @@
     background-position: right 10px center;
     background-size: 12px;
     padding-right: 30px;
-    height: 40px; /* Ensure consistent height */
+    height: 40px;
 }
 
 .batch-action-bar span {
     font-weight: 500;
 }
+
 .batch-action-bar .btn {
     width: auto;
     margin-top: 0;
@@ -243,15 +267,17 @@
     cursor: pointer;
     border-radius: 8px;
     transition: background-color 0.2s ease, color 0.2s ease;
-    height: 40px; 
-    line-height: 1; /* Center text vertically */
+    height: 40px;
+    line-height: 1;
 }
+
 .batch-action-bar #batch-status-update-btn,
 .batch-action-bar #batch-pending-status-update-btn {
     background-color: #1e40af;
     color: white;
     border: none;
 }
+
 .batch-action-bar #batch-status-update-btn:hover,
 .batch-action-bar #batch-pending-status-update-btn:hover {
     background-color: #173287;
@@ -261,18 +287,23 @@
     background-color: #dc2626;
     color: white;
 }
+
 .batch-action-bar .btn-danger:hover {
     background-color: #b91c1c;
 }
 
-/* Animation for batch action bar sliding up */
 @keyframes slideUp {
-    from { opacity: 0; transform: translate(-50%, 20px); }
-    to { opacity: 1; transform: translate(-50%, 0); }
+    from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
 }
 
-/* --- Modal Styles --- */
-/* Modal overlay */
+/* --- Base Modal Styles --- */
 .modal {
     display: none;
     position: fixed;
@@ -281,53 +312,55 @@
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
     animation: fadeIn 0.3s;
 }
-/* Modal content box */
+
 .modal-content {
     background-color: #fff;
     margin: 5% auto;
-    padding: 0; /* Let header/body/footer handle padding */
+    padding: 0;
     border-radius: 12px;
     width: 90%;
     max-width: 700px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     animation: slideIn 0.3s;
-    max-height: 90vh; /* Max height */
+    max-height: 90vh;
     display: flex;
-    flex-direction: column; /* Stack header, body, footer */
+    flex-direction: column;
 }
-/* Modal header */
-.modal-header { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    border-bottom: 1px solid #e2e8f0; 
-    padding-bottom: 16px; 
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 16px;
     margin-bottom: 0;
     padding: 24px 24px 16px 24px;
-    flex-shrink: 0; /* Prevents header from shrinking */
+    flex-shrink: 0;
 }
+
 .modal-header h2 {
     margin: 0;
     font-size: 20px;
 }
+
 .close-btn {
     font-size: 28px;
     cursor: pointer;
     color: #64748b;
 }
-/* Modal body (scrollable) */
-.modal-body { 
-    flex-grow: 1; /* Allows body to take remaining space */
-    overflow-y: auto; /* Adds scrollbar if content overflows */
+
+.modal-body {
+    flex-grow: 1;
+    overflow-y: auto;
     padding: 24px;
 }
-/* Modal footer */
+
 .modal-footer {
     display: flex;
     justify-content: flex-end;
@@ -338,21 +371,21 @@
     border-top: 1px solid #e2e8f0;
 }
 
-/* Form for single status update (in modal footer) */
+/* --- Modal: Single Status Update Form --- */
 .modal-footer #single-status-form {
     display: flex;
     align-items: center;
     gap: 1rem;
     margin: 0;
-    margin-left: auto; /* Push form to the right */
+    margin-left: auto;
 }
+
 .modal-footer #single-status-form label {
     font-size: 15px;
     color: #475569;
     font-weight: 500;
 }
 
-/* Dropdown select in modal footer */
 .modal-footer .status-select {
     padding: 10px 14px;
     border: 1px solid #cbd5e1;
@@ -369,14 +402,14 @@
     background-repeat: no-repeat;
     background-position: right 10px center;
     background-size: 12px;
-    padding-right: 30px; /* Space for custom arrow */
+    padding-right: 30px;
 }
+
 .modal-footer .status-select:focus {
     border-color: #1e40af;
     box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
 }
 
-/* Primary button in modal footer */
 .modal-footer .btn-primary {
     padding: 10px 20px;
     font-size: 15px;
@@ -388,33 +421,38 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
+
 .modal-footer .btn-primary:hover {
     background-color: #173287;
 }
 
-/* --- Modal Content Details --- */
-/* Layout for image + info in modal */
+/* --- Modal Content Details Layout --- */
 .details-layout {
     display: flex;
     gap: 2rem;
 }
+
 .details-image-container {
     flex-basis: 40%;
     flex-shrink: 0;
 }
+
 .details-image {
     width: 100%;
     height: auto;
     border-radius: 8px;
 }
+
 .details-info {
     flex-basis: 60%;
 }
+
 .details-name {
     font-size: 22px;
     font-weight: 700;
     margin: 0 0 1rem 0;
 }
+
 .details-description {
     font-size: 14px;
     color: #475569;
@@ -424,7 +462,7 @@
     overflow-y: auto;
     padding-right: 10px;
 }
-/* Grid for key-value pairs in modal */
+
 .details-summary-grid {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -433,14 +471,16 @@
     padding-top: 1rem;
     border-top: 1px solid #f1f5f9;
 }
+
 .details-summary-grid span {
     color: #64748b;
 }
+
 .details-summary-grid strong {
     font-weight: 600;
     color: #1e293b;
 }
-/* Note for approved orders */
+
 #details-claim-note {
     display: none;
     margin-top: 1.5rem;
@@ -451,40 +491,46 @@
     font-size: 13px;
 }
 
-/* Modal Animations */
+/* --- Modal Animations --- */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
+
 @keyframes slideIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); }
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+    }
 }
 
-
-/* Wrapper for modal title and badge */
+/* --- Modal Header Badge Layout --- */
 .details-header-with-badge {
     display: flex;
-    align-items: center; /* Vertically align title and badge */
-    gap: 0.75rem; /* Space between title and badge */
-    margin-bottom: 1rem; /* This margin was on the .details-name */
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
 }
 
-/* Remove margin from the h3, since it's on the wrapper now */
 .details-name {
     margin: 0;
 }
 
-/* Override absolute positioning for the badge *inside* the modal */
 .details-header-with-badge .status-badge {
     position: relative;
     top: auto;
     right: auto;
-    flex-shrink: 0; /* Prevents badge from shrinking if title is long */
+    flex-shrink: 0;
 }
 
-/* --- Modal Button Styles --- */
-/* Style for the secondary/cancel button */
+/* --- Modal Button Variants --- */
 .modal-footer .btn-secondary,
 .modal-footer .cancel-modal-btn {
     background-color: #f1f5f9;
@@ -497,12 +543,12 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
+
 .modal-footer .btn-secondary:hover,
 .modal-footer .cancel-modal-btn:hover {
     background-color: #e2e8e7;
 }
 
-/* Style for the destructive/danger button */
 .modal-footer .btn-danger {
     background-color: #dc2626;
     color: white;
@@ -514,25 +560,26 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
+
 .modal-footer .btn-danger:hover {
     background-color: #b91c1c;
 }
 
-/* Form for updating "Pending" status in modal */
+/* --- Modal: Pending Status Form --- */
 .modal-footer #single-pending-status-form {
     display: flex;
     align-items: center;
     gap: 1rem;
     margin: 0;
-    margin-left: auto; /* Push this form group to the right */
+    margin-left: auto;
 }
+
 .modal-footer #single-pending-status-form label {
     font-size: 15px;
     color: #475569;
     font-weight: 500;
 }
 
-/* Select dropdown for "Pending" form */
 .modal-footer #single-pending-status-select {
     padding: 10px 14px;
     border: 1px solid #cbd5e1;
@@ -551,12 +598,12 @@
     background-size: 12px;
     padding-right: 30px;
 }
+
 .modal-footer #single-pending-status-select:focus {
     border-color: #1e40af;
     box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
 }
 
-/* Button for "Pending" form */
 .modal-footer #single-pending-status-form .btn-primary {
     padding: 10px 20px;
     font-size: 15px;
@@ -568,12 +615,12 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
+
 .modal-footer #single-pending-status-form .btn-primary:hover {
     background-color: #173287;
 }
 
-/* --- Card Animation --- */
-/* Animation for moving/removing cards */
+/* --- Card Animations --- */
 .order-card.moving {
     animation: fadeOut 0.3s ease-out forwards;
 }
@@ -589,7 +636,7 @@
     }
 }
 
-/* --- Django Messages --- */
+/* --- Django Message Alerts --- */
 .messages {
     list-style: none;
     padding: 0;
@@ -624,12 +671,11 @@
     transition: opacity 0.5s ease;
 }
 
-/* Container for the top search bar */
+/* --- Search Layout & Empty State --- */
 .global-search-container {
     margin-bottom: 2rem;
 }
 
-/* Message for when all sections are empty after a search */
 .no-data-message {
     text-align: center;
     padding: 2rem;

@@ -1,4 +1,4 @@
-
+/* --- Welcome Header Card --- */
 .welcome-card {
     background: linear-gradient(135deg, #800000 0%, #a04000 100%);
     color: white;
@@ -11,12 +11,11 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/*  NEW: Style for the hand icon */
 .welcome-card h1 i {
     font-size: 36px;
     margin-left: 10px;
     vertical-align: middle;
-    color: #fcd34d; /* A friendly yellow */
+    color: #fcd34d;
 }
 
 .welcome-card p {
@@ -25,6 +24,7 @@
     opacity: 0.9;
 }
 
+/* --- Action Card Grid --- */
 .action-cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -68,6 +68,7 @@
     line-height: 1.5;
 }
 
+/* --- Summary Section Layout --- */
 .summary-section .section-title {
     font-size: 24px;
     font-weight: 600;
@@ -99,6 +100,7 @@
     margin: 0 0 1.5rem 0;
 }
 
+/* --- Item Card (Within Summary) --- */
 .item-card {
     display: flex;
     gap: 1.5rem;
@@ -133,6 +135,7 @@
     color: #1e293b;
 }
 
+/* --- Empty State Placeholder --- */
 .no-items-message {
     flex-grow: 1;
     display: flex;
@@ -146,6 +149,7 @@
     border-radius: 8px;
 }
 
+/* --- "View All" Button --- */
 .view-all-btn {
     margin-top: 1.5rem;
     padding: 10px 24px;
@@ -167,6 +171,7 @@
     transform: translateY(-2px);
 }
 
+/* --- Responsive Media Queries --- */
 @media (max-width: 992px) {
     .summary-grid {
         grid-template-columns: 1fr;
@@ -203,6 +208,7 @@
     }
 }
 
+/* --- Alert & Message Styles --- */
 .message-container {
     margin-bottom: 2rem;
 }
@@ -239,6 +245,7 @@
     border-color: #bfdbfe;
 }
 
+/* --- Django Message List Styles --- */
 .messages {
     list-style: none;
     padding: 0;
@@ -272,5 +279,3 @@
     gap: 0.75rem;
     transition: opacity 0.5s ease;
 }
-
-
