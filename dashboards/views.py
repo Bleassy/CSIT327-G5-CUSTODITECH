@@ -942,6 +942,7 @@ def manage_products_view(request):
         'products': products, 
         'categories': categories,
         'active_page': 'manage_products',
+        'page_title': 'Manage Products',
     }
     return render(request, 'dashboards/manage_products.html', context)
 
@@ -1576,6 +1577,7 @@ def reports_view(request):
         'search_query': search_query,
         'log_pagination': log_pagination_context,
         'active_page': 'reports',
+        'page_title': 'System Reports',
         'pending_backorders_count': pending_backorders_count
     }
     return render(request, 'dashboards/reports.html', context)
