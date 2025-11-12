@@ -274,12 +274,12 @@ SUPABASE_URL=supabase-url-here
 SUPABASE_ANON_KEY=supabase-anon-key-here
 SUPABASE_SERVICE_ROLE=supabase-service-role-key-here
 
-SUPABASE_DB_URL=postgresql://postgres.lsumstfswtxqrieuibky:[PASSWORD HERE]@aws-1-us-east-1.pooler.supabase.com:6543/postgres
+SUPABASE_DB_URL=supabase-db-url-here
 ```
 
 **⚠️ Important Security Notes:**
 
-  - Always request the .env file directly from the developers — do not create or share your own.**.
+  - Always request the .env file directly from the developers — do not create or share your own.
   - Never commit `.env` to version control.
       
 
