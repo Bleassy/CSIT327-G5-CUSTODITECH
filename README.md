@@ -264,21 +264,22 @@ Create a `.env` file in the project root directory
 Add the following configuration to `.env`:
 
 ```env
+DEBUG=True
+
 # Django Secret Key
 SECRET_KEY=django-insecure-your-secret-key-here
 
 # Supabase Configuration
-SUPABASE_URL=https://lsumstfswtxqrieuibky.supabase.co
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzdW1zdGZzd3R4cXJpZXVpYmt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjQ3ODYsImV4cCI6MjA3NTUwMDc4Nn0.Ec1zIGJtibTLOaMLuRoecqhxVTWnYjAgzKnGVvq-xxY
-SUPABASE_SERVICE_ROLE=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzdW1zdGZzd3R4cXJpZXVpYmt5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTkyNDc4NiwiZXhwIjoyMDc1NTAwNzg2fQ.iI0-luBMxXxUB1d3Xaq1MaVZqmJj5wv14X_ARR01Tfs
+SUPABASE_URL=supabase-url-here
+SUPABASE_ANON_KEY=supabase-anon-key-here
+SUPABASE_SERVICE_ROLE=supabase-service-role-key-here
 
-# Optional: If using Supabase as Django database
-SUPABASE_DB_URL=postgresql://postgres:[YOUR-PASSWORD]@db.your-project-id.supabase.co:5432/postgres
+SUPABASE_DB_URL=postgresql://postgres.lsumstfswtxqrieuibky:[PASSWORD HERE]@aws-1-us-east-1.pooler.supabase.com:6543/postgres
 ```
 
 **⚠️ Important Security Notes:**
 
-  - You can find your Supabase URL and keys in your Supabase project dashboard under **Project Settings \> API**.
+  - Always request the .env file directly from the developers — do not create or share your own.**.
   - Never commit `.env` to version control.
       
 
