@@ -5,6 +5,7 @@ set -o errexit
 pip install --upgrade pip
 pip install -r requirements.txt
 
-python manage.py makemigrations
-python manage.py migrate --noinput
+# This command just collects your static files
 python manage.py collectstatic --noinput
+
+# DO NOT run makemigrations or migrate here
