@@ -5,16 +5,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CIT Wildcats Store</title>
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
     <link rel="icon" type="image/png" href="{% static 'images/tablogo.png' %}?v=2">
     <link rel="apple-touch-icon" href="{% static 'images/tablogo.png' %}?v=2">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+          integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
+
 <body>
     <div class="container">
+
+        <!-- LEFT SIDE -->
         <div class="left-side">
             <div class="form-container">
+
                 <h1>WildShoppers Portal</h1>
                 <p class="welcome-text">Welcome back, Wildcat!</p>
 
@@ -27,209 +34,188 @@
                     {% endfor %}
                 {% endif %}
 
-                <div id="ajax-error-message" class="error-message" style="display: none;"></div>
+                <div id="ajax-error-message" class="error-message" style="display:none;"></div>
 
-                <!-- Role Selection Buttons -->
+                <!-- ROLE SWITCH -->
                 <div class="role-selector">
                     <button type="button" class="role-btn active" data-role="student">Student</button>
                     <button type="button" class="role-btn" data-role="admin">Admin</button>
                 </div>
 
+                <!-- LOGIN FORM -->
                 <form method="post" id="login-form">
                     {% csrf_token %}
-                    
-                    <!-- Hidden input to store the selected role -->
+
                     <input type="hidden" name="user_type" id="user_type_input" value="student">
 
                     <div class="form-group">
                         <label for="email">CIT Institutional Email</label>
-                        <input type="email" 
-                               id="email" 
-                               name="email" 
+                        <input type="email" id="email" name="email"
                                placeholder="your.email@cit.edu"
                                class="form-control"
-                               required
-                               autofocus>
+                               required autofocus>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" 
-                               id="password" 
-                               name="password" 
-                               placeholder="Enter your password"
+                        <input type="password" id="password" name="password"
                                class="form-control"
+                               placeholder="Enter your password"
                                required>
                     </div>
 
                     <button type="submit" class="btn-login" id="login-button">LOGIN</button>
                 </form>
-                
+
                 <div class="links">
                     <p>New to CIT? <a href="{% url 'register' %}">Register here</a></p>
                     <a href="{% url 'forgot_password' %}">Forgot Password?</a>
                 </div>
             </div>
         </div>
-        
+
+        <!-- RIGHT SIDE -->
         <div class="right-side">
             <div class="logo-box">
-                <img src="{% static 'images/loginlogo.png' %}" alt="WildShoppers Portal Logo" class="login-logo">
+                <img src="{% static 'images/loginlogo.png' %}"
+                     alt="WildShoppers Portal Logo"
+                     class="login-logo">
             </div>
+
             <p class="tagline">Excellence in Education</p>
             <p class="tagline">Innovation in Technology</p>
             <p class="tagline">Pride of Cebu</p>
         </div>
     </div>
 
-   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // --- Role Button Logic (Keep As Is) ---
-        const roleButtons = document.querySelectorAll('.role-btn');
-        const roleInput = document.getElementById('user_type_input');
-        roleButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                document.querySelector('.role-btn.active')?.classList.remove('active');
-                button.classList.add('active');
-                roleInput.value = button.dataset.role;
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            /* ----------------------- ROLE BUTTON HANDLER ----------------------- */
+            const roleButtons = document.querySelectorAll(".role-btn");
+            const roleInput = document.getElementById("user_type_input");
+
+            roleButtons.forEach(btn => {
+                btn.addEventListener("click", () => {
+                    document.querySelector(".role-btn.active")?.classList.remove("active");
+                    btn.classList.add("active");
+                    roleInput.value = btn.dataset.role;
+                });
             });
-        });
-
-        // --- AJAX Error Handling ---
-        const ajaxErrorDiv = document.getElementById('ajax-error-message');
-        let errorTimeout = null; // To manage the timeout
-
-        function showAjaxError(message) {
-            if (!ajaxErrorDiv) return;
-            ajaxErrorDiv.textContent = message;
-            ajaxErrorDiv.style.display = 'block'; // Make it visible
-            ajaxErrorDiv.classList.remove('fade-out'); // Ensure it's not faded
-            ajaxErrorDiv.style.opacity = '1'; // Ensure visible
-
-            // Clear any previous timeout
-            if (errorTimeout) clearTimeout(errorTimeout);
-
-            // Set new timeout to hide the message
-            errorTimeout = setTimeout(() => {
-                ajaxErrorDiv.classList.add('fade-out');
-                setTimeout(() => {
-                    ajaxErrorDiv.style.display = 'none'; // Hide completely after fade
-                }, 500); // Match CSS transition
-            }, 3000); // 3 seconds
-        }
-
-        // --- NEW: Check for Registration Success Message ---
-        const urlParams = new URLSearchParams(window.location.search);
-        const successMessage = urlParams.get('message');
-
-        if (successMessage) {
-            // Use a similar display function as showAjaxError, but for success
-            const messageContainer = document.querySelector('.form-container'); // Or another suitable container
-            if (messageContainer) {
-                const successDiv = document.createElement('div');
-                successDiv.className = 'success-message'; // Use your success style
-                successDiv.textContent = '✅ ' + successMessage; // Add checkmark
-                // Insert it before the role selector or form
-                const roleSelector = messageContainer.querySelector('.role-selector');
-                if (roleSelector) {
-                    messageContainer.insertBefore(successDiv, roleSelector);
-                } else {
-                    messageContainer.prepend(successDiv); // Fallback
-                }
 
 
-                // Auto-hide the success message after 3-5 seconds
-                setTimeout(() => {
-                    successDiv.classList.add('fade-out');
+            /* ----------------------- AJAX ERROR MESSAGE ----------------------- */
+            const ajaxErr = document.getElementById("ajax-error-message");
+            let errTimer = null;
+
+            const displayAjaxError = msg => {
+                if (!ajaxErr) return;
+
+                ajaxErr.textContent = msg;
+                ajaxErr.style.display = "block";
+                ajaxErr.classList.remove("fade-out");
+                ajaxErr.style.opacity = "1";
+
+                if (errTimer) clearTimeout(errTimer);
+
+                errTimer = setTimeout(() => {
+                    ajaxErr.classList.add("fade-out");
+                    setTimeout(() => (ajaxErr.style.display = "none"), 500);
+                }, 3000);
+            };
+
+
+            /* ----------------------- SUCCESS MESSAGE ON REDIRECT ----------------------- */
+            const params = new URLSearchParams(window.location.search);
+            const successMsg = params.get("message");
+
+            if (successMsg) {
+                const container = document.querySelector(".form-container");
+
+                if (container) {
+                    const box = document.createElement("div");
+                    box.className = "success-message";
+                    box.textContent = "✅ " + successMsg;
+
+                    const roleBox = container.querySelector(".role-selector");
+                    roleBox
+                        ? container.insertBefore(box, roleBox)
+                        : container.prepend(box);
+
                     setTimeout(() => {
-                        successDiv.remove();
-                    }, 500); // Match CSS
-                }, 3000); // 5 seconds display time
+                        box.classList.add("fade-out");
+                        setTimeout(() => box.remove(), 500);
+                    }, 3000);
 
-                // Optional: Clean the URL (remove the message parameter)
-                if (history.replaceState) {
-                    const cleanUrl = window.location.pathname; // URL without query params
-                    history.replaceState(null, '', cleanUrl);
+                    if (history.replaceState) {
+                        history.replaceState(null, "", window.location.pathname);
+                    }
                 }
             }
-        }
-        // --- END NEW SCRIPT ---
 
-        // --- Auto-hide Initial Django Messages (Keep As Is) ---
-        const initialMessages = document.querySelectorAll('.error-message:not(#ajax-error-message), .success-message');
-        initialMessages.forEach(messageElement => {
-            setTimeout(() => {
-                messageElement.classList.add('fade-out');
-                setTimeout(() => {
-                    messageElement.remove();
-                }, 500);
-            }, 3000);
-        });
 
-        // --- AJAX Form Submission Logic ---
-        const loginForm = document.getElementById('login-form');
-        const loginButton = document.getElementById('login-button');
+            /* ----------------------- FADE OUT DJANGO MESSAGES ----------------------- */
+            document.querySelectorAll(".error-message:not(#ajax-error-message), .success-message")
+                .forEach(el => {
+                    setTimeout(() => {
+                        el.classList.add("fade-out");
+                        setTimeout(() => el.remove(), 500);
+                    }, 3000);
+                });
 
-        if (loginForm && loginButton) {
-            loginForm.addEventListener('submit', async function(event) {
-                event.preventDefault(); // Prevent default page reload
 
-                // --- Show Loading State ---
-                const originalButtonText = loginButton.textContent;
-                loginButton.disabled = true;
-                loginButton.textContent = 'LOGGING IN...';
-                loginButton.style.opacity = '0.7';
-                loginButton.style.cursor = 'wait';
+            /* ----------------------- LOGIN FORM AJAX ----------------------- */
+            const loginForm = document.getElementById("login-form");
+            const loginBtn = document.getElementById("login-button");
 
-                // --- Hide previous AJAX error ---
-                if (ajaxErrorDiv) ajaxErrorDiv.style.display = 'none';
-                if (errorTimeout) clearTimeout(errorTimeout);
+            if (loginForm && loginBtn) {
 
-                const formData = new FormData(loginForm);
-                const url = loginForm.action; // Should post to the login_view URL
+                loginForm.addEventListener("submit", async e => {
+                    e.preventDefault();
 
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            // Django needs CSRF token even for AJAX POST
-                            'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
-                            'X-Requested-With': 'XMLHttpRequest'
+                    const originalText = loginBtn.textContent;
+                    loginBtn.disabled = true;
+                    loginBtn.textContent = "LOGGING IN...";
+                    loginBtn.style.opacity = ".7";
+                    loginBtn.style.cursor = "wait";
+
+                    if (ajaxErr) ajaxErr.style.display = "none";
+                    if (errTimer) clearTimeout(errTimer);
+
+                    const formData = new FormData(loginForm);
+
+                    try {
+                        const response = await fetch(loginForm.action, {
+                            method: "POST",
+                            body: formData,
+                            headers: {
+                                "X-CSRFToken": formData.get("csrfmiddlewaretoken"),
+                                "X-Requested-With": "XMLHttpRequest"
+                            }
+                        });
+
+                        const result = await response.json();
+
+                        if (!response.ok || !result.success) {
+                            throw new Error(result.error || "Login failed.");
                         }
-                    });
 
-                    const data = await response.json();
+                        window.location.href = result.redirect_url;
 
-                    if (!response.ok || !data.success) {
-                        // Throw an error if response status is bad OR if success:false
-                        throw new Error(data.error || `HTTP error! Status: ${response.status}`);
+                    } catch (err) {
+                        displayAjaxError(err.message);
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = originalText;
+                        loginBtn.style.opacity = "1";
+                        loginBtn.style.cursor = "pointer";
                     }
+                });
 
-                    // --- SUCCESS ---
-                    console.log("Login successful, redirecting to:", data.redirect_url);
-                    // Redirect using JavaScript
-                    window.location.href = data.redirect_url;
-                    // Don't need to reset button here as page will navigate away
+            } else {
+                console.error("Login form or button not found.");
+            }
 
-                } catch (error) {
-                    // --- ERROR ---
-                    console.error("Login failed:", error);
-                    showAjaxError(error.message || 'Login failed. Please try again.');
-
-                    // --- Reset Button State on Error ---
-                    loginButton.disabled = false;
-                    loginButton.textContent = originalButtonText;
-                    loginButton.style.opacity = '1';
-                    loginButton.style.cursor = 'pointer';
-                }
-                // No finally needed as success navigates away, error resets button
-            });
-        } else {
-            console.error("Login form or button not found!");
-        }
-    });
-</script>
+        });
+    </script>
 </body>
 </html>
-

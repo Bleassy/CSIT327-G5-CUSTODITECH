@@ -5,269 +5,339 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration - CIT Wildcats Store</title>
+
     <link rel="stylesheet" href="{% static 'css/register.css' %}?v=1.2">
     <link rel="icon" type="image/png" href="{% static 'images/tablogo.png' %}?v=2">
     <link rel="apple-touch-icon" href="{% static 'images/tablogo.png' %}?v=2">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+          integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer" />
 </head>
 
 <body>
-    <div class="container">
 
-        <!-- Left Side -->
-        <div class="left-side">
-            <div class="logo-box">
-                <img src="{% static 'images/loginlogo.png' %}" alt="WildShoppers Portal Logo" class="register-logo">
-            </div>
-            <p class="tagline">Join the Pride</p>
-            <p class="tagline">Shop Smart</p>
-            <p class="tagline">Go Wildcats!</p>
+<div class="container">
+
+    <!-- LEFT PANEL -->
+    <div class="left-side">
+
+        <div class="logo-box">
+            <img src="{% static 'images/loginlogo.png' %}"
+                 alt="WildShoppers Portal Logo"
+                 class="register-logo">
         </div>
 
-        <!-- Right Side -->
-        <div class="right-side">
-            <div class="form-container">
-                <h1>Create Your Student Account</h1>
+        <p class="tagline">Join the Pride</p>
+        <p class="tagline">Shop Smart</p>
+        <p class="tagline">Go Wildcats!</p>
 
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
+    </div>
 
-                <div id="ajax-error-container"></div>
+    <!-- RIGHT PANEL -->
+    <div class="right-side">
 
-                <form method="post" id="register-form">
-                    {% csrf_token %}
-                    <input type="hidden" name="user_type" value="student">
+        <div class="form-container">
 
-                    <!-- Full Name -->
-                    <div class="form-group">
-                        <label for="full_name">Full Name <span class="required">*</span></label>
-                        <input type="text" id="full_name" name="full_name"
-                               placeholder="Juan Dela Cruz"
-                               class="form-control"
-                               value="{{ form_data.full_name }}"
-                               pattern="^[a-zA-ZñÑ ]+$"
-                               title="Name can only contain letters and spaces."
-                               required>
+            <h1>Create Your Student Account</h1>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">
+                        {{ message }}
                     </div>
+                {% endfor %}
+            {% endif %}
 
-                    <!-- Student ID -->
-                    <div class="form-group">
-                        <label for="student_id">Student ID <span class="required">*</span></label>
-                        <input type="text" id="student_id" name="student_id"
-                               placeholder="12-3456-789"
-                               class="form-control"
-                               value="{{ form_data.student_id }}"
-                               maxlength="12"
-                               required>
-                        <small class="help-text">Format: 12-3456-789</small>
-                    </div>
+            <div id="ajax-error-container"></div>
 
-                    <!-- Email -->
-                    <div class="form-group">
-                        <label for="email">CIT Institutional Email <span class="required">*</span></label>
-                        <input type="email" id="email" name="email"
-                               placeholder="juan.delacruz@cit.edu"
-                               pattern="[a-zA-Z0-9._%+-]+@cit\.edu$"
-                               class="form-control"
-                               value="{{ form_data.email }}"
-                               required>
-                        <small class="help-text">Must end with @cit.edu</small>
-                    </div>
+            <form id="register-form" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="user_type" value="student">
 
-                    <!-- Phone Number -->
-                    <div class="form-group">
-                        <label for="phone_number">Phone Number <span class="required">*</span></label>
-                        <input type="text" id="phone_number" name="phone_number"
-                               placeholder="+63 912 345 6789"
-                               class="form-control"
-                               value="{{ form_data.phone_number }}"
-                               maxlength="17"
-                               required>
-                        <small class="help-text">Format: +63 912 345 6789</small>
-                    </div>
+                <!-- FULL NAME -->
+                <div class="form-group">
+                    <label for="full_name">
+                        Full Name <span class="required">*</span>
+                    </label>
 
-                    <!-- Address -->
-                    <div class="form-group">
-                        <label for="address">Address <span class="required">*</span></label>
-                        <input type="text" id="address" name="address"
-                               class="form-control"
-                               value="{{ form_data.address }}"
-                               placeholder="e.g., Mango Avenue, Kamagayan, Cebu City, Cebu"
-                               pattern="^[^,]+, [^,]+, [^,]+, [^,]+$"
-                               title="Please follow the format: Street, Barangay, City, Province"
-                               required>
-                        <small class="help-text">Street, Barangay, City, and Province.</small>
-                    </div>
-
-                    <!-- Password -->
-                    <div class="form-group">
-                        <label for="password1">Password <span class="required">*</span></label>
-                        <input type="password" id="password1" name="password1"
-                               placeholder="Enter your password"
-                               class="form-control"
-                               minlength="8"
-                               pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}"
-                               title="Must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)."
-                               required>
-                        <small class="help-text">Min 8 characters, with uppercase, lowercase, number & special character.</small>
-                    </div>
-
-                    <!-- Confirm Password -->
-                    <div class="form-group">
-                        <label for="password2">Confirm Password <span class="required">*</span></label>
-                        <input type="password" id="password2" name="password2"
-                               placeholder="Re-enter your password"
-                               class="form-control"
-                               minlength="8"
-                               required>
-                    </div>
-
-                    <!-- Register Button -->
-                    <button type="submit" class="btn-register">REGISTER</button>
-                </form>
-
-                <!-- Login Link -->
-                <div class="links">
-                    <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+                    <input type="text"
+                           id="full_name"
+                           name="full_name"
+                           value="{{ form_data.full_name }}"
+                           placeholder="Juan Dela Cruz"
+                           class="form-control"
+                           pattern="^[a-zA-ZñÑ ]+$"
+                           title="Name can only contain letters and spaces."
+                           required>
                 </div>
+
+                <!-- STUDENT ID -->
+                <div class="form-group">
+                    <label for="student_id">
+                        Student ID <span class="required">*</span>
+                    </label>
+
+                    <input type="text"
+                           id="student_id"
+                           name="student_id"
+                           value="{{ form_data.student_id }}"
+                           placeholder="12-3456-789"
+                           class="form-control"
+                           maxlength="12"
+                           required>
+
+                    <small class="help-text">Format: 12-3456-789</small>
+                </div>
+
+                <!-- EMAIL -->
+                <div class="form-group">
+                    <label for="email">
+                        CIT Institutional Email <span class="required">*</span>
+                    </label>
+
+                    <input type="email"
+                           id="email"
+                           name="email"
+                           value="{{ form_data.email }}"
+                           placeholder="juan.delacruz@cit.edu"
+                           class="form-control"
+                           pattern="[a-zA-Z0-9._%+-]+@cit\.edu$"
+                           required>
+
+                    <small class="help-text">Must end with @cit.edu</small>
+                </div>
+
+                <!-- PHONE NUMBER -->
+                <div class="form-group">
+                    <label for="phone_number">
+                        Phone Number <span class="required">*</span>
+                    </label>
+
+                    <input type="text"
+                           id="phone_number"
+                           name="phone_number"
+                           value="{{ form_data.phone_number }}"
+                           placeholder="+63 912 345 6789"
+                           class="form-control"
+                           maxlength="17"
+                           required>
+
+                    <small class="help-text">Format: +63 912 345 6789</small>
+                </div>
+
+                <!-- ADDRESS -->
+                <div class="form-group">
+                    <label for="address">
+                        Address <span class="required">*</span>
+                    </label>
+
+                    <input type="text"
+                           id="address"
+                           name="address"
+                           value="{{ form_data.address }}"
+                           placeholder="e.g., Mango Avenue, Kamagayan, Cebu City, Cebu"
+                           class="form-control"
+                           pattern="^[^,]+, [^,]+, [^,]+, [^,]+$"
+                           title="Please follow the format: Street, Barangay, City, Province"
+                           required>
+
+                    <small class="help-text">Street, Barangay, City, and Province.</small>
+                </div>
+
+                <!-- PASSWORD -->
+                <div class="form-group">
+                    <label for="password1">
+                        Password <span class="required">*</span>
+                    </label>
+
+                    <input type="password"
+                           id="password1"
+                           name="password1"
+                           class="form-control"
+                           placeholder="Enter your password"
+                           minlength="8"
+                           pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}"
+                           title="Must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)."
+                           required>
+
+                    <small class="help-text">
+                        Min 8 characters, with uppercase, lowercase, number & special character.
+                    </small>
+                </div>
+
+                <!-- CONFIRM PASSWORD -->
+                <div class="form-group">
+                    <label for="password2">
+                        Confirm Password <span class="required">*</span>
+                    </label>
+
+                    <input type="password"
+                           id="password2"
+                           name="password2"
+                           class="form-control"
+                           placeholder="Re-enter your password"
+                           minlength="8"
+                           required>
+                </div>
+
+                <!-- REGISTER BUTTON -->
+                <button type="submit" class="btn-register">REGISTER</button>
+
+            </form>
+
+            <div class="links">
+                <p>
+                    Already have an account?
+                    <a href="{% url 'login' %}">Login here</a>
+                </p>
             </div>
+
         </div>
     </div>
 
-    <!-- Script Section -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // --- Input Formatting (Keep As Is) ---
-        const studentIdInput = document.getElementById('student_id');
-        if (studentIdInput) {
-            studentIdInput.addEventListener('input', function (e) { /* ... keep formatting ... */ });
-        }
-        const phoneInput = document.getElementById('phone_number');
-        if (phoneInput) {
-            phoneInput.addEventListener('input', function (e) { /* ... keep formatting ... */ });
-        }
-         // --- (Keep the full formatting code here) ---
-         if (studentIdInput) { studentIdInput.addEventListener('input', function (e) { let v = e.target.value.replace(/\D/g, ''), f = ''; if (v.length > 0) f = v.substring(0, 2); if (v.length > 2) f += '-' + v.substring(2, 6); if (v.length > 6) f += '-' + v.substring(6, 9); e.target.value = f; }); }
-         if (phoneInput) { phoneInput.addEventListener('input', function (e) { let v = e.target.value.replace(/\D/g, ''); if (v.startsWith('09')) { v = '639' + v.substring(2); } let f = ''; if (v.length > 0) f = '+' + v.substring(0, 2); if (v.length > 2) f += ' ' + v.substring(2, 5); if (v.length > 5) f += ' ' + v.substring(5, 8); if (v.length > 8) f += ' ' + v.substring(8, 12); e.target.value = f; }); }
+</div>
 
+<!-- JAVASCRIPT SECTION -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
 
-        // --- AJAX Error Handling ---
-        const ajaxErrorContainer = document.getElementById('ajax-error-container');
-        const messageTimeouts = []; // Store timeouts to clear them
+    const studentIdInput = document.getElementById("student_id");
+    const phoneInput = document.getElementById("phone_number");
 
-        function clearAjaxErrors() {
-             if (!ajaxErrorContainer) return;
-             // Clear existing timeouts
-             messageTimeouts.forEach(clearTimeout);
-             messageTimeouts.length = 0; // Empty the array
-             // Remove existing messages immediately
-             ajaxErrorContainer.innerHTML = '';
-        }
+    if (studentIdInput) {
+        studentIdInput.addEventListener("input", e => {
+            let v = e.target.value.replace(/\D/g, "");
+            let f = "";
 
-        function showAjaxErrors(errors) {
-             if (!ajaxErrorContainer) return;
-             clearAjaxErrors(); // Clear previous errors first
+            if (v.length > 0) f = v.substring(0, 2);
+            if (v.length > 2) f += "-" + v.substring(2, 6);
+            if (v.length > 6) f += "-" + v.substring(6, 9);
 
-             // Ensure errors is always an array
-             const errorList = Array.isArray(errors) ? errors : [errors];
+            e.target.value = f;
+        });
+    }
 
-             errorList.forEach(message => {
-                 const errorDiv = document.createElement('div');
-                 errorDiv.className = 'error-message'; // Use your CSS class
-                 errorDiv.textContent = message;
-                 ajaxErrorContainer.appendChild(errorDiv);
+    if (phoneInput) {
+        phoneInput.addEventListener("input", e => {
+            let v = e.target.value.replace(/\D/g, "");
 
-                 // Set timeout for this specific message
-                 const timeoutId = setTimeout(() => {
-                     errorDiv.classList.add('fade-out');
-                     setTimeout(() => {
-                         errorDiv.remove();
-                     }, 500); // Match CSS transition
-                 }, 3000); // 3 seconds
-                 messageTimeouts.push(timeoutId); // Store timeout ID
-             });
-        }
+            if (v.startsWith("09")) v = "639" + v.substring(2);
 
-        // --- Auto-hide Initial Django Messages (Keep As Is) ---
-        const initialMessages = document.querySelectorAll('.form-container > .error-message, .form-container > .success-message'); // Target direct children
-        initialMessages.forEach(messageElement => {
-            setTimeout(() => {
-                messageElement.classList.add('fade-out');
-                setTimeout(() => {
-                    messageElement.remove();
-                }, 500);
-            }, 3000); // Hide initial messages faster or slower?
+            let f = "";
+            if (v.length > 0) f = "+" + v.substring(0, 2);
+            if (v.length > 2) f += " " + v.substring(2, 5);
+            if (v.length > 5) f += " " + v.substring(5, 8);
+            if (v.length > 8) f += " " + v.substring(8, 12);
+
+            e.target.value = f;
+        });
+    }
+
+    const ajaxErrorContainer = document.getElementById("ajax-error-container");
+    const messageTimeouts = [];
+
+    function clearAjaxErrors() {
+        if (!ajaxErrorContainer) return;
+
+        messageTimeouts.forEach(clearTimeout);
+        messageTimeouts.length = 0;
+
+        ajaxErrorContainer.innerHTML = "";
+    }
+
+    function showAjaxErrors(errors) {
+        if (!ajaxErrorContainer) return;
+
+        clearAjaxErrors();
+
+        const list = Array.isArray(errors) ? errors : [errors];
+
+        list.forEach(msg => {
+            const div = document.createElement("div");
+            div.className = "error-message";
+            div.textContent = msg;
+
+            ajaxErrorContainer.appendChild(div);
+
+            const timeoutId = setTimeout(() => {
+                div.classList.add("fade-out");
+                setTimeout(() => div.remove(), 500);
+            }, 3000);
+
+            messageTimeouts.push(timeoutId);
+        });
+    }
+
+    const initialMessages =
+        document.querySelectorAll(".form-container > .error-message, .form-container > .success-message");
+
+    initialMessages.forEach(msg => {
+        setTimeout(() => {
+            msg.classList.add("fade-out");
+            setTimeout(() => msg.remove(), 500);
+        }, 3000);
+    });
+
+    const registerForm = document.getElementById("register-form");
+    const registerButton = registerForm ? registerForm.querySelector("button[type='submit']") : null;
+
+    if (registerForm && registerButton) {
+        registerForm.addEventListener("submit", async e => {
+            e.preventDefault();
+
+            const orig = registerButton.textContent;
+            registerButton.disabled = true;
+            registerButton.textContent = "REGISTERING...";
+
+            clearAjaxErrors();
+
+            const formData = new FormData(registerForm);
+            const url = registerForm.action || window.location.href;
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-CSRFToken": formData.get("csrfmiddlewaretoken"),
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(
+                        data.errors
+                        ? data.errors.join("; ")
+                        : data.error || `HTTP error! Status: ${response.status}`
+                    );
+                }
+
+                window.location.href = data.redirect_url;
+
+            } catch (err) {
+
+                const msgs = err.message.includes("; ")
+                    ? err.message.split("; ")
+                    : [err.message];
+
+                showAjaxErrors(msgs);
+
+                registerButton.disabled = false;
+                registerButton.textContent = orig;
+            }
         });
 
+    } else {
+        console.error("Register form or button not found!");
+    }
 
-        // --- AJAX Form Submission ---
-        const registerForm = document.getElementById('register-form');
-        const registerButton = registerForm ? registerForm.querySelector('button[type="submit"]') : null;
-
-        if (registerForm && registerButton) {
-            registerForm.addEventListener('submit', async function(event) {
-                event.preventDefault();
-
-                // --- Loading State ---
-                const originalButtonText = registerButton.textContent;
-                registerButton.disabled = true;
-                registerButton.textContent = 'REGISTERING...';
-                // Add styles if needed: registerButton.style.opacity = '0.7';
-
-                clearAjaxErrors(); // Clear previous errors
-
-                const formData = new FormData(registerForm);
-                const url = registerForm.action || window.location.href; // Use current URL if action is empty
-
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-
-                    const data = await response.json();
-
-                    if (!response.ok || !data.success) {
-                        // Handle validation errors or Supabase errors
-                        throw new Error(data.errors ? data.errors.join('; ') : (data.error || `HTTP error! Status: ${response.status}`));
-                    }
-
-                    // --- SUCCESS ---
-                    console.log("Registration successful:", data.message);
-                    // Optional: Show success message briefly before redirecting
-                    // showAjaxErrors([data.message], 'success'); // Need to adapt showAjaxErrors for success class
-                    // Redirect to login page
-                    window.location.href = data.redirect_url;
-                    // Don't reset button on success redirect
-
-                } catch (error) {
-                    // --- ERROR ---
-                    console.error("Registration failed:", error);
-                    // Split combined errors if they came as a single string
-                    const errorMessages = error.message.includes('; ') ? error.message.split('; ') : [error.message];
-                    showAjaxErrors(errorMessages);
-
-                    // --- Reset Button ---
-                    registerButton.disabled = false;
-                    registerButton.textContent = originalButtonText;
-                    // registerButton.style.opacity = '1';
-                }
-            });
-        } else {
-            console.error("Register form or button not found!");
-        }
-    });
+});
 </script>
+
 </body>
 </html>
