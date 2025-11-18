@@ -10,6 +10,14 @@ from django.http import JsonResponse
 from django.urls import reverse
 
 
+"""
+    Register a new user with Supabase Auth and create profile.
+    
+    Validates user input (email format, password strength, personal information),
+    creates a new user account in Supabase Auth, and stores user metadata.
+    Supports both traditional form submissions and AJAX requests.
+    Returns JSON responses for AJAX calls and redirects for standard form submissions.
+    """
 def register(request):
     """Register a new user with Supabase Auth and create profile"""
     user_type = request.GET.get('type', 'student') # Keep this if needed elsewhere
@@ -114,7 +122,14 @@ def register(request):
     # Handle GET request
     return render(request, 'registration/register.html', context)
 
-
+"""
+    Handle user login process for both students and admins.
+    
+    Authenticates users with Supabase credentials, validates user role/type matches
+    the selected login option, checks if user is blocked, and establishes a session
+    with access and refresh tokens. Prevents role mismatches and blocks access for
+    suspended users. Supports both standard form submissions and AJAX requests.
+    """
 @require_http_methods(["GET", "POST"]) # Allow GET for initial page load
 def login_view(request):
     """Handles the user login process for both students and admins."""
@@ -208,7 +223,13 @@ def login_view(request):
     # Handle GET request (initial page load)
     return render(request, 'registration/login.html')
 
-
+"""
+    Log out user from Supabase and clear the Django session.
+    
+    Signs out the user from Supabase authentication and removes stored access/refresh
+    tokens from the Django session. Displays a success message and redirects to login page.
+    Gracefully handles errors if Supabase sign-out fails.
+    """
 def logout_view(request):
     """Logout user from Supabase and clear the Django session."""
     try:
@@ -227,7 +248,14 @@ def logout_view(request):
     
     return redirect('login')
 
-
+"""
+    Send password reset OTP via Supabase (AJAX enabled).
+    
+    Validates that the email address belongs to a CIT institutional account (@cit.edu),
+    requests an OTP from Supabase, and redirects to OTP verification page.
+    Always returns success message for security (prevents email enumeration attacks).
+    Supports both standard form submissions and AJAX requests.
+    """
 def forgot_password(request):
     """Send password reset OTP via Supabase (AJAX enabled)."""
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
@@ -271,7 +299,15 @@ def forgot_password(request):
     
     return render(request, 'registration/forgot_password.html')
 
-
+"""
+    Verify OTP sent by Supabase for password reset.
+    
+    Validates the 6-digit OTP entered by the user against Supabase records,
+    establishes an authenticated session upon successful verification, and
+    stores the reset email in session for password reset flow.
+    Provides user-friendly error messages for invalid/expired OTPs.
+    Supports both standard form submissions and AJAX requests.
+    """
 def verify_otp(request, email):
     """Verify OTP sent by Supabase (AJAX enabled)."""
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
@@ -330,7 +366,14 @@ def verify_otp(request, email):
     
     return render(request, 'registration/verify_otp.html', {'email': email})
 
-
+"""
+    Reset password after OTP verification (AJAX enabled).
+    
+    Validates new password against security requirements (length, uppercase, lowercase,
+    numbers, special characters), updates the user's password in Supabase, clears
+    session tokens, and redirects to login. Requires prior OTP verification via session token.
+    Supports both standard form submissions and AJAX requests.
+    """
 def reset_password(request):
     """Reset password after OTP verification (AJAX enabled)."""
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'

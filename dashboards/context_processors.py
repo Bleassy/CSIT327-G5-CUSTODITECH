@@ -3,8 +3,13 @@ from datetime import datetime
 
 def profile_context(request):
     """
-    Adds the user's profile data AND a display_name
-    to every request context by reading it from request.user.
+    Context processor that adds user profile data to template context.
+    
+    Retrieves the authenticated user's profile information from the request object
+    and extracts key data such as full name and email. Provides a display name
+    (fallback to email prefix or default 'Student') that can be used in templates.
+    Gracefully handles missing profile data by returning default values.
+    Returns a dictionary containing 'profile' (user profile object) and 'display_name' (user-friendly name).
     """
     # Set default values
     context = {
@@ -22,7 +27,6 @@ def profile_context(request):
             pass 
 
         # --- 2. Get profile data from the request.user object ---
-        # The middleware already fetched this for us.
         try:
             profile_data = request.user.profile
             
@@ -34,8 +38,6 @@ def profile_context(request):
                 if full_name and full_name.strip():
                     context['display_name'] = full_name.split(' ')[0]
             
-            # If profile_data is empty or full_name is blank,
-            # the email fallback we set above will be used.
         
         except Exception as e:
             # Fail silently if request.user.profile doesn't exist
@@ -47,11 +49,18 @@ def profile_context(request):
 
 def notifications_context(request):
     """
-    Adds unread notifications and their count to every request context.
+    Context processor that adds unread notifications to template context.
+    
+    Fetches the 20 most recent notifications for the authenticated user from Supabase,
+    including notification details (message, link, timestamp, read status) and associated
+    product images. Separately queries the total count of unread notifications for use
+    in UI indicators (red dot badges). Converts ISO 8601 timestamp strings to Python
+    datetime objects for proper template formatting and filtering.
+    Returns a dictionary containing 'notifications' (list of notification objects)
+    and 'notification_count' (integer count of unread notifications).
     """
     if hasattr(request, 'user') and request.user.is_authenticated:
         try:
-            # ✅ FIX: Fetch 5 newest notifications,
             # selecting 'is_read' but NOT filtering by it.
             response = supabase.table('notifications') \
                 .select('id, message, link_url, created_at, is_read, products(image_url)') \
@@ -60,13 +69,11 @@ def notifications_context(request):
                 .execute()
             
             # Fetch the TOTAL unread count for the "red dot"
-            # We must use 'exact' count for this to work
             count_response = supabase.table('notifications') \
                 .select('id', count='exact') \
                 .eq('is_read', False) \
                 .execute()
 
-            # We must parse the date strings into datetime objects
             notifications_data = []
             if response.data:
                 for item in response.data:

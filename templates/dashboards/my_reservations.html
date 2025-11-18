@@ -37,7 +37,6 @@
             </div>
         {% endfor %}
     </div>
-    {# Improved Empty State (hidden) #}
     <div class="empty-state-container no-items-message" id="no-pickup-message" style="display: none;">
         <div class="empty-state-icon"><i class="fa-solid fa-calendar-check"></i></div>
         <h3>You have no items for pickup</h3>
@@ -45,7 +44,6 @@
         <a href="{% url 'browse_products' %}" class="btn btn btn-primary">Browse Products</a>
     </div>
 {% else %}
-    {# Improved Empty State (visible) #}
     <div class="reservations-grid" id="pickup-grid"></div> {# Empty grid for JS target #}
     <div class="empty-state-container no-items-message" id="no-pickup-message">
         <div class="empty-state-icon"><i class="fa-solid fa-calendar-check"></i></div>
@@ -96,7 +94,6 @@
         <a href="{% url 'browse_products' %}" class="btn btn btn-primary">Browse Products</a>
     </div>
 {% else %}
-    {# Improved Empty State (visible) #}
     <div class="reservations-grid" id="backorder-grid"></div> {# Empty grid for JS target #}
     <div class="empty-state-container no-items-message" id="no-backorder-message">
         <div class="empty-state-icon"><i class="fa-solid fa-box-open"></i></div>
@@ -351,10 +348,9 @@ function showDynamicMessage(message, className = 'success') {
 // Main function to handle AJAX form submission
 function handleAjaxFormSubmit(form) {
     form.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Stop the page from reloading
+        event.preventDefault();
 
         const submitButton = form.querySelector('button[type="submit"]');
-        // Store original text OUTSIDE try/catch/finally
         const originalButtonText = submitButton.textContent;
         submitButton.disabled = true;
         submitButton.textContent = 'Processing...';
@@ -378,11 +374,9 @@ function handleAjaxFormSubmit(form) {
                 throw new Error(data.error || 'An unknown error occurred.');
             }
 
-            // --- Success ---
             closeModal(form.closest('.modal'));
             showDynamicMessage(data.message, 'success');
 
-            // --- Card Removal Logic ---
             let reservationId = null;
             if (form.id === 'checkout-form') {
                 reservationId = form.querySelector('#checkout-reservation-id')?.value;
@@ -416,17 +410,12 @@ function handleAjaxFormSubmit(form) {
                     }, 400);
                 } else { console.warn("Card to remove not found in DOM for ID:", reservationId); }
             } else { console.error("Could not determine reservation ID to remove card."); }
-            // --- End Card Removal ---
 
         } catch (error) {
-            // --- Error ---
             console.error('Form submission error:', error);
             showDynamicMessage(`Error: ${error.message}`, 'error');
-            // submitButton.disabled = false;
-            // submitButton.textContent = originalButtonText;
         } finally {
-            //
-            console.log("Resetting button state."); // Debug log
+            console.log("Resetting button state.");
             submitButton.disabled = false;
             submitButton.textContent = originalButtonText;
         }

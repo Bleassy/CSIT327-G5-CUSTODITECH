@@ -88,10 +88,10 @@ body {
 /* --- Animation for Pulsing Glow --- */
 @keyframes pulseGlow {
     0% {
-        box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); /* #FFD700 at 30% */
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); 
     }
     50% {
-        box-shadow: 0 0 30px rgba(255, 215, 0, 0.7); /* #FFD700 at 70% */
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.7); 
     }
     100% {
         box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);

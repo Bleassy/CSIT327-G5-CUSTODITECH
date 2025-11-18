@@ -322,7 +322,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // ==================================================================
-    // == 1. GET ALL ELEMENTS (No changes here)
+    // GET ALL ELEMENTS
     // ==================================================================
     const addModal = document.getElementById('add-product-modal');
     const editModal = document.getElementById('edit-product-modal');
@@ -351,14 +351,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==================================================================
-    // == 2. DEFINE ALL HELPER FUNCTIONS
+    // DEFINE ALL HELPER FUNCTIONS
     // ==================================================================
-
-    /**
-     * Displays a temporary message in the message container.
-     * @param {string} message - The message to display.
-     * @param {string} type - 'success' or 'error'.
-     */
     function showMessage(message, type = 'success') {
         const container = document.getElementById('message-container');
         if (!container) {
@@ -395,9 +389,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function getCsrfToken() {
         return document.querySelector('#batch-action-form [name=csrfmiddlewaretoken]').value;
     }
-
-    // ... (All other helper functions: createProductRow, updateProductRow, addListenersToRow, openModal, closeModal, updateBatchActionBar, filterProducts) ...
-    // [These functions are unchanged]
 
     function createProductRow(product) {
         if (!tableBody) return;
@@ -638,15 +629,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const category = row.dataset.category || '';
             const status = row.dataset.status || '';
 
-            // Check 1: Category filter
             const categoryMatch = (selectedCategory === 'all') || (category === selectedCategory);
 
-            // Check 2: Text search filter
             const searchMatch = productName.includes(searchTerm) || 
                                category.includes(searchTerm) || 
                                status.includes(searchTerm);
             
-            // Final: Must match BOTH
             const rowMatches = categoryMatch && searchMatch;
 
             row.style.display = rowMatches ? '' : 'none';
@@ -655,24 +643,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (noResultsRow) noResultsRow.style.display = (visibleRowCount === 0 && currentProductRows.length > 0) ? '' : 'none';
         if (initialEmptyRow) {
-            // Show initial empty row only if there are no products AND no search term
             initialEmptyRow.style.display = (currentProductRows.length === 0 && searchTerm.length === 0) ? '' : 'none';
         }
     }
 
 
     // ==================================================================
-    // == 3. ATTACH EVENT LISTENERS (No changes here)
+    // ATTACH EVENT LISTENERS
     // ==================================================================
 
     if (searchInput) {
         searchInput.addEventListener('input', filterProducts);
     }
-    if (categoryFilter) { // Add this
+    if (categoryFilter) { 
         categoryFilter.addEventListener('change', filterProducts);
     }
 
-    filterProducts(); // Run once on load
+    filterProducts(); 
 
     document.querySelectorAll('.data-table tbody tr.product-row').forEach(row => {
         addListenersToRow(row);
@@ -743,7 +730,6 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', () => {
             const selectedIds = Array.from(document.querySelectorAll('.product-checkbox:checked')).map(cb => cb.value);
             const count = selectedIds.length;
-            //Use showMessage
             if (count === 0) { showMessage('Please select at least one product.', 'error'); return; }
             if (batchDeleteConfirmModal) {
                 batchDeleteConfirmModal.querySelector('#batch-delete-count').textContent = count;
@@ -755,7 +741,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==================================================================
-    // == 4. AJAX FORM SUBMISSION HANDLERS
+    // AJAX FORM SUBMISSION HANDLERS
     // ==================================================================
 
     if (addProductForm) {
@@ -938,8 +924,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     
                     filterProducts();
-                    //updateBatchActionBar();
-                    //batchActionBar.style.display = 'none';
                     if(selectAllCheckbox) selectAllCheckbox.checked = false; 
                         updateBatchActionBar();
                 } else {
@@ -960,8 +944,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    updateBatchActionBar(); // Run on load
+    updateBatchActionBar();
 
-}); // <-- Closes the DOMContentLoaded listener
+});
 </script>
 {% endblock %}

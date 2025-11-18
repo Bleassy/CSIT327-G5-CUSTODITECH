@@ -19,13 +19,13 @@ import uuid
 import math
 import requests
 
-
-# --- Main Redirect View ---
-
 def dashboard_redirect(request):
     """
     Redirects an authenticated user to their appropriate dashboard (admin or student).
-    If the user is not authenticated, it redirects them to the login page.
+    
+    Checks if the user is authenticated and retrieves their user_type to determine
+    which dashboard to display. Unauthenticated users are redirected to the login page.
+    Returns a redirect response to either the admin or student dashboard.
     """
     if not hasattr(request.user, 'is_authenticated') or not request.user.is_authenticated:
         messages.error(request, 'Please login to access the dashboard.')
@@ -36,6 +36,8 @@ def dashboard_redirect(request):
         return redirect('admin_dashboard')
     return redirect('student_dashboard')
 
+
+
 # --- Student Views ---
 
 @student_required
@@ -43,7 +45,10 @@ def dashboard_redirect(request):
 def mark_notifications_as_read(request):
     """
     Marks all unread notifications for the current user as 'read'.
-    Called by JavaScript when the notification bell is opened.
+    
+    Handles AJAX POST requests to update the user's unread notifications to read status.
+    Uses row-level security (RLS) to ensure users can only modify their own notifications.
+    Returns JSON response indicating success or failure.
     """
     # We only want AJAX requests
     if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -69,8 +74,10 @@ def mark_notifications_as_read(request):
 @require_http_methods(["POST"])
 def mark_all_as_read_header_view(request):
     """
-    Handles an AJAX POST request to mark all of the user's
-    unread notifications as 'read'.
+    Marks all unread notifications for a user as 'read' via AJAX request.
+    
+    Processes an AJAX POST request to update all pending unread notifications
+    to read status. Returns the new unread count (0) for updating the UI notification badge.
     """
     if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
@@ -93,8 +100,11 @@ def mark_all_as_read_header_view(request):
 @require_http_methods(["POST"])
 def mark_notification_read_and_redirect(request, notification_id):
     """
-    Marks a single notification as read and then redirects the user
-    to that notification's link.
+    Marks a single notification as read and redirects user to the notification's link.
+    
+    Retrieves a specific notification's URL, marks it as read, and returns a redirect URL
+    for the frontend to navigate to. Provides a fallback URL if the notification link is missing.
+    Returns JSON response with redirect URL or error message.
     """
     # Default URL if something goes wrong
     fallback_url = '/dashboard/student/my-orders/' 
@@ -130,8 +140,11 @@ def mark_notification_read_and_redirect(request, notification_id):
 @student_required
 def all_notifications_view(request):
     """
-    Renders the new "All Notifications" page.
-    Fetches all notifications (both read and unread) with product details.
+    Displays all notifications (both read and unread) for the authenticated student.
+    
+    Renders a comprehensive notifications page by fetching detailed notification data
+    including product information using an RPC function. Handles date parsing and provides
+    user-friendly error messages if data retrieval fails.
     """
     all_notifications = []
     try:
@@ -163,8 +176,11 @@ def all_notifications_view(request):
 @require_http_methods(["POST"])
 def batch_update_notifications(request):
     """
-    Handles an AJAX POST request to mark a batch of notifications
-    as 'read' or 'unread'.
+    Handles batch updates to notification read status via AJAX.
+    
+    Processes multiple notification IDs to mark them as read or unread in a single operation.
+    Validates input, updates the database, and returns the new total unread count for UI updates.
+    Returns JSON response with success status and updated notification count.
     """
     if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
@@ -209,7 +225,11 @@ def batch_update_notifications(request):
 @require_http_methods(["POST"])
 def batch_delete_notifications(request):
     """
-    Handles an AJAX POST request to permanently delete a batch of notifications.
+    Permanently deletes a batch of notifications via AJAX request.
+    
+    Processes multiple notification IDs for deletion while ensuring the user
+    only deletes their own notifications. Returns the updated unread count after deletion.
+    Returns JSON response with success status and new notification count.
     """
     if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
@@ -249,8 +269,11 @@ def batch_delete_notifications(request):
 @require_http_methods(["POST"])
 def mark_all_as_read_view(request):
     """
-    Handles an AJAX POST request to mark ALL unread notifications
-    for a user as 'read'.
+    Marks ALL unread notifications as read via AJAX request.
+    
+    Updates all pending unread notifications for the authenticated user to read status
+    in a single operation. Returns success confirmation with new unread count (0).
+    Returns JSON response indicating completion.
     """
     if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
@@ -275,8 +298,11 @@ def mark_all_as_read_view(request):
 @student_required
 def student_dashboard(request):
     """
-    Renders the main student dashboard with a welcome message and summaries
-    of the most recent reservation and order.
+    Renders the main student dashboard with personalized welcome and order summaries.
+    
+    Displays a greeting message, user display name, and summaries of the most recent
+    reservation and order. Fetches data via RPC functions and handles date parsing.
+    Provides a welcoming interface with key information at a glance.
     """
     raw_name = getattr(request.user, 'get_full_name', lambda: 'Wildcat')()
     display_name = "Wildcat" # Default name
@@ -347,7 +373,11 @@ def student_dashboard(request):
 @student_required
 def browse_products_view(request):
     """
-    Renders the page for browsing products, categorized and searchable.
+    Displays all available products organized by category with search functionality.
+    
+    Fetches products from the database, groups them by category, and supports
+    keyword search filtering. Returns categorized product data for template rendering.
+    Handles errors gracefully with user-friendly messages.
     """
     search_query = request.GET.get('search', '').strip()
     categorized_products = defaultdict(list)
@@ -383,8 +413,11 @@ def browse_products_view(request):
 @student_required
 def my_reservations_view(request):
     """
-    Displays a student's active reservations and backorders.
-    It fetches all 'pending' reservations/backorders associated with the user.
+    Displays the student's active reservations and backorders.
+    
+    Fetches all pending reservations and backorders associated with the authenticated user.
+    Separates them by order_type and handles date parsing for display.
+    Shows only items currently in pending status.
     """
     reservations, backorders = [], []
     try:
@@ -419,8 +452,11 @@ def my_reservations_view(request):
 @student_required
 def my_orders_view(request):
     """
-    Displays a student's order history, categorized by status (Pending, 
-    Approved, Completed, and Other).
+    Displays student's complete order history organized by status categories.
+    
+    Fetches all orders and categorizes them into pending, approved, completed, and other
+    (cancelled/rejected) statuses. Handles date and expiration time parsing for proper display.
+    Provides comprehensive order tracking and history view.
     """
     pending_orders, approved_orders, completed_orders, other_orders = [], [], [], []
     
@@ -491,8 +527,11 @@ def my_orders_view(request):
 @student_required
 def batch_delete_orders_view(request):
     """ 
-    Handles an AJAX POST request for a student to delete multiple
-    'other' (e.g., cancelled, rejected) orders they own. 
+    Allows students to delete multiple completed or cancelled orders via AJAX.
+    
+    Processes batch deletion of "other" status orders (cancelled, rejected) that the
+    student owns. Ensures data integrity by verifying ownership before deletion.
+    Returns JSON confirmation with count of deleted orders.
     """
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         order_ids_str = request.POST.get('order_ids')
@@ -520,8 +559,11 @@ def batch_delete_orders_view(request):
 @student_required
 def delete_single_order_view(request, order_id):
     """ 
-    Handles an AJAX POST request for a student to delete a single
-    'other' (e.g., cancelled, rejected) order they own. 
+    Allows students to delete a single completed or cancelled order via AJAX.
+    
+    Handles deletion of a specific "other" status order after verifying the student
+    is the owner. Provides immediate feedback on successful deletion.
+    Returns JSON response with status and confirmation message.
     """
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
@@ -544,9 +586,12 @@ def delete_single_order_view(request, order_id):
 @student_required
 def create_reservation_view(request):
     """
-    Handles an AJAX POST request from a student to create a reservation or backorder
-    by calling the 'create_reservation' RPC in Supabase.
-    Returns the new stock quantity to update the UI.
+    Processes AJAX POST request to create a new reservation or backorder.
+    
+    Calls Supabase RPC to reserve a product with specified quantity, deal method,
+    and urgency status. Handles the response, fetches updated stock quantity,
+    and returns product availability status for UI updates.
+    Returns JSON with success status and new stock information.
     """
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
@@ -611,9 +656,12 @@ def create_reservation_view(request):
 @student_required
 def create_order_view(request):
     """
-    Handles an AJAX POST request from a student to "buy" a product
-    by calling the 'buy_product' RPC in Supabase.
-    Returns the new stock quantity to update the UI.
+    Processes AJAX POST request to create a new order (direct purchase).
+    
+    Calls Supabase RPC to process a product purchase with payment and delivery details.
+    Handles success responses and edge cases, fetches updated stock quantity,
+    and returns order confirmation with current inventory status.
+    Returns JSON with success status and new stock information.
     """
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
@@ -682,8 +730,11 @@ def create_order_view(request):
 @student_required
 def checkout_reservation_view(request):
     """
-    Handles an AJAX POST request to convert a student's reservation into
-    a 'pending' order by calling the 'checkout_reservation' RPC.
+    Converts a reservation into a pending order via AJAX POST request.
+    
+    Processes checkout of an existing reservation by calling the RPC function
+    to transition it to order status. Ensures the reservation belongs to the authenticated user.
+    Returns JSON confirmation of successful checkout.
     """
     if request.method == 'POST':
         try:
@@ -706,8 +757,13 @@ def checkout_reservation_view(request):
 @student_required
 def student_profile_view(request):
     """
-    Renders the student's profile page (GET) and handles AJAX POST requests
-    to update profile details (including avatar) or change their password.
+    Displays student profile page (GET) and handles profile/password updates (POST AJAX).
+    
+    For GET requests: Shows user's profile information including avatar, contact details, and address.
+    For POST requests with form_type='details': Updates profile information and avatar image in storage.
+    For POST requests with form_type='password': Validates current password, updates to new password,
+    and logs user out with redirect to login page.
+    Returns HTML page for GET, JSON responses for AJAX POST requests.
     """
     user_id = request.user.id
     
@@ -838,8 +894,11 @@ def student_profile_view(request):
 @student_required
 def cancel_reservation_view(request, reservation_id):
     """
-    Allows a student to cancel their own reservation via an AJAX POST request.
-    This re-uses the 'cancel_or_reject_order' RPC.
+    Allows students to cancel their own reservation via AJAX POST request.
+    
+    Processes cancellation of a specific reservation by calling the RPC function
+    to update status to cancelled. Verifies ownership implicitly through RLS.
+    Returns JSON confirmation of successful cancellation.
     """
     if request.method == 'POST':
         try:
@@ -859,8 +918,11 @@ def cancel_reservation_view(request, reservation_id):
 @student_required
 def cancel_order_view(request, order_id):
     """ 
-    Handles an AJAX POST request for a student to cancel their own 'approved' order.
-    This calls an RPC to cancel the order and restore product stock.
+    Allows students to cancel approved orders via AJAX POST request.
+    
+    Verifies the order is approved and belongs to the authenticated student before cancellation.
+    Calls RPC to cancel order and restore product stock. Includes ownership validation.
+    Returns JSON response confirming cancellation or error details.
     """
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
@@ -884,8 +946,11 @@ def cancel_order_view(request, order_id):
 @admin_required
 def admin_dashboard(request):
     """
-    Renders the main admin dashboard, showing a greeting and key statistics
-    from the 'get_dashboard_stats' RPC.
+    Renders the main admin dashboard with greeting and key performance statistics.
+    
+    Displays personalized greeting, admin name, and dashboard statistics (total products,
+    orders, active products, pending orders) fetched via RPC. Provides at-a-glance overview
+    of system status and key metrics.
     """
     raw_name = getattr(request.user, 'get_full_name', lambda: 'Admin')()
     display_name = raw_name.split()[0] if isinstance(raw_name, str) else "Admin"
@@ -906,8 +971,11 @@ def admin_dashboard(request):
 @admin_required
 def manage_products_view(request):
     """
-    Renders the product management page for admins.
-    Displays a searchable list of all products, sorted by availability and stock status.
+    Displays product management interface for admins with search and filtering.
+    
+    Fetches all products with optional keyword search across name and category.
+    Sorts products to highlight unavailable items and low-stock products first.
+    Provides comprehensive product list for management operations.
     """
     search_query = request.GET.get('search', '').strip()
     page_number = request.GET.get('page', 1) 
@@ -949,8 +1017,11 @@ def manage_products_view(request):
 @admin_required
 def add_product(request):
     """
-    Handles an AJAX POST request for an admin to add a new product.
-    This includes uploading a product image to storage.
+    Handles AJAX POST request for admin to add a new product.
+    
+    Processes product creation including image upload to Supabase storage,
+    and handles size field for Uniforms category. Validates all input data
+    and logs the activity. Returns JSON with new product details.
     """
     if request.method == 'POST':
         try:
@@ -1007,8 +1078,11 @@ def add_product(request):
 @admin_required
 def edit_product(request, product_id):
     """
-    Handles an AJAX POST request for an admin to edit an existing product.
-    This includes logic for updating or replacing the product image.
+    Handles AJAX POST request for admin to update an existing product.
+    
+    Processes product updates including price, stock, category, and optional image replacement.
+    Tracks changes made for activity logging. Handles old image deletion when new image uploaded.
+    Returns JSON with updated product details.
     """
     if request.method == 'POST':
         try:
@@ -1105,7 +1179,11 @@ def edit_product(request, product_id):
 @admin_required
 def delete_product(request, product_id):
     """
-    Handles an AJAX POST request for an admin to delete a product.
+    Handles AJAX POST request for admin to permanently delete a product.
+    
+    Removes a product from the database and logs the deletion activity.
+    Fetches product name before deletion for meaningful audit logging.
+    Returns JSON confirmation with deleted product ID.
     """
     if request.method == 'POST':
         try:
@@ -1133,8 +1211,11 @@ def delete_product(request, product_id):
 @admin_required
 def order_management_view(request):
     """
-    Renders the order management page for admins.
-    Fetches all orders using an RPC and categorizes them by status.
+    Displays all orders organized by status for admin management.
+    
+    Fetches orders using RPC with optional search filtering. Categorizes into
+    pending, approved, completed, and other (cancelled/rejected) statuses.
+    Handles date parsing and provides comprehensive order overview.
     """
     search_query = request.GET.get('search', '').strip()
     
@@ -1197,7 +1278,11 @@ def order_management_view(request):
 @admin_required
 def admin_batch_delete_orders_view(request):
     """ 
-    Handles an AJAX POST request for an admin to delete multiple orders.
+    Allows admins to permanently delete multiple orders via AJAX.
+    
+    Processes batch deletion of selected orders and logs the activity.
+    Validates order IDs and ensures deletion is recorded in audit trail.
+    Returns JSON confirmation with count and details of deleted orders.
     """
     if request.method == 'POST':
         order_ids_str = request.POST.get('order_ids')
@@ -1233,8 +1318,11 @@ def admin_batch_delete_orders_view(request):
 @admin_required
 def batch_update_products(request):
     """
-    Handles batch actions for products (e.g., mark as available, delete).
-    Handles both standard POST (for 'mark-available') and AJAX POST (for 'delete-selected').
+    Handles batch operations on multiple products via POST request.
+    
+    Supports multiple actions: 'mark-available' (standard form submission)
+    and 'delete-selected' (AJAX request). Validates product IDs and logs all activities.
+    Returns appropriate response based on action type (redirect or JSON).
     """
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -1299,9 +1387,12 @@ def batch_update_products(request):
 @admin_required
 def update_order_status(request, order_id):
     """
-    Handles an AJAX POST request for an admin to update the status of one or
-    more orders. Can handle single updates (via order_id URL) or batch updates
-    (if order_id is 0).
+    Handles AJAX POST request for admin to update order status (single or batch).
+    
+    Supports single order updates via order_id parameter or batch updates via POST data.
+    Handles special logic for cancelled/rejected orders (stock restoration via RPC)
+    and expiration date management for approved/completed orders. Logs all changes.
+    Returns JSON with updated order data and confirmation message.
     """
     if request.method == 'POST':
         try:
@@ -1402,8 +1493,11 @@ def update_order_status(request, order_id):
 @admin_required
 def delete_order_view(request, order_id):
     """
-    Handles an AJAX POST request for an admin to permanently delete a single order.
-    Fetches order details before deletion for logging purposes.
+    Handles AJAX POST request for admin to permanently delete a single order.
+    
+    Fetches order details before deletion for comprehensive audit logging including
+    product name and student information. Logs the deletion activity.
+    Returns JSON confirmation with deleted order ID.
     """
     if request.method == 'POST':
         
@@ -1446,9 +1540,12 @@ def delete_order_view(request, order_id):
 @admin_required
 def reports_view(request):
     """
-    Renders the admin reports page.
-    Fetches comprehensive sales, inventory, and activity log data using
-    the 'get_advanced_report_stats' RPC and direct table queries.
+    Displays comprehensive system reports with KPIs, inventory, sales, and activity logs.
+    
+    Fetches advanced report statistics via RPC including dashboard KPIs, inventory overview,
+    reservation statistics, and sales performance. Implements paginated activity log display
+    with 10 entries per page. Identifies and highlights low-stock and unavailable products.
+    Provides multi-faceted reporting for business intelligence.
     """
     search_query = request.GET.get('search', '').strip()
     log_page_number = request.GET.get('log_page', 1) 
@@ -1585,8 +1682,10 @@ def reports_view(request):
 @admin_required
 def batch_delete_logs_view(request):
     """
-    Handles an AJAX POST request for an admin to batch delete specific
-    activity log entries.
+    Handles AJAX POST request for admin to batch delete activity log entries.
+    
+    Processes deletion of multiple log records by IDs. Validates input and removes
+    entries from the activity_log table. Returns JSON with deletion count and confirmation.
     """
     if request.method == 'POST':
         log_ids_str = request.POST.get('log_ids')
@@ -1615,8 +1714,11 @@ def batch_delete_logs_view(request):
 @admin_required
 def clear_all_logs_view(request):
     """
-    Handles an AJAX POST request for an admin to delete ALL entries
-    from the activity_log table.
+    Handles AJAX POST request for admin to delete ALL activity log entries.
+    
+    Performs complete purge of the activity_log table. Counts entries before deletion
+    and logs this destructive action for security audit trail purposes.
+    Returns JSON confirmation with count of cleared entries.
     """
     if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
@@ -1648,8 +1750,13 @@ def clear_all_logs_view(request):
 @admin_required
 def admin_profile_view(request):
     """
-    Renders the admin's profile page (GET) and handles AJAX POST requests
-    to update profile details (including avatar) or change their password.
+    Displays admin profile page (GET) and handles profile/password updates (POST AJAX).
+    
+    For GET requests: Shows admin's profile information including avatar, contact details, and address.
+    For POST requests with form_type='details': Updates profile and avatar image in storage.
+    For POST requests with form_type='password': Validates current password, updates password,
+    and logs user out with redirect to login page.
+    Returns HTML page for GET, JSON responses for AJAX POST requests.
     """
     user_id = request.user.id
 
@@ -1772,9 +1879,11 @@ def admin_profile_view(request):
 @admin_required
 def manage_students_view(request):
     """
-    Renders the student management page for admins.
-    Handles both initial page load (GET) and AJAX requests for searching
-    and pagination of the student list.
+    Displays paginated student list with search and filtering for admin management.
+    
+    Supports both standard page load (GET) and AJAX pagination/search requests.
+    Fetches paginated student data via RPC with 10 students per page. Shows student
+    statistics on initial load. Returns HTML page or JSON data based on request type.
     """
     search_query = request.GET.get('search', '').strip()
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
@@ -1852,8 +1961,11 @@ def manage_students_view(request):
 @admin_required
 def admin_block_student_view(request, user_id):
     """
-    Handles an AJAX POST request for an admin to block or unblock a student account.
-    Fetches student details before the action for logging.
+    Handles AJAX POST request for admin to block or unblock a student account.
+    
+    Toggles student's blocked status based on the is_blocked parameter.
+    Fetches student details before action for detailed audit logging including
+    student name and ID number. Returns JSON confirmation of status change.
     """
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         
@@ -1904,8 +2016,11 @@ def admin_block_student_view(request, user_id):
 @admin_required
 def admin_delete_student_view(request, user_id):
     """
-    Handles an AJAX POST request for an admin to permanently delete a student account.
-    Fetches student details before deletion for logging.
+    Handles AJAX POST request for admin to permanently delete a student account.
+    
+    Calls RPC function to delete student and all associated data (orders, reservations, etc.).
+    Fetches student details before deletion for comprehensive audit logging.
+    Returns JSON confirmation with deleted student ID and name.
     """
     if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)

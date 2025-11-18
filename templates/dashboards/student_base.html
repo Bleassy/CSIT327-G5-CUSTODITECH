@@ -158,7 +158,6 @@
                 const cookies = document.cookie.split(';');
                 for (let i = 0; i < cookies.length; i++) {
                     const cookie = cookies[i].trim();
-                    // Does this cookie string begin with the name we want?
                     if (cookie.substring(0, 10) === 'csrftoken=') {
                         cookieValue = decodeURIComponent(cookie.substring(10));
                         break;
@@ -168,7 +167,7 @@
             return cookieValue;
         }
 
-        // NEW: Helper function to update the bell count
+        // Helper function to update the bell count
         function updateHeaderCount(newCount) {
             const bellButton = document.getElementById('notification-bell-btn');
             if (!bellButton) return;
@@ -183,7 +182,6 @@
                 countElement.textContent = newCount;
             } else {
                 if (countElement) {
-                    // Fade out and remove
                     countElement.style.transition = 'opacity 0.3s ease';
                     countElement.style.opacity = '0';
                     setTimeout(() => countElement.remove(), 300);
@@ -218,7 +216,6 @@
                     }
                     if (e.target.closest('#notification-bell-btn')) return;
                     
-                    // Filter for new tab buttons
                     if (e.target.closest('#notification-tabs')) return; 
 
                     if (e.ctrlKey || e.metaKey) return;
@@ -227,7 +224,6 @@
             });
         }
 
-        // Wait for the document to be fully loaded
         document.addEventListener('DOMContentLoaded', function() {
             
             // --- Hamburger Menu Logic ---
@@ -249,12 +245,11 @@
                 });
             }
 
-            // --- Updated Notification Logic ---
+            // --- Notification Logic ---
             const bellBtn = document.getElementById('notification-bell-btn');
             const dropdown = document.getElementById('notification-dropdown');
 
             if (bellBtn && dropdown) {
-                // Toggle dropdown on bell click
                 bellBtn.addEventListener('click', function(e) {
                     if (bellBtn.classList.contains('active')) {
                         return;
@@ -264,7 +259,6 @@
                     const isOpening = !dropdown.classList.contains('visible');
                     dropdown.classList.toggle('visible');
 
-                    // Close hamburger menu if it's open
                     if (isOpening && header.classList.contains('menu-is-open')) {
                             header.classList.remove('menu-is-open');
                             body.classList.remove('menu-is-open');
@@ -273,7 +267,6 @@
                         }
                     });
 
-                // Close dropdown when clicking outside - enhanced for mobile
                 document.addEventListener('click', function(e) {
                     if (dropdown.classList.contains('visible') && 
                         !dropdown.contains(e.target) && 
@@ -282,7 +275,6 @@
                     }
                 });
 
-                // Close dropdown on window resize (prevents layout issues)
                 window.addEventListener('resize', function() {
                     if (window.innerWidth <= 992 && dropdown.classList.contains('visible')) {
                         dropdown.classList.remove('visible');
@@ -325,12 +317,11 @@
                 });
             }
 
-            // --- NEW: Tab switching logic for dropdown ---
+            // --- Tab switching logic for dropdown ---
             const notificationTabs = document.getElementById('notification-tabs');
             if (notificationList && notificationTabs) {
                 notificationTabs.addEventListener('click', function(e) {
                     if (e.target.classList.contains('tab-btn')) {
-                        // Stop the dropdown from closing
                         e.stopPropagation();
                         
                         // Update active tab button
@@ -355,19 +346,18 @@
                 });
             }
 
-            // --- NEW: Mark All as Read Logic ---
+            // --- Mark All as Read Logic ---
             const markAllReadBtn = document.getElementById('dropdown-mark-all-read-btn');
             if (markAllReadBtn) {
                 markAllReadBtn.addEventListener('click', function(e) {
-                    e.stopPropagation(); // Stop dropdown from closing
+                    e.stopPropagation();
 
                     // We check inside notificationList directly
                     const unreadItems = notificationList.querySelectorAll('.notification-item.notification-unread');
                     if (unreadItems.length === 0) {
-                        return; // Do nothing if there's nothing to mark as read
+                        return;
                     }
 
-                    // Disable button to prevent double clicks
                     markAllReadBtn.disabled = true;
                     markAllReadBtn.textContent = 'Processing...';
 
@@ -381,27 +371,21 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // 1. Update the header count
                             updateHeaderCount(data.new_unread_count);
                             
-                            // 2. Find the current active tab
                             const currentTab = notificationTabs.querySelector('.tab-btn.active').dataset.tab;
                             
-                            // 3. Update all items in the dropdown
                             dropdown.querySelectorAll('.notification-item.notification-unread').forEach(item => {
                                 item.classList.remove('notification-unread');
-                                item.dataset.read = 'true'; // Update its state
+                                item.dataset.read = 'true';
 
-                                // 4. If we are on the "Unread" tab, hide the item
                                 if (currentTab === 'unread') {
                                     item.style.display = 'none';
                                 }
                             });
             
-                            // 5. Check if the "Unread" tab is now empty
                             checkDropdownEmptyState();
                         
-                            // 6. Reset the button
                             markAllReadBtn.textContent = 'Mark all as read';
                             markAllReadBtn.disabled = false;
 
@@ -419,14 +403,13 @@
                 });
             }
 
-            // --- NEW HELPER FUNCTION ---
+        // --- HELPER FUNCTION TO CHECK DROPDOWN EMPTY STATE ---
         const dynamicEmptyState = document.getElementById('dynamic-empty-state');
         const staticEmptyState = notificationList.querySelector('.empty-state:not(#dynamic-empty-state)');
 
         function checkDropdownEmptyState() {
             if (!notificationList || !dynamicEmptyState) return;
             
-            // If "All Clear!" is showing, don't do anything
             if (staticEmptyState && staticEmptyState.offsetParent !== null) {
                 dynamicEmptyState.style.display = 'none';
                 return;
@@ -443,7 +426,6 @@
                 dynamicEmptyState.style.display = 'none';
             }
         }
-        // --- END HELPER FUNCTION ---
 
         });
     </script>

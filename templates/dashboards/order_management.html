@@ -44,7 +44,6 @@
         {% endif %}
         <div class="orders-grid">
             {% for order in approved_orders %}
-            <!-- MERGE: Added data-expires-at -->
             <div class="order-card" 
                  data-id="{{ order.id }}" 
                  data-order-type="{{ order.order_type|title|default:'N/A' }}" 
@@ -73,7 +72,6 @@
                         <span>Student:</span><strong>{{ order.student_name|default:'N/A' }} ({{ order.student_id|default:'N/A' }})</strong>
                         <span>Date:</span><strong>{{ order.created_at|date:"M d, Y" }}</strong>
                         
-                        <!-- MERGE: Added Expires On row -->
                         {% if order.expires_at %}
                         <span>Expires On:</span><strong>{{ order.expires_at|date:"M d, Y" }}</strong>
                         {% endif %}
@@ -102,7 +100,6 @@
         {% endif %}
         <div class="orders-grid">
             {% for order in pending_orders %}
-            <!-- MERGE: Added data-expires-at -->
             <div class="order-card" 
                  data-id="{{ order.id }}" 
                  data-order-type="{{ order.order_type|title|default:'N/A' }}" 
@@ -131,7 +128,6 @@
                         <span>Student:</span><strong>{{ order.student_name|default:'N/A' }} ({{ order.student_id|default:'N/A' }})</strong>
                         <span>Date:</span><strong>{{ order.created_at|date:"M d, Y" }}</strong>
                         
-                        <!-- MERGE: Added Expires On row -->
                         {% if order.expires_at %}
                         <span>Expires On:</span><strong>{{ order.expires_at|date:"M d, Y" }}</strong>
                         {% endif %}
@@ -160,7 +156,6 @@
         {% endif %}
         <div class="orders-grid">
             {% for order in completed_orders %}
-            <!-- MERGE: Added data-expires-at -->
             <div class="order-card" 
                  data-id="{{ order.id }}" 
                  data-order-type="{{ order.order_type|title|default:'N/A' }}" 
@@ -210,7 +205,6 @@
         {% endif %}
         <div class="orders-grid">
             {% for order in other_orders %}
-            <!-- MERGE: Added data-expires-at -->
             <div class="order-card" 
                  data-id="{{ order.id }}" 
                  data-order-type="{{ order.order_type|title|default:'N/A' }}" 
@@ -309,7 +303,6 @@
                         <span>Student:</span><strong id="details-student"></strong>
                         <span>Date Ordered:</span><strong id="details-created-at"></strong>
                         
-                        <!-- MERGE: Added Expires On elements -->
                         <span id="details-expires-label">Expires On:</span>
                         <strong id="details-expires-at"></strong>
                         
@@ -391,7 +384,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // ==================================================================
-    // == 1. GET ALL ELEMENTS
+    // GET ALL ELEMENTS
     // ==================================================================
     const detailsModal = document.getElementById('order-details-modal');
     const batchDeleteConfirmModal = document.getElementById('batch-delete-confirm-modal');
@@ -419,7 +412,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmSingleDeleteBtn = document.getElementById('confirm-single-delete-btn');
 
     // --- Search & Content ---
-    // REMOVED: const searchInput = document.getElementById('admin-order-search');
     const globalSearchInput = document.getElementById('global-order-search'); // ADDED
     const allSearchableSections = document.querySelectorAll('.searchable-section'); // ADDED
     const globalNoResults = document.getElementById('global-no-results'); // ADDED
@@ -429,12 +421,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectAllCheckboxes = document.querySelectorAll('.select-all-checkbox');
 
     // ==================================================================
-    // == 2. DEFINE ALL HELPER FUNCTIONS
+    // DEFINE ALL HELPER FUNCTIONS
     // ==================================================================
-
-    /**
-     * Displays a temporary message in the message container.
-     */
     function showMessage(message, type = 'success') {
         const container = document.getElementById('message-container');
         if (!container) return;
@@ -455,7 +443,6 @@ document.addEventListener('DOMContentLoaded', () => {
      * Gets the CSRF token from any of the forms.
      */
     function getCsrfToken() {
-        // More robust - searches the whole document if the first form isn't found
         let tokenInput = document.querySelector('form [name=csrfmiddlewaretoken]');
         return tokenInput ? tokenInput.value : '';
     }
@@ -466,13 +453,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function removeOrderCard(orderId) {
         const card = document.querySelector(`.order-card[data-id="${orderId}"]`);
         if (card) {
-            card.classList.add('moving'); // Add fade-out animation
+            card.classList.add('moving');
             setTimeout(() => {
                 card.remove();
-                // We'll call filterGlobalOrders which handles no-data visibility
                 filterGlobalOrders();
                 updateActionBars();
-            }, 300); // Wait for animation
+            }, 300);
         }
     }
 
@@ -485,7 +471,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let targetGrid, newCheckboxClass, targetSectionSelector;
 
-        // Determine target grid, checkbox class, and section selector
         if (newStatus === 'approved') {
             targetSectionSelector = '.order-section[data-section-status="approved"]';
             newCheckboxClass = 'order-checkbox approved-checkbox';
@@ -507,37 +492,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         if (targetGrid) {
-            // Animate card out
             card.classList.add('moving');
 
             setTimeout(() => {
-                // Update card data
                 card.dataset.status = newStatus;
 
-                // Update status badge
                 const statusBadge = card.querySelector('.status-badge');
                 if (statusBadge) {
                     statusBadge.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
                     statusBadge.className = `status-badge status-${newStatus}`;
                 }
 
-                // Update checkbox
                 const checkbox = card.querySelector('.order-checkbox');
                 if (checkbox) {
                     checkbox.className = newCheckboxClass;
-                    checkbox.checked = false; // Always uncheck on move
+                    checkbox.checked = false;
                 }
 
-                // Move card
                 targetGrid.prepend(card);
 
-                // Animate card in
                 card.classList.remove('moving');
 
-                // Update UI - Use global filter now
                 filterGlobalOrders();
                 updateActionBars();
-            }, 300); // Wait for fade-out
+            }, 300);
         } else {
              console.error(`Could not find target grid for status "${newStatus}" using selector "${targetSectionSelector}"`);
         }
@@ -554,11 +532,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Card Click Logic (Opens Modal) ---
     document.querySelectorAll('.order-card').forEach(card => {
         card.addEventListener('click', (e) => {
-            // Prevent modal opening if clicking checkbox or button inside card (if any)
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('button')) {
-                 // Specifically allow checkbox click to propagate for selection logic
                  if (!e.target.classList.contains('order-checkbox')) {
-                     e.stopPropagation(); // Stop modal opening for buttons etc.
+                     e.stopPropagation();
                  }
                 return;
             }
@@ -567,12 +543,9 @@ document.addEventListener('DOMContentLoaded', () => {
              const checkbox = card.querySelector('.order-checkbox');
              if (checkbox && !e.target.classList.contains('order-checkbox')) {
                  checkbox.checked = !checkbox.checked;
-                 // Manually trigger the 'change' event to update action bars
                  checkbox.dispatchEvent(new Event('change'));
-                 // Important: Stop propagation here so the logic doesn't run twice if checkbox handler also calls it
                  e.stopPropagation();
              }
-             // --- End Checkbox Toggle ---
 
 
             const data = card.dataset;
@@ -593,22 +566,18 @@ document.addEventListener('DOMContentLoaded', () => {
             statusBadge.className = 'status-badge';
             statusBadge.classList.add(`status-${status}`);
 
-            // --- MERGE: Show/Hide Expires On in Modal ---
             const expiresLabelEl = detailsModal.querySelector('#details-expires-label');
             const expiresValueEl = detailsModal.querySelector('#details-expires-at');
             
-            // data.expiresAt will be the string from the attribute, or ""
             if (data.expiresAt) {
                 expiresValueEl.textContent = data.expiresAt;
-                expiresLabelEl.style.display = ''; // Use '' to reset to default
+                expiresLabelEl.style.display = '';
                 expiresValueEl.style.display = '';
             } else {
-                // Hide if no date (e.g., for backorders or completed orders)
                 expiresValueEl.textContent = '';
                 expiresLabelEl.style.display = 'none';
                 expiresValueEl.style.display = 'none';
             }
-            // --- END MERGE ---
 
             // Set action URLs for all forms
             singleStatusForm.action = `/dashboard/admin/update-order-status/${data.id}/`;
@@ -616,27 +585,25 @@ document.addEventListener('DOMContentLoaded', () => {
             singleDeleteForm.action = `/dashboard/admin/delete-order/${data.id}/`;
 
              // --- Show/Hide Footer Forms based on Status ---
-             // Hide all first
              singleStatusForm.style.display = 'none';
              singlePendingStatusForm.style.display = 'none';
              singleDeleteForm.style.display = 'none';
 
              if (status === 'approved') {
-                 singleStatusForm.style.display = 'flex'; // Show the full status update form
-                 singleStatusForm.querySelector('#single-status-select').value = status; // Pre-select current status
+                 singleStatusForm.style.display = 'flex';
+                 singleStatusForm.querySelector('#single-status-select').value = status;
              } else if (status === 'pending') {
-                 singlePendingStatusForm.style.display = 'flex'; // Show the pending-specific status update form
-             } else { // For 'completed', 'cancelled', 'rejected'
-                 singleDeleteForm.style.display = 'flex'; // Show only the delete button form
+                 singlePendingStatusForm.style.display = 'flex';
+             } else {
+                 singleDeleteForm.style.display = 'flex';
              }
-             // --- End Show/Hide ---
 
             openModal(detailsModal);
         });
     });
 
     // ==================================================================
-    // == 3. GLOBAL SEARCH FILTER (NEW)
+    // GLOBAL SEARCH FILTER
     // ==================================================================
     function filterGlobalOrders() {
         if (!globalSearchInput || !allSearchableSections.length || !globalNoResults) {
@@ -668,7 +635,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (isMatch) {
                     sectionHasVisibleCard = true;
                 } else {
-                    // Uncheck hidden cards
                     const cb = card.querySelector('.order-checkbox');
                     if (cb) cb.checked = false;
                 }
@@ -691,20 +657,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show/hide the global "no results" message
         globalNoResults.style.display = (visibleSectionsCount === 0 && searchTerm !== '') ? 'block' : 'none';
 
-        // Update action bars after filtering
         updateActionBars();
     }
 
     if (globalSearchInput) {
         globalSearchInput.addEventListener('input', filterGlobalOrders);
-        filterGlobalOrders(); // Initial filter on load
+        filterGlobalOrders();
     } else {
         console.warn("Global order search input not found.");
     }
 
 
     // ==================================================================
-    // == 4. BATCH ACTION / CHECKBOX LOGIC
+    // BATCH ACTION / CHECKBOX LOGIC
     // ==================================================================
 
     function updateActionBars() {
@@ -733,9 +698,7 @@ document.addEventListener('DOMContentLoaded', () => {
         allCheckboxes.forEach(cb => {
             const card = cb.closest('.order-card');
             if (card) {
-                // Add 'selected' class only if checked AND visible
                 card.classList.toggle('selected', cb.checked && card.style.display !== 'none');
-                // Ensure hidden cards never look selected
                 if (card.style.display === 'none') {
                     card.classList.remove('selected');
                 }
@@ -763,7 +726,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const clickedGroupClass = `${clickedSection}-checkbox`;
             const isChecked = sa.checked;
 
-            // Apply check state only to VISIBLE checkboxes in this group
             document.querySelectorAll(`.searchable-section:not([style*="display: none"]) .${clickedGroupClass}`).forEach(cb => {
                  cb.checked = isChecked;
             });
@@ -778,7 +740,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectAllCheckboxes.forEach(otherSA => {
                     if (otherSA !== sa) {
                         otherSA.checked = false;
-                        otherSA.indeterminate = false; // Reset indeterminate state too
+                        otherSA.indeterminate = false;
                     }
                 });
             }
@@ -798,7 +760,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // If checking a box, uncheck all boxes from other groups
         if (clickedCheckbox.checked && clickedGroup) {
             allCheckboxes.forEach(cb => {
-                if (cb === clickedCheckbox) return; // Skip self
+                if (cb === clickedCheckbox) return; 
                 let cbGroup = null;
                 if (cb.classList.contains('approved-checkbox')) cbGroup = 'approved-checkbox';
                 else if (cb.classList.contains('pending-checkbox')) cbGroup = 'pending-checkbox';
@@ -820,7 +782,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-        updateActionBars(); // Update bars after any change
+        updateActionBars();
     }
     allCheckboxes.forEach(cb => cb.addEventListener('change', handleExclusiveSelection));
 
@@ -829,12 +791,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==================================================================
-    // == 5. ATTACH AJAX SUBMIT LISTENERS
+    // ATTACH AJAX SUBMIT LISTENERS
     // ==================================================================
-
-    /**
-     * Helper for all fetch requests
-     */
     function handleFetch(url, formData, button) {
         const originalText = button.textContent;
         button.disabled = true;
@@ -855,7 +813,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => {
             console.error('Fetch error:', error);
             showMessage(`A network or server error occurred: ${error.message}`, 'error');
-            return null; // Return null to stop the .then() chain
+            return null;
         })
         .finally(() => {
             button.disabled = false;
@@ -873,7 +831,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const formData = new FormData(batchStatusForm);
             formData.set('order_ids', selectedIds.join(','));
             formData.set('status', document.getElementById('batch-status-select').value);
-            const url = batchStatusForm.getAttribute('action'); // Assumes action is correct
+            const url = batchStatusForm.getAttribute('action');
 
             handleFetch(url, formData, batchStatusUpdateBtn).then(data => {
                 if (data && data.success) {
@@ -881,7 +839,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     data.orders.forEach(order => {
                         moveOrderCard(order.id, order.status);
                     });
-                    // updateActionBars will be called by moveOrderCard -> filterGlobalOrders
                 } else if (data) {
                     showMessage(data.error || 'An unknown error occurred.', 'error');
                 }
@@ -899,7 +856,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const formData = new FormData(batchPendingStatusForm);
             formData.set('order_ids', selectedIds.join(','));
             formData.set('status', document.getElementById('batch-pending-status-select').value);
-            const url = batchPendingStatusForm.getAttribute('action'); // Assumes action is correct
+            const url = batchPendingStatusForm.getAttribute('action');
 
             handleFetch(url, formData, batchPendingStatusUpdateBtn).then(data => {
                 if (data && data.success) {
@@ -907,7 +864,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     data.orders.forEach(order => {
                         moveOrderCard(order.id, order.status);
                     });
-                     // updateActionBars will be called by moveOrderCard -> filterGlobalOrders
                 } else if (data) {
                     showMessage(data.error || 'An unknown error occurred.', 'error');
                 }
@@ -937,16 +893,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
              const formData = new FormData(batchDeleteForm);
              formData.set('order_ids', idsToSubmit);
-             const url = batchDeleteForm.getAttribute('action'); // Assumes action is correct
+             const url = batchDeleteForm.getAttribute('action');
 
              handleFetch(url, formData, this).then(data => {
                  if (data && data.success) {
                      showMessage(data.message, 'success');
                      closeModal(batchDeleteConfirmModal);
-                     data.order_ids.forEach(id => { // Use the IDs returned from backend
+                     data.order_ids.forEach(id => {
                          removeOrderCard(id);
                      });
-                      // updateActionBars will be called by removeOrderCard -> filterGlobalOrders
                  } else if (data) {
                      showMessage(data.error || 'An unknown error occurred.', 'error');
                  }
@@ -966,10 +921,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data && data.success) {
                     showMessage(data.message, 'success');
                     closeModal(detailsModal);
-                    data.orders.forEach(order => { // Expecting one order
+                    data.orders.forEach(order => {
                         moveOrderCard(order.id, order.status);
                     });
-                    // updateActionBars called by moveOrderCard
                 } else if (data) {
                     showMessage(data.error || 'An unknown error occurred.', 'error');
                 }
@@ -989,10 +943,9 @@ document.addEventListener('DOMContentLoaded', () => {
                  if (data && data.success) {
                      showMessage(data.message, 'success');
                      closeModal(detailsModal);
-                     data.orders.forEach(order => { // Expecting one order
+                     data.orders.forEach(order => {
                          moveOrderCard(order.id, order.status);
                      });
-                      // updateActionBars called by moveOrderCard
                  } else if (data) {
                      showMessage(data.error || 'An unknown error occurred.', 'error');
                  }
@@ -1004,8 +957,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (openSingleDeleteModalBtn) {
         openSingleDeleteModalBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            e.stopPropagation(); // Prevent form submission if inside a form
-            const actionUrl = singleDeleteForm.action; // Get URL from the hidden form
+            e.stopPropagation();
+            const actionUrl = singleDeleteForm.action;
             if (!actionUrl) return;
 
             const orderIdMatch = actionUrl.match(/\/delete-order\/(\d+)\/?$/);
@@ -1013,7 +966,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (orderId && singleDeleteConfirmModal) {
                 singleDeleteConfirmModal.querySelector('#single-delete-order-id').textContent = `#${orderId}`;
-                confirmSingleDeleteBtn.dataset.url = actionUrl; // Pass the URL to the final confirm button
+                confirmSingleDeleteBtn.dataset.url = actionUrl;
                 openModal(singleDeleteConfirmModal);
             } else {
                  console.error("Could not extract order ID or find single delete confirmation modal.");
@@ -1042,9 +995,8 @@ document.addEventListener('DOMContentLoaded', () => {
                  if (data && data.success) {
                      showMessage(data.message, 'success');
                      closeModal(singleDeleteConfirmModal);
-                     closeModal(detailsModal); // Close the details modal too
-                     removeOrderCard(data.order_id || orderId); // Use ID from response or fallback to extracted ID
-                      // updateActionBars called by removeOrderCard
+                     closeModal(detailsModal); 
+                     removeOrderCard(data.order_id || orderId);
                  } else if (data) {
                      showMessage(data.error || 'An unknown error occurred.', 'error');
                  }
@@ -1052,6 +1004,6 @@ document.addEventListener('DOMContentLoaded', () => {
          });
      }
 
-}); // End DOMContentLoaded
+});
 </script>
 {% endblock %}

@@ -7,15 +7,18 @@ import os
 from dotenv import load_dotenv
 import dj_database_url
 
+# ============================================================================
+# BASE CONFIGURATION
+# ============================================================================
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from .env file
 load_dotenv(BASE_DIR / '.env')
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
-
+# ============================================================================
+# SECURITY SETTINGS
+# ============================================================================
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here')
 
@@ -26,20 +29,25 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = []
 
+# Configure allowed hosts for Render deployment
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
+# Configure CSRF trusted origins for cross-site request forgery protection
 CSRF_TRUSTED_ORIGINS = []
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
 
+# Add localhost for development debugging
 if DEBUG:
     ALLOWED_HOSTS.append('127.0.0.1')
     ALLOWED_HOSTS.append('localhost')
 
 
-# Application definition
+# ============================================================================
+# INSTALLED APPLICATIONS
+# ============================================================================
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -52,6 +60,11 @@ INSTALLED_APPS = [
     'accounts',
     'dashboards',
 ]
+
+# ============================================================================
+# MIDDLEWARE CONFIGURATION
+# ============================================================================
+# Order matters: Middleware processes requests top-to-bottom and responses bottom-to-top
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -66,6 +79,11 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'config.urls'
+
+# ============================================================================
+# TEMPLATE CONFIGURATION
+# ============================================================================
+# Configure template engine and context processors for rendering HTML templates
 
 TEMPLATES = [
     {
@@ -90,8 +108,10 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+# ============================================================================
+# DATABASE CONFIGURATION
+# ============================================================================
+# Use SQLite for development and PostgreSQL (Supabase) for production
 
 if DEBUG:
     # Development (local) database
@@ -110,25 +130,11 @@ else:
         )
     }
 
-# Optional: If you want to use Supabase Postgres instead of SQLite
-# Uncomment below and comment out the SQLite config above
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'postgres',
-#         'USER': 'postgres',
-#         'PASSWORD': os.environ.get('SUPABASE_DB_PASSWORD', ''),
-#         'HOST': os.environ.get('SUPABASE_DB_HOST', ''),
-#         'PORT': '5432',
-#         'OPTIONS': {
-#             'sslmode': 'require',
-#         },
-#     }
-# }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
+# ============================================================================
+# PASSWORD VALIDATION
+# ============================================================================
+# Define password validators to enforce strong passwords
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -146,8 +152,10 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.0/topics/i18n/
+# ============================================================================
+# INTERNATIONALIZATION
+# ============================================================================
+# Configure language, timezone, and localization settings
 
 LANGUAGE_CODE = 'en-us'
 
@@ -158,8 +166,10 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
+# ============================================================================
+# STATIC FILES CONFIGURATION
+# ============================================================================
+# Configure CSS, JavaScript, and image file handling
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
@@ -169,29 +179,41 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
+# ============================================================================
+# DEFAULT SETTINGS
+# ============================================================================
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+# ============================================================================
+# AUTHENTICATION SETTINGS
+# ============================================================================
+# Configure custom user model and authentication redirect URLs
+
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
-
-# Login/Logout URLs
+# Login/Logout URL redirects
 LOGIN_REDIRECT_URL = 'dashboard_redirect'
 LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = 'login'
 
 
-# Supabase Configuration
+# ============================================================================
+# SUPABASE CONFIGURATION
+# ============================================================================
+# Load Supabase credentials from environment variables for authentication
+
 SUPABASE_URL = os.environ.get('SUPABASE_URL', '')
 SUPABASE_ANON_KEY = os.environ.get('SUPABASE_ANON_KEY', '')
 SUPABASE_SERVICE_ROLE = os.environ.get('SUPABASE_SERVICE_ROLE', '')
 
 
-# Email Configuration
+# ============================================================================
+# EMAIL CONFIGURATION
+# ============================================================================
+# Configure email backend for development and production
+
 # For development: Use console backend (prints to terminal)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-

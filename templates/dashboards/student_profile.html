@@ -115,7 +115,6 @@
 </div>
 {% endblock %}
 
-{#  --- REFACTORED JAVASCRIPT BLOCK --- #}
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -177,17 +176,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Phone Number Formatter ---
     function formatPhoneNumber(value) {
-        const unformattedRegex = /^09\d{9}$/; // 11 digits total, starting with "09"
+        const unformattedRegex = /^09\d{9}$/; 
         if (unformattedRegex.test(value)) {
-            const group1 = value.substring(1, 4); // "912"
-            const group2 = value.substring(4, 7); // "345"
-            const group3 = value.substring(7, 11); // "6789"
+            const group1 = value.substring(1, 4); 
+            const group2 = value.substring(4, 7); 
+            const group3 = value.substring(7, 11);
             return `+63 ${group1} ${group2} ${group3}`;
         }
-        return value; // Return original if no match
+        return value; 
     }
 
-    //  --- NEW: Individual Validation Functions ---
+    //  --- Individual Validation Functions ---
     const fullNameInput = document.getElementById('full_name');
     const phoneInput = document.getElementById('phone_number');
     const addressInput = document.getElementById('address');
@@ -201,12 +200,11 @@ document.addEventListener('DOMContentLoaded', () => {
             errorEl.textContent = 'Full name can only contain letters, spaces, and periods.';
             return false;
         }
-        errorEl.textContent = ''; // Clear error
+        errorEl.textContent = '';
         return true;
     }
 
     function validatePhoneNumber() {
-        // First, format the number
         phoneInput.value = formatPhoneNumber(phoneInput.value.trim());
         const phoneNumber = phoneInput.value;
         const errorEl = document.getElementById('phone_number-error');
@@ -216,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
             errorEl.textContent = 'Please enter a valid Philippine mobile number format: +63 912 345 6789.';
             return false;
         }
-        errorEl.textContent = ''; // Clear error
+        errorEl.textContent = '';
         return true;
     }
 
@@ -228,10 +226,9 @@ document.addEventListener('DOMContentLoaded', () => {
             errorEl.textContent = 'Address format: Street, Barangay, City, Province.';
             return false;
         }
-        errorEl.textContent = ''; // Clear error
+        errorEl.textContent = '';
         return true;
     }
-    //  --- END: Individual Validation Functions ---
 
     // --- Main function to handle AJAX form submission ---
     function handleAjaxFormSubmit(form) {
@@ -261,9 +258,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } 
             
-            //  --- MODIFIED: Details Validation Logic ---
+            //  --- Details Validation Logic ---
             else if (form.id === 'details-form') {
-                clearDetailsServerError(); // Clear *only* server errors
+                clearDetailsServerError();
 
                 // Run all validations and check
                 const isNameValid = validateFullName();
@@ -275,7 +272,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
             }
-            //  --- End of Modified Details Validation ---
             
             // --- This part runs if validation passes ---
             const submitButton = form.querySelector('button[type="submit"]');
@@ -303,19 +299,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // --- Success ---
                 showDynamicMessage(data.message, 'success');
 
                 if (form.id === 'password-form') {
-                    // 1. Check if the redirect_url exists in the JSON response
                     if (data.redirect_url) {
-                        // 2. Wait 1.5 seconds for the user to read the message
                         setTimeout(() => {
-                            // 3. Force the page to redirect
                             window.location.href = data.redirect_url;
                         }, 1500); 
                     } else {
-                        // Fallback in case something went wrong
                         form.reset();
                         clearPasswordErrors();
                     }
@@ -354,18 +345,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (detailsForm) handleAjaxFormSubmit(detailsForm);
     if (passwordForm) handleAjaxFormSubmit(passwordForm);
 
-    //  --- MODIFIED: Add 'blur' listeners for instant validation ---
     if (fullNameInput) {
         fullNameInput.addEventListener('blur', validateFullName);
     }
     if (phoneInput) {
-        // We just need to run the phone validator, which also formats
         phoneInput.addEventListener('blur', validatePhoneNumber);
     }
     if (addressInput) {
         addressInput.addEventListener('blur', validateAddress);
     }
-    //  --- END of new listeners ---
 
 
     // --- View/Edit Mode Toggle Logic ---
@@ -375,14 +363,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (infoCard && editBtn && cancelBtn) {
         editBtn.addEventListener('click', () => { infoCard.classList.remove('view-mode'); });
         
-        // MODIFIED: 'Cancel' button logic
+        // 'Cancel' button logic
         cancelBtn.addEventListener('click', () => {
             infoCard.classList.add('view-mode');
-            clearAllFieldErrors(); // Clear field errors
-            clearDetailsServerError(); // Clear server errors
+            clearAllFieldErrors(); 
+            clearDetailsServerError(); 
             if (detailsForm) {
                 detailsForm.reset();
-                // Full image preview reset logic
                 const avatarInput = document.getElementById('avatar_image');
                 if (avatarInput) avatarInput.value = ''; 
                 const previewEl = document.getElementById('avatar-preview');
@@ -427,7 +414,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 link.classList.add('active');
                 targetCard.classList.add('active');
                 
-                // MODIFIED: Clear all errors when switching tabs
                 clearPasswordErrors();
                 clearAllFieldErrors();
                 clearDetailsServerError();

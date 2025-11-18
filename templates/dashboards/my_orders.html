@@ -46,7 +46,6 @@
                     <div class="details-grid">
                         <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
                         
-                        <!-- MODIFICATION: Added Expires On row -->
                         {% if item.expires_at %}
                         <span>Expires On:</span><strong>{{ item.expires_at|date:"M d, Y" }}</strong>
                         {% endif %}
@@ -70,7 +69,6 @@
         </div>
     </section>
 
-    <!-- MERGE: Changed title from "Reservation Orders" to "Pending Orders" -->
     <section class="order-section" data-section-status="pending">
         <h2 class="section-title">Pending Orders</h2>
         <div class="orders-grid">
@@ -103,12 +101,10 @@
                             <span>Date Ordered:</span><strong>{{ item.created_at|date:"M d, Y" }}</strong>
                         
 
-                            <!-- MODIFICATION: Added Expires On row -->
                             {% if item.expires_at %}
                             <span>Expires On:</span><strong>{{ item.expires_at|date:"M d, Y" }}</strong>
                             {% endif %}
 
-                            <!-- MERGE: Added Order Type row -->
                             <span>Order Type:</span><strong>{{ item.order_type|title }}</strong>
                             
                             <span>Quantity:</span><strong>{{ item.quantity }} pc(s)</strong>
@@ -213,11 +209,9 @@
                         <span>Date Ordered:</span><strong id="details-created-at"></strong>
                     
                         
-                        <!-- MODIFICATION: Added Expires On elements -->
                         <span id="details-expires-label">Expires On:</span>
                         <strong id="details-expires-at"></strong>
 
-                        <!-- MERGE: Added Order Type elements -->
                         <span id="details-order-type-label">Order Type:</span>
                         <strong id="details-order-type"></strong>
                         
@@ -303,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Get Modals & Elements ---
     const detailsModal = document.getElementById('order-details-modal');
 
-    // --- MERGE: Added new modal elements for Order Type ---
+    // --- modal elements for Order Type ---
     const detailsOrderTypeLabel = detailsModal.querySelector('#details-order-type-label');
     const detailsOrderTypeVal = detailsModal.querySelector('#details-order-type');
 
@@ -365,34 +359,28 @@ document.addEventListener('DOMContentLoaded', () => {
     allOrderCards.forEach(card => {
         const checkbox = card.querySelector('.order-checkbox');
         
-        // This makes the checkbox work when you click it directly
         if (checkbox) {
             checkbox.addEventListener('click', (e) => {
-                e.stopPropagation(); // Stop the card click from firing
-                handleExclusiveSelection(checkbox); // Run exclusive logic
-                updateBatchActionBar(); // Update the bar
+                e.stopPropagation();
+                handleExclusiveSelection(checkbox);
+                updateBatchActionBar();
             });
         }
 
-        // This makes the whole card clickable
         card.addEventListener('click', (e) => {
-            // Don't run if we're clicking the checkbox
             if (e.target.classList.contains('order-checkbox')) return;
             
-            // Toggle the checkbox if it exists
             if (checkbox) {
                 checkbox.checked = !checkbox.checked;
-                handleExclusiveSelection(checkbox); // Run exclusive logic
-                updateBatchActionBar(); // Update the bar
+                handleExclusiveSelection(checkbox);
+                updateBatchActionBar();
             }
             
-            // Now, open the modal
             if (!detailsModal) { console.error("Details modal not found!"); return; }
 
             const status = card.dataset.status;
             if (status !== 'cancelled' && status !== 'rejected') {
                 
-                // This code will now run for 'approved', 'pending', and 'completed'
                 const data = card.dataset;
                 detailsModal.querySelector('#details-image').src = data.imageUrl;
                 const nameEl = detailsModal.querySelector('#details-name');
@@ -411,43 +399,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 const claimNote = detailsModal.querySelector('#details-claim-note');
                 claimNote.style.display = (data.status === 'approved') ? 'block' : 'none';
 
-                // --- MODIFICATION: Show/Hide Expires On in Modal ---
                 const expiresLabelEl = detailsModal.querySelector('#details-expires-label');
                 const expiresValueEl = detailsModal.querySelector('#details-expires-at');
                 
-                // data.expiresAt will be the string from the attribute, or ""
                 if (data.expiresAt) {
                     expiresValueEl.textContent = data.expiresAt;
-                    expiresLabelEl.style.display = ''; // Use '' to reset to default (block, inline, grid-item, etc.)
+                    expiresLabelEl.style.display = ''; 
                     expiresValueEl.style.display = '';
                 } else {
                     expiresValueEl.textContent = '';
                     expiresLabelEl.style.display = 'none';
                     expiresValueEl.style.display = 'none';
                 }
-                // --- END MODIFICATION ---
 
-                // --- MERGE: Add JS logic for Order Type ---
                 if (detailsOrderTypeLabel && detailsOrderTypeVal) {
-                    // data.orderType will be "Reservation" or "Backorder" (from |title filter)
                     if (data.status === 'pending' && data.orderType) {
                         detailsOrderTypeVal.textContent = data.orderType;
                         detailsOrderTypeLabel.style.display = '';
                         detailsOrderTypeVal.style.display = '';
                     } else {
-                        // Hide it for 'approved' or 'completed' orders
                         detailsOrderTypeVal.textContent = '';
                         detailsOrderTypeLabel.style.display = 'none';
                         detailsOrderTypeVal.style.display = 'none';
                     }
                 }
-                // --- End of MERGE ---
 
                 const deleteBtn = detailsModal.querySelector('#details-delete-btn');
                 const cancelBtn = detailsModal.querySelector('#details-cancel-btn');
 
                 if (deleteBtn) {
-                    // This logic will now correctly run for 'completed' cards
                     if (['cancelled', 'rejected'].includes(data.status)) {
                         deleteBtn.style.display = 'inline-block';
                         deleteBtn.dataset.orderId = data.id;
@@ -459,7 +439,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (cancelBtn) {
-                    // This logic will correctly hide the button for 'completed' cards
                     if (data.status === 'approved') {
                         cancelBtn.style.display = 'inline-block';
                         cancelBtn.dataset.orderId = data.id;
@@ -471,11 +450,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 openModal(detailsModal);
             }
-            // --- END OF FIX ---
         });
     });
 
-    // --- Batch Action Logic ---
     function updateBatchActionBar() {
         const otherChecked = document.querySelectorAll('.other-checkbox:checked').length;
         const count = otherChecked;
@@ -502,24 +479,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // This listener is for when you click an individual checkbox
     allOrderCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', () => {
             if (!checkbox.checked) {
                 if (checkbox.classList.contains('other-checkbox') && selectAllOtherCheckbox) selectAllOtherCheckbox.checked = false;
             }
-            // handleExclusiveSelection(checkbox) is called by the 'click' listener
             updateBatchActionBar();
         });
     });
     
     // Helper function to manage exclusive selection
     function handleExclusiveSelection(clickedCheckbox, groupClass = null) {
-        if (!clickedCheckbox.checked) return; // Only run on checking a box
+        if (!clickedCheckbox.checked) return;
 
         const clickedGroupClass = groupClass || (clickedCheckbox.classList.contains('completed-checkbox') ? 'completed-checkbox' : 'other-checkbox');
 
-        // Uncheck all checkboxes from the OTHER group
         allOrderCheckboxes.forEach(cb => {
             if (clickedGroupClass === 'completed-checkbox' && cb.classList.contains('other-checkbox')) {
                 cb.checked = false;
@@ -528,7 +502,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Uncheck the OTHER "Select All" toggle
         if (clickedGroupClass === 'completed-checkbox' && selectAllOtherCheckbox) {
             selectAllOtherCheckbox.checked = false;
         } else if (clickedGroupClass === 'other-checkbox' && selectAllCompletedCheckbox) {
@@ -536,8 +509,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- AJAX Logic ---
-    // FIXED: Robust CSRF Token Retrieval
     let csrfToken = null;
     if (batchForm) {
         const tokenInput = batchForm.querySelector('[name=csrfmiddlewaretoken]');
@@ -546,7 +517,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // If not found in batchForm (or if batchForm was null), search the whole document.
     if (!csrfToken) {
         const anyTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
         if (anyTokenInput) {
@@ -556,7 +526,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!csrfToken) {
         console.error('CSRF TOKEN NOT FOUND. AJAX requests will fail.');
-        // We can let it proceed, but fetches will fail.
     }
 
     function showDynamicMessage(message, className = 'success') {
@@ -634,7 +603,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- AJAX for SINGLE Delete ---
-    // This is the "Delete Order" button *inside* the details modal
     const detailsDeleteBtn = document.getElementById('details-delete-btn');
     if (detailsDeleteBtn) {
         detailsDeleteBtn.addEventListener('click', function(e) {
@@ -646,7 +614,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // This is the form *inside* the single delete confirmation modal
     const singleDeleteForm = document.getElementById('delete-single-order-form');
     if (singleDeleteForm) {
         singleDeleteForm.addEventListener('submit', async function(event) {
@@ -698,22 +665,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (detailsCancelBtn) {
         detailsCancelBtn.addEventListener('click', function(e) {
-            e.stopPropagation(); // Stop any other modal clicks
+            e.stopPropagation();
             
             const orderId = this.dataset.orderId;
             const productName = this.dataset.productName;
             
             if (cancelConfirmModal && cancelOrderForm) {
-                // Set the form's action URL (uses the URL from urls.py)
                 cancelOrderForm.action = `/dashboard/student/cancel-order/${orderId}/`; 
                 
-                // Set the product name in the confirmation modal
                 cancelConfirmModal.querySelector('#cancel-confirm-product-name').textContent = productName;
                 
-                // Close the details modal first
                 closeModal(detailsModal);
                 
-                // Open the confirmation modal
                 openModal(cancelConfirmModal);
             } else {
                 console.error('Cancel confirmation modal or form not found!');
@@ -724,7 +687,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add submit listener for the new cancel form
     if (cancelOrderForm) {
         cancelOrderForm.addEventListener('submit', async function(event) {
-            event.preventDefault(); // Stop default form submission
+            event.preventDefault();
             const submitButton = this.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.textContent;
             submitButton.disabled = true;
@@ -736,7 +699,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 
-                        'X-CSRFToken': csrfToken, // 'csrfToken' is now robustly defined
+                        'X-CSRFToken': csrfToken,
                         'X-Requested-With': 'XMLHttpRequest' 
                     },
                 });
@@ -744,34 +707,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error);
                 
-                // Close the modal
                 closeModal(cancelConfirmModal);
                 
-                // Show the success message (this function is already in your script)
                 showDynamicMessage(data.message, 'success');
                 
-                // Get the order ID from the form's action URL
                 const orderId = url.split('/').filter(Boolean).pop();
                 
-                // Use your existing function to remove the card from the UI
                 removeCardsFromUI([orderId]);
                 
             } catch (error) {
                 closeModal(cancelConfirmModal);
                 showDynamicMessage(`Error: ${error.message}`, 'error');
-                // The reset logic is now in 'finally'
             } finally {
-                // --- THIS IS THE FIX ---
-                // This code runs after EITHER try or catch finishes.
-                // It guarantees the button is always reset.
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
             }
         });
     }
-    // --- END OF ADDED SCRIPT ---
 
-    updateBatchActionBar(); // Initial check
+    updateBatchActionBar();
 });
 </script>
 {% endblock %}

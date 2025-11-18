@@ -101,7 +101,6 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Get Elements ---
     const listContainer = document.getElementById('notification-list-main');
     const allNotificationRows = listContainer.querySelectorAll('.notification-item-row');
     const actionBar = document.getElementById('action-bar');
@@ -136,9 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return '';
     }
 
-    // --- NEW HELPER: Update Header Count ---
+    // --- Update Header Count ---
     function updateHeaderCount(newCount) {
-        // Find the bell button in the header
         const bellButton = document.getElementById('notification-bell-btn');
         if (!bellButton) return;
 
@@ -146,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (newCount > 0) {
             if (!countElement) {
-                // If the count span doesn't exist, create it
                 countElement = document.createElement('span');
                 countElement.className = 'notification-count';
                 bellButton.appendChild(countElement);
@@ -171,37 +168,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const filterEmptyState = document.getElementById('filter-empty-state');
 
         if (totalRows === 0) {
-            // --- CASE 1: All notifications are truly gone (deleted) ---
-            // Show "All clear! 🎉"
             if (staticEmptyState) {
                 staticEmptyState.style.display = 'block';
             }
-            // Hide "No filter results 🧐"
             if (filterEmptyState) {
                 filterEmptyState.style.display = 'none';
             }
         } else {
-            // --- CASE 2: Notifications exist, but may be filtered ---
-            // Hide "All clear! 🎉"
             if (staticEmptyState) {
                 staticEmptyState.style.display = 'none';
            }
             
-            // Now, check if the *filter* resulted in 0 items
             if (visibleRows === 0) {
-                // Show "No filter results 🧐"
                 if (filterEmptyState) {
                     filterEmptyState.style.display = 'block';
                 }
             } else {
-                // Hide "No filter results 🧐"
                 if (filterEmptyState) {
                     filterEmptyState.style.display = 'none';
                 }
             }
         }
     }
-    // --- 1. Tab Switching Logic ---
+    // --- Tab Switching Logic ---
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
             tabButtons.forEach(btn => btn.classList.remove('active'));
@@ -224,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 2. Action Bar & Checkbox Logic ---
+    // --- Action Bar & Checkbox Logic ---
     function updateActionBar() {
         const visibleCheckboxes = listContainer.querySelectorAll('.notification-item-row:not([style*="display: none"]) .notification-checkbox');
         const checkedCheckboxes = listContainer.querySelectorAll('.notification-item-row:not([style*="display: none"]) .notification-checkbox:checked');
@@ -232,7 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const checkedCount = checkedCheckboxes.length;
         
         if (checkedCount > 0) {
-            // ✅ CHANGE 3: Replaced style.display with CSS class toggles
             actionBar.classList.add('is-active');
             document.body.classList.add('action-bar-visible');
             
@@ -246,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteBtn.style.display = 'inline-block'; // Show delete if anything is selected
 
         } else {
-            // ✅ CHANGE 4: Replaced style.display with CSS class toggles
             actionBar.classList.remove('is-active');
             document.body.classList.remove('action-bar-visible');
         }
@@ -272,7 +259,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- ✅ 3. FIX: Notification Row Click (Redirect) ---
     listContainer.addEventListener('click', e => {
         // Don't run if we clicked the checkbox
         if (e.target.classList.contains('notification-checkbox')) {
@@ -284,11 +270,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const url = row.dataset.url;
             if (!url) return;
 
-            // 1. Show the page loader immediately
+            // Show the page loader immediately
             if (loader) loader.classList.add('visible');
 
-            // 2. Call the "mark as read" view using FETCH POST
-            // (This is the same logic from your dropdown)
+            // Call the "mark as read" view using FETCH POST
             fetch(url, {
                 method: 'POST',
                 headers: {
@@ -298,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(response => response.json())
             .then(data => {
-                // 3. Redirect to the URL from the response
+                // Redirect to the URL from the response
                 if (data.redirect_url) {
                     window.location.href = data.redirect_url;
                 } else {
@@ -312,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- 4. AJAX Action Button Clicks ---
+    // --- AJAX Action Button Clicks ---
     async function handleBatchAction(action, button) {
         const checkedIds = Array.from(listContainer.querySelectorAll('.notification-item-row:not([style*="display: none"]) .notification-checkbox:checked')).map(cb => cb.value);
         if (checkedIds.length === 0) return;
@@ -399,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- ✅ NEW "MARK ALL READ" FUNCTION ---
+    // --- "MARK ALL READ" FUNCTION ---
     async function handleMarkAllRead() {
         const hasUnread = listContainer.querySelector('.notification-item-row[data-read="false"]');
         if (!hasUnread) {
@@ -421,35 +406,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             if (!data.success) throw new Error(data.error);
 
-            // 1. Update header count
+            // Update header count
             if (data.new_unread_count !== undefined) {
                 updateHeaderCount(data.new_unread_count);
             }
 
-            // 2. Update all visible items on the page
+            // Update all visible items on the page
             allNotificationRows.forEach(row => {
                 row.dataset.read = 'true';
                 const dot = row.querySelector('.unread-dot');
                 if (dot) dot.remove();
                 
-                // 3. If on "Unread" tab, hide the row
+                // If on "Unread" tab, hide the row
                 if (currentTab === 'unread') {
                     row.style.display = 'none';
                 }
             });
             
-            // 4. Update the empty state message
+            // Update the empty state message
             checkEmptyState();
         } catch (error) {
             console.error('Mark all as read failed:', error);
             alert('An error occurred. Please try again.');
         } finally {
-            // 5. Reset the button
+            // Reset the button
             markAllReadBtn.disabled = false;
             markAllReadBtn.textContent = 'Mark all as read';
         }
     }
-    // --- END OF NEW FUNCTION ---
 
 
     // Attach listeners
@@ -460,7 +444,6 @@ document.addEventListener('DOMContentLoaded', () => {
         markAllReadBtn.addEventListener('click', handleMarkAllRead);
     }
 
-    // --- NEW MODAL LISTENERS ---
     // When "Delete" in the action bar is clicked, show the modal
     deleteBtn.addEventListener('click', () => {
         if (deleteModal) deleteModal.style.display = 'flex';
@@ -479,7 +462,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-    // --- END OF NEW LISTENERS ---
 
 
     // Initial setup

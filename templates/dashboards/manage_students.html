@@ -13,12 +13,10 @@
 <div class="stats-grid">
     <div class="stat-card">
         <h3>Total Student Accounts</h3>
-        {#ID for total students count #}
         <div class="stat-card-value" id="total-students-count">{{ stats.total_students }}</div>
     </div>
     <div class="stat-card">
         <h3>Blocked Accounts</h3>
-        {#ID for blocked students count #}
         <div class="stat-card-value" id="blocked-students-count">{{ stats.blocked_students }}</div>
     </div>
 </div>
@@ -190,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     //Get the stat card elements
     const blockedStudentsCountEl = document.getElementById('blocked-students-count');
-    const totalStudentsCountEl = document.getElementById('total-students-count'); // (In case you add a "delete" feature later)
+    const totalStudentsCountEl = document.getElementById('total-students-count');
     const modalDeleteStudentBtn = document.getElementById('modal-delete-student-btn');
     const deleteStudentModal = document.getElementById('delete-student-modal');
     const deleteStudentForm = document.getElementById('delete-student-form');
@@ -245,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (modalDeleteStudentBtn) {
-            modalDeleteStudentBtn.dataset.userId = data.userId; // Make sure data-user-id is on the view button
+            modalDeleteStudentBtn.dataset.userId = data.userId;
             modalDeleteStudentBtn.dataset.name = data.name;
             modalDeleteStudentBtn.dataset.email = data.email;
         }
@@ -263,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const formData = new FormData(form);
         const userId = formData.get('user_id');
-        const isBlocked = formData.get('is_blocked'); // This is the action we are *about* to perform
+        const isBlocked = formData.get('is_blocked');
         const url = `/dashboard/admin/block-student/${userId}/`;
         const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
 
@@ -279,23 +277,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'An unknown error occurred');
 
-            // --- Success! ---
             showDynamicMessage(data.message, 'success');
 
             //Live Stat Card Update
             if (blockedStudentsCountEl) {
                 let currentCount = parseInt(blockedStudentsCountEl.textContent);
                 if (isBlocked === 'true') {
-                    // We just blocked a user, so increment the count
                     currentCount++;
                 } else {
-                    // We just unblocked a user, so decrement the count
                     currentCount--;
                 }
                 blockedStudentsCountEl.textContent = currentCount;
             }
 
-            // Live UI Update for the row
             const row = form.closest('tr');
             const statusBadge = row.querySelector('.badge');
             const isBlockedInput = form.querySelector('input[name="is_blocked"]');
@@ -335,10 +329,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Helper: Render New Table Rows ---
     function renderTableRows(students) {
-        tableBody.innerHTML = ''; // Clear the table
+        tableBody.innerHTML = '';
         
         if (students.length === 0) {
-            // Show "no results" or "initial empty" based on search
             if (currentSearchTerm.length > 0) {
                 if (noResultsRow) noResultsRow.style.display = '';
             } else if (initialEmptyRow) {
@@ -390,9 +383,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Helper to render pagination links ---
     function renderPagination(data) {
         if (!paginationContainer) return;
-        paginationContainer.innerHTML = ''; // Clear old pagination
+        paginationContainer.innerHTML = '';
 
-        if (data.total_pages <= 1) return; // Don't show if only 1 page
+        if (data.total_pages <= 1) return;
 
         const infoHtml = `<div class="pagination-info">Showing page ${data.current_page} of ${data.total_pages} (${data.total_count} total students)</div>`;
         let linksHtml = '<div class="pagination-links">';
@@ -416,19 +409,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function attachPaginationListeners() {
         paginationContainer.querySelectorAll('.pagination-link').forEach(link => {
             link.addEventListener('click', (e) => {
-                e.preventDefault(); // Stop the link from reloading the page
+                e.preventDefault();
                 const pageNum = e.currentTarget.dataset.page;
-                fetchStudents(pageNum, currentSearchTerm); // Fetch the new page
+                fetchStudents(pageNum, currentSearchTerm);
             });
         });
     }
 
     // --- Main function to fetch data ---
     async function fetchStudents(page = 1, search = '') {
-        if (loadingRow) loadingRow.style.display = ''; // Show loading
+        if (loadingRow) loadingRow.style.display = '';
         if (noResultsRow) noResultsRow.style.display = 'none';
         if (initialEmptyRow) initialEmptyRow.style.display = 'none';
-        tableBody.querySelectorAll('.student-row').forEach(row => row.remove()); // Clear only student rows
+        tableBody.querySelectorAll('.student-row').forEach(row => row.remove());
         
         try {
             const url = `{% url 'manage_students' %}?page=${page}&search=${encodeURIComponent(search)}&format=json`;
@@ -440,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             if (data.error) throw new Error(data.error);
             
-            if (loadingRow) loadingRow.style.display = 'none'; // Hide loading
+            if (loadingRow) loadingRow.style.display = 'none';
             
             renderTableRows(data.students);
             renderPagination(data);
@@ -458,8 +451,8 @@ document.addEventListener('DOMContentLoaded', () => {
             currentSearchTerm = searchInput.value;
             clearTimeout(searchTimer);
             searchTimer = setTimeout(() => {
-                fetchStudents(1, currentSearchTerm); // Search always resets to page 1
-            }, 300); // 300ms debounce
+                fetchStudents(1, currentSearchTerm);
+            }, 300);
         });
     }
     
@@ -468,16 +461,15 @@ document.addEventListener('DOMContentLoaded', () => {
     attachPaginationListeners();
 
     // ==================================================================
-    // == 5. NEW: DELETE STUDENT LOGIC
+    // DELETE STUDENT LOGIC
     // ==================================================================
 
-    // --- Helper: Make new modal closable ---
     if (deleteStudentModal) {
         const closeModalBtn = deleteStudentModal.querySelector('.close-btn');
         const cancelModalBtn = deleteStudentModal.querySelector('.cancel-btn');
         if (closeModalBtn) closeModalBtn.addEventListener('click', () => closeModal(deleteStudentModal));
         if (cancelModalBtn) cancelModalBtn.addEventListener('click', (e) => {
-            e.preventDefault(); // Prevent form submission
+            e.preventDefault();
             closeModal(deleteStudentModal);
         });
         window.addEventListener('click', (e) => {
@@ -485,29 +477,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 1. When "Delete Account" button in View Modal is clicked ---
     if (modalDeleteStudentBtn) {
         modalDeleteStudentBtn.addEventListener('click', (e) => {
             const data = e.currentTarget.dataset;
             
-            // Populate the confirmation modal
             if (deleteStudentModal) {
                 deleteStudentModal.querySelector('#delete-student-name').textContent = data.name;
                 deleteStudentModal.querySelector('#delete-student-email').textContent = data.email;
             }
             
-            // Set the form's action URL
             if (deleteStudentForm) {
                 deleteStudentForm.action = `/dashboard/admin/delete-student/${data.userId}/`;
             }
             
-            // Close the view modal and open the confirm modal
             closeModal(profileModal);
             openModal(deleteStudentModal);
         });
     }
 
-    // --- 2. When the final "Yes, Delete Account" form is submitted ---
     if (deleteStudentForm) {
         deleteStudentForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -536,17 +523,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(data.error || 'An unknown error occurred.');
                 }
 
-                // --- Success! ---
                 closeModal(deleteStudentModal);
-                showDynamicMessage(data.message, 'success'); // Show success message
+                showDynamicMessage(data.message, 'success');
 
-                // Remove the row from the table
                 const rowToRemove = document.querySelector(`.btn-view-profile[data-user-id="${data.user_id}"]`).closest('tr');
                 if (rowToRemove) {
                     rowToRemove.remove();
                 }
 
-                // Update total student count
                 if (totalStudentsCountEl) {
                     let currentCount = parseInt(totalStudentsCountEl.textContent);
                     if (currentCount > 0) {
@@ -554,9 +538,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 
-                // Update blocked count (if the deleted user was blocked)
-                // This is a simple way to do it: just re-fetch the data.
-                // Or, we can check the badge, but this is safer:
                 if (blockedStudentsCountEl) {
                     const rowBadge = rowToRemove.querySelector('.badge');
                     if (rowBadge && rowBadge.classList.contains('badge-blocked')) {
@@ -570,18 +551,16 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 closeModal(deleteStudentModal);
 
-                let errorMessage = error.message; // Get the ugly error string
+                let errorMessage = error.message; 
                 try {
-                    // This regex finds the text inside "message': '...'"
                     const match = errorMessage.match(/message': '([^']*)'/);
                     if (match && match[1]) {
-                        errorMessage = match[1]; // Get just the clean message
+                        errorMessage = match[1];
                     }
                 } catch (parseError) {
-                    // If parsing fails, just use the original error
                 }
                 
-                showDynamicMessage(errorMessage, 'error'); // Show the clean message
+                showDynamicMessage(errorMessage, 'error');
 
             } finally {
                 submitButton.disabled = false;

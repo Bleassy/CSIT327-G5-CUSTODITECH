@@ -8,13 +8,13 @@
 {% block content %}
 
 
-<!-- 1. Welcome Card -->
+<!-- Welcome Card -->
 <div class="welcome-card">
     <h1>{{ greeting }}, {{ display_name }}!</h1>
     <p>Manage your reservations and orders with ease.</p>
 </div>
 
-<!-- 2. Action Cards -->
+<!-- Action Cards -->
 <div class="action-cards-grid">
     <a href="{% url 'browse_products' %}" class="action-card">
         <div class="card-icon"><i class="fa-solid fa-store"></i></div>
@@ -28,7 +28,7 @@
     </a>
 </div>
 
-<!-- 3. Summary Sections -->
+<!-- Summary Sections -->
 <div class="summary-section">
     <h2 class="section-title">Recent Activity</h2>
     <div class="summary-grid">

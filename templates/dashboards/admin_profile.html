@@ -1,12 +1,10 @@
 {% extends 'dashboards/admin_base.html' %}
 {% load static %}
 
-<!-- Block for page-specific CSS -->
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/admin_profile.css' %}?v=1.2">
 {% endblock %}
 
-<!-- Main content block -->
 {% block content %}
 <div class="page-header">
     <h1>Admin Profile</h1>
@@ -133,7 +131,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- Helper function to show dynamic success/error messages at the top of the page ---
+    // Display dynamic toast messages
     function showDynamicMessage(message, className = 'success') {
         const messageContainer = document.getElementById('message-container');
         if (!messageContainer) return;
@@ -144,7 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
         messageContainer.prepend(li);
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        // Auto-fade out the message
         setTimeout(() => {
             li.style.opacity = '0';
             li.style.transition = 'opacity 0.5s ease';
@@ -152,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 5000);
     }
 
-    // --- Helpers for Personal Details form server errors ---
+    // Handle Details form errors
     const detailsServerErrorContainer = document.getElementById('details-server-errors');
     function showDetailsServerError(error) {
         if (!detailsServerErrorContainer) return;
@@ -166,14 +163,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Helper to clear all individual field validation errors ---
+    // Clear field validation errors
     function clearAllFieldErrors() {
         document.querySelectorAll('#details-form .form-error-message').forEach(el => {
             el.textContent = '';
         });
     }
 
-    // --- Helpers for Password form validation errors ---
+    // Handle Password form errors
     const passwordErrorContainer = document.getElementById('password-errors');
     function showPasswordErrors(errors) {
         if (!passwordErrorContainer) return;
@@ -200,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const group3 = value.substring(7, 11); // "6789"
             return `+63 ${group1} ${group2} ${group3}`;
         }
-        return value; // Return original if no match
+        return value; 
     }
 
     // --- Individual Client-Side Validation Functions ---
@@ -222,7 +219,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function validatePhoneNumber() {
-        // First, format the number on blur
         phoneInput.value = formatPhoneNumber(phoneInput.value.trim());
         const phoneNumber = phoneInput.value;
         const errorEl = document.getElementById('phone_number-error');
@@ -232,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
             errorEl.textContent = 'Please enter a valid Philippine mobile number format: +63 912 345 6789.';
             return false;
         }
-        errorEl.textContent = ''; // Clear error
+        errorEl.textContent = ''; 
         return true;
     }
 
@@ -244,11 +240,11 @@ document.addEventListener('DOMContentLoaded', () => {
             errorEl.textContent = 'Address format: Street, Barangay, City, Province.';
             return false;
         }
-        errorEl.textContent = ''; // Clear error
+        errorEl.textContent = ''; 
         return true;
     }
     
-    // --- Main function to handle AJAX form submission for both forms ---
+    // Handle AJAX Form Submission
     function handleAjaxFormSubmit(form) {
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -272,25 +268,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (errors.length > 0) {
                     showPasswordErrors(errors);
-                    return; // Stop the submission
+                    return; 
                 }
             }
             // --- Details Form Validation Logic ---
             else if (form.id === 'details-form') {
-                clearDetailsServerError(); // Clear *only* server errors
+                clearDetailsServerError(); 
 
-                // Run all validations and check
                 const isNameValid = validateFullName();
                 const isPhoneValid = validatePhoneNumber();
                 const isAddressValid = validateAddress();
                 
-                // Stop submission if any validation failed
                 if (!isNameValid || !isPhoneValid || !isAddressValid) {
                     return;
                 }
             }
             
-            // --- AJAX Submission (if validation passes) ---
             const submitButton = form.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.textContent;
             submitButton.disabled = true;
@@ -318,21 +311,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 showDynamicMessage(data.message, 'success');
                 
                 if (form.id === 'password-form') {
-                    // 1. Check if the redirect_url exists
                     if (data.redirect_url) {
-                        // 2. Wait 1.5 seconds for the message to be read
                         setTimeout(() => {
-                            // 3. Force the redirect to the login page
                             window.location.href = data.redirect_url;
                         }, 1500);
                     } else {
-                        // Fallback
                         form.reset();
                         clearPasswordErrors();
                     }
 
                 } else if (form.id === 'details-form') {
-                    // This is your original, correct logic for the details form
                     form.querySelector('.form-view-text[data-field="full_name"]').textContent = formData.get('full_name') || 'Not set';
                     form.querySelector('.form-view-text[data-field="phone_number"]').textContent = formData.get('phone_number') || 'Not set';
                     form.querySelector('.form-view-text[data-field="address"]').textContent = formData.get('address') || 'Not set';
@@ -347,10 +335,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
             } catch (error) {
-                // --- Handle Failure ---
                 console.error('Form submission error:', error);
                 
-                // Route errors to the correct error box
                 if (form.id === 'password-form') {
                     showPasswordErrors([error.message]);
                 } else if (form.id === 'details-form') {
@@ -359,20 +345,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     showDynamicMessage(`Error: ${error.message}`, 'error');
                 }
             } finally {
-                // Re-enable submit button
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
             }
         });
     }
 
-    // Attach AJAX submit handlers to the forms
     const detailsForm = document.getElementById('details-form');
     const passwordForm = document.getElementById('password-form');
     if (detailsForm) handleAjaxFormSubmit(detailsForm);
     if (passwordForm) handleAjaxFormSubmit(passwordForm);
 
-    // Add 'blur' listeners for instant validation on details form
     if (fullNameInput) {
         fullNameInput.addEventListener('blur', validateFullName);
     }
@@ -383,24 +366,19 @@ document.addEventListener('DOMContentLoaded', () => {
         addressInput.addEventListener('blur', validateAddress);
     }
 
-    // --- View/Edit Mode Toggle Logic ---
     const infoCard = document.getElementById('personal-info-card');
     const editBtn = document.getElementById('edit-profile-btn');
     const cancelBtn = document.getElementById('cancel-edit-btn');
 
     if (infoCard && editBtn && cancelBtn) {
-        // Click "Edit" -> remove 'view-mode'
         editBtn.addEventListener('click', () => { infoCard.classList.remove('view-mode'); });
         
-        // Click "Cancel" -> add 'view-mode' and reset form
         cancelBtn.addEventListener('click', () => {
             infoCard.classList.add('view-mode');
 
-            // Clear all errors on cancel
             clearAllFieldErrors();
             clearDetailsServerError();
 
-            // Reset the form fields and image preview
             if (detailsForm) {
                 detailsForm.reset();
                 const avatarInput = document.getElementById('avatar_image');
@@ -445,15 +423,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const targetCard = document.querySelector(targetId);
             
             if (targetCard) {
-                // Update active link
                 navLinks.forEach(nav => nav.classList.remove('active'));
                 link.classList.add('active');
                 
-                // Update active card
                 contentCards.forEach(card => card.classList.remove('active'));
                 targetCard.classList.add('active');
                 
-                // Clear all errors when switching tabs
                 clearPasswordErrors();
                 clearAllFieldErrors();
                 clearDetailsServerError();

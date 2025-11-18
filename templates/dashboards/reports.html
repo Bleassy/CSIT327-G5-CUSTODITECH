@@ -419,7 +419,7 @@
 
 <script>
 // ==================================================================
-// == 1. HELPER FUNCTIONS
+// HELPER FUNCTIONS
 // ==================================================================
 function showMessage(message, type = 'success') {
     const container = document.getElementById('message-container');
@@ -438,13 +438,9 @@ function showMessage(message, type = 'success') {
 }
 
 function getCsrfToken() {
-    // Check both forms now, starting with the batch delete form
     let form = document.getElementById('batch-log-delete-form');
     let tokenInput = form ? form.querySelector('[name=csrfmiddlewaretoken]') : null;
-    
-    // Fallback to the clear-all form (though it doesn't exist, this is good practice if it did)
-    // Or just rely on the one form that *does* have a token.
-    
+        
     return tokenInput ? tokenInput.value : '';
 }
 
@@ -459,7 +455,7 @@ function closeModal(modal) {
 document.addEventListener('DOMContentLoaded', () => {
 
     // ==================================================================
-    // == 2. CHART LOGIC (Unchanged)
+    // CHART LOGIC
     // ==================================================================
     const dataElement = document.getElementById('chart-data');
     const chartCanvas = document.getElementById('orderStatusChart');
@@ -513,7 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==================================================================
-    // == 3. LOG DELETION LOGIC
+    // LOG DELETION LOGIC
     // ==================================================================
     const logDeleteForm = document.getElementById('batch-log-delete-form');
     const logDeleteBar = document.getElementById('log-delete-bar');
@@ -526,7 +522,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let noLogsRow = document.getElementById('no-logs-row'); // Use let
     const noLogResultsRow = document.getElementById('no-log-results-row');
     
-    // NEW: "Clear All" Elements
     const clearAllLogsBtn = document.getElementById('clear-all-logs-btn');
     const clearAllLogsModal = document.getElementById('clear-all-logs-confirm-modal');
     const confirmClearAllLogsBtn = document.getElementById('confirm-clear-all-logs-btn');
@@ -625,7 +620,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     data.deleted_ids.forEach(id => {
                         document.querySelector(`tr[data-log-id="${id}"]`)?.remove();
                     });
-                    filterLogs(); // Re-run filter which calls updateLogDeleteBar
+                    filterLogs();
                 } else {
                     showMessage(data.error || 'An unknown error occurred.', 'error');
                 }
@@ -640,14 +635,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- NEW: "CLEAR ALL LOGS" LOGIC ---
+    // ---"CLEAR ALL LOGS" LOGIC ---
     if (clearAllLogsBtn && confirmClearAllLogsBtn && clearAllLogsModal) {
-        // 1. Open the confirm modal
         clearAllLogsBtn.addEventListener('click', () => {
             openModal(clearAllLogsModal);
         });
 
-        // 2. Handle the final confirmation
         confirmClearAllLogsBtn.addEventListener('click', () => {
             const button = confirmClearAllLogsBtn;
             const originalText = button.textContent;
@@ -657,7 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fetch("{% url 'clear_all_logs' %}", {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': getCsrfToken(), // Use the same CSRF token
+                    'X-CSRFToken': getCsrfToken(),
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
@@ -670,12 +663,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     showMessage(data.message, 'success');
                     closeModal(clearAllLogsModal);
                     
-                    // Clear the UI
-                    logTableBody.innerHTML = ''; // Remove all rows
+                    logTableBody.innerHTML = '';
                     
-                    // Re-create or find the 'noLogsRow'
                     if (!noLogsRow) {
-                        // If it was removed, create it
                         noLogsRow = document.createElement('tr');
                         noLogsRow.id = 'no-logs-row';
                         noLogsRow.innerHTML = '<td colspan="5" class="no-data-cell"><p></p></td>';
@@ -685,9 +675,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     noLogsRow.querySelector('p').textContent = "Log cleared. New log for this action will appear on next refresh.";
                     noLogsRow.style.display = ''; 
                     
-                    if (noLogResultsRow) noLogResultsRow.style.display = 'none'; // Hide no results row
+                    if (noLogResultsRow) noLogResultsRow.style.display = 'none';
                     if (selectAllLogsCheckbox) selectAllLogsCheckbox.checked = false;
-                    updateLogDeleteBar(); // This will hide the bar
+                    updateLogDeleteBar();
                 } else {
                     showMessage(data.error || 'An unknown error occurred.', 'error');
                 }
@@ -701,11 +691,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-    //END: "CLEAR ALL LOGS" LOGIC
 
 
     // ==================================================================
-    // == 4. LIVE SEARCH FILTER FOR LOGS
+    // LIVE SEARCH FILTER FOR LOGS
     // ==================================================================
     const logSearchInput = document.getElementById('log-search-input');
 
@@ -736,7 +725,6 @@ document.addEventListener('DOMContentLoaded', () => {
             noLogResultsRow.style.display = (visibleRowCount === 0 && hasLogsNow && searchTerm) ? '' : 'none';
         }
         if (noLogsRow) {
-            // Show 'no logs' row only if there are no logs at all AND no search term
             noLogsRow.style.display = (!hasLogsNow && !searchTerm) ? '' : 'none';
         }
 
@@ -749,7 +737,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } 
 
     // ==================================================================
-    // == 5. GLOBAL REPORT SEARCH (NEW)
+    // GLOBAL REPORT SEARCH
     // ==================================================================
     const globalSearchInput = document.getElementById('global-report-search');
     const allSearchableSections = document.querySelectorAll('.searchable-section'); 
@@ -784,7 +772,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==================================================================
-    // == 6. AJAX PAGINATION FOR LOGS (NEW)
+    // AJAX PAGINATION FOR LOGS
     // ==================================================================
     const logSectionContent = document.getElementById('log-section-content');
 
@@ -821,7 +809,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 logSectionContent.innerHTML = newLogContent.innerHTML;
                 history.pushState({}, '', url);
 
-                // --- Re-attach Listeners for the new content ---
                 const newLogSearchInput = logSectionContent.querySelector('#log-search-input');
                 const newSelectAllCheckbox = logSectionContent.querySelector('#select-all-logs-checkbox');
                 const newLogCheckboxes = logSectionContent.querySelectorAll('.log-checkbox');
@@ -879,6 +866,6 @@ document.addEventListener('DOMContentLoaded', () => {
          initialSelectAll.addEventListener('change', handleSelectAllChange);
      }
 
-}); // End DOMContentLoaded
+});
 </script>
 {% endblock %}

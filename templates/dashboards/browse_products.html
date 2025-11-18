@@ -178,40 +178,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const categorySections = document.querySelectorAll('.category-section');
 
     function filterProducts() {
-        // 1. Get the values from BOTH inputs
+        // Filter visible cards based on search text and category dropdown
         const searchTerm = searchInput.value.toLowerCase().trim();
         const selectedCategory = categoryFilter.value.toLowerCase(); // 'all' or a category name
 
-        // 2. Loop through every product card
+        // Loop through every product card
         productCards.forEach(card => {
             const productName = card.dataset.name.toLowerCase();
             const cardCategory = card.dataset.category.toLowerCase();
 
-            // 3. Check for matches
-            // Category matches if "All" is selected OR if card's category matches
             const categoryMatch = (selectedCategory === 'all') || (cardCategory === selectedCategory);
-            // Search matches if the product name includes the search term
             const searchMatch = productName.includes(searchTerm);
 
-            // 4. Show card only if it matches BOTH filters
             const cardShouldBeVisible = categoryMatch && searchMatch;
             card.style.display = cardShouldBeVisible ? 'flex' : 'none';
         });
 
-        // 5. Loop through category sections and hide them if they are now empty
+        // Loop through category sections and hide them if they are now empty
         categorySections.forEach(section => {
-            // Find all visible cards within this section
             const visibleCards = section.querySelectorAll('.product-card[style*="display: flex"]');
-            // Hide the whole section (including title) if no cards are visible
             section.style.display = visibleCards.length > 0 ? 'block' : 'none';
         });
     }
 
-    // 6. Add event listeners to BOTH inputs
+    // Add event listeners to BOTH inputs
     searchInput.addEventListener('input', filterProducts);
     categoryFilter.addEventListener('change', filterProducts);
 
-    // 7. Run the filter once on page load (to apply any initial search_query)
+    // Run the filter once on page load (to apply any initial search_query)
     filterProducts();
 
     document.querySelectorAll('.product-card').forEach(card => {
@@ -258,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- HELPER FUNCTIONS (Your original code) ---
     function openBuyNowModal(data) {
         buyModal.querySelector('#buy-product-id').value = data.id;
         buyModal.querySelector('.modal-product-image').src = data.imageUrl;
@@ -319,25 +312,20 @@ document.addEventListener('DOMContentLoaded', () => {
         openModal(backorderModal);
     }
 
-    //  --- NEW: AJAX Form Handling --- 
+    //  ---  AJAX Form Handling --- 
 
-    // Helper function to show dynamic success/error messages
     function showDynamicMessage(message, className = 'success') {
         const messagesContainer = document.getElementById('messages-container');
         if (!messagesContainer) return;
 
-        // Create the new message element
         const li = document.createElement('li');
         li.className = className; // 'success' or 'error'
         li.textContent = message;
 
-        // Add it to the container
         messagesContainer.prepend(li);
 
-        // Scroll to the top to see the message
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        // Remove the message after 5 seconds
         setTimeout(() => {
             li.style.opacity = '0';
             li.style.transition = 'opacity 0.5s ease';
@@ -348,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Main function to handle AJAX form submission
     function handleAjaxFormSubmit(form) {
         form.addEventListener('submit', async (event) => {
-            event.preventDefault(); // Stop the page from reloading
+            event.preventDefault();
             
             const submitButton = form.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.textContent;
@@ -366,41 +354,36 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: formData,
                     headers: {
                         'X-CSRFToken': csrfToken,
-                        'X-Requested-With': 'XMLHttpRequest', // Tells Django it's an AJAX request
+                        'X-Requested-With': 'XMLHttpRequest', 
                     },
                 });
 
                 const data = await response.json();
 
                 if (!response.ok) {
-                    // If server returns an error (status 400, 500, etc.)
                     throw new Error(data.error || 'An unknown error occurred.');
                 }
 
-                // --- Success ---
-                closeModal(form.closest('.modal')); // Close the modal
-                showDynamicMessage(data.message, 'success'); // Show success toast
+                closeModal(form.closest('.modal')); 
+                showDynamicMessage(data.message, 'success'); 
             if (data.product_id !== undefined && data.new_stock_quantity !== undefined) {
                 const productId = data.product_id;
                 const newStock = parseInt(data.new_stock_quantity);
-                console.log(`Updating card ${productId} to new stock: ${newStock}`); // Debug log
+                console.log(`Updating card ${productId} to new stock: ${newStock}`);
 
                 const card = document.querySelector(`.product-card[data-id="${productId}"]`);
 
                 if (card) {
-                    // Update displayed stock number
                     const stockSpan = card.querySelector('.product-stock');
                     if (stockSpan) {
                         stockSpan.textContent = `${newStock} pcs available`;
                     }
 
-                    // Update data-stock attribute
                     card.dataset.stock = newStock;
 
-                    // Update stock overlay
                     const overlayContainer = card.querySelector('.product-image-container');
                     let overlay = overlayContainer.querySelector('.stock-overlay');
-                    if (overlay) overlay.remove(); // Remove old overlay
+                    if (overlay) overlay.remove();
 
                     if (newStock === 0) {
                         overlay = document.createElement('div');
@@ -421,18 +404,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             } catch (error) {
-                // --- Error ---
                 console.error('Form submission error:', error);
                 showDynamicMessage(`Error: ${error.message}`, 'error'); // Show error toast
             } finally {
-                // Re-enable the button
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
             }
         });
     }
 
-    // Attach the AJAX handler to all three forms
     const buyNowForm = document.getElementById('buy-now-form');
     const reservationForm = document.getElementById('reservation-form');
     const backorderForm = document.getElementById('backorder-form');
